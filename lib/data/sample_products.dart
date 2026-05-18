@@ -1,0 +1,165 @@
+part of '../main.dart';
+
+const List<String> categories = <String>[
+  'All',
+  'Mac',
+  'iPhone',
+  'iPad',
+  'Watch',
+  'AirPods',
+];
+
+final List<Product> sampleProducts = <Product>[
+  Product(
+    id: 'macbook-pro-16',
+    name: 'MacBook Pro 16"',
+    category: 'Mac',
+    tagline: 'Built for serious study and executive work.',
+    description:
+        'A portable powerhouse with an immersive Liquid Retina XDR display, pro silicon, and all-day battery life.',
+    basePrice: 2499,
+    specs: const ['M4 Pro chip', 'Liquid Retina XDR', '22-hour battery'],
+    accent: const Color(0xFF7D8A95),
+    icon: CupertinoIcons.device_laptop,
+    featured: true,
+    variants: const [
+      Variant(
+        id: 'space-black-512',
+        colorName: 'Space Black',
+        color: Color(0xFF303033),
+        storage: '512GB SSD',
+        price: 2499,
+        stock: 7,
+      ),
+      Variant(
+        id: 'silver-1tb',
+        colorName: 'Silver',
+        color: Color(0xFFD9DADB),
+        storage: '1TB SSD',
+        price: 2899,
+        stock: 3,
+      ),
+    ],
+  ),
+  Product(
+    id: 'iphone-16-pro',
+    name: 'iPhone 16 Pro',
+    category: 'iPhone',
+    tagline: 'Titanium. Camera control. Pro intelligence.',
+    description:
+        'Flagship performance with a brilliant ProMotion display and advanced camera system for daily work and life.',
+    basePrice: 999,
+    specs: const ['A18 Pro', '48MP Fusion camera', 'Titanium design'],
+    accent: const Color(0xFFC9B8A6),
+    icon: CupertinoIcons.device_phone_portrait,
+    featured: true,
+    variants: const [
+      Variant(
+        id: 'natural-256',
+        colorName: 'Natural Titanium',
+        color: Color(0xFFC9C3B8),
+        storage: '256GB',
+        price: 1099,
+        stock: 12,
+      ),
+      Variant(
+        id: 'desert-512',
+        colorName: 'Desert Titanium',
+        color: Color(0xFFD0B39A),
+        storage: '512GB',
+        price: 1299,
+        stock: 4,
+      ),
+    ],
+  ),
+  Product(
+    id: 'ipad-air',
+    name: 'iPad Air',
+    category: 'iPad',
+    tagline: 'Light, fast, and ready for campus notes.',
+    description:
+        'A thin tablet for study, sketching, reading, presentations, and portable productivity.',
+    basePrice: 599,
+    specs: const ['M2 chip', 'Apple Pencil support', '13-inch option'],
+    accent: const Color(0xFF9EC5DD),
+    icon: Icons.tablet_mac,
+    variants: const [
+      Variant(
+        id: 'blue-128',
+        colorName: 'Blue',
+        color: Color(0xFFAEC7D7),
+        storage: '128GB',
+        price: 599,
+        stock: 9,
+      ),
+      Variant(
+        id: 'purple-256',
+        colorName: 'Purple',
+        color: Color(0xFFC5B8D8),
+        storage: '256GB',
+        price: 749,
+        stock: 6,
+      ),
+    ],
+  ),
+  Product(
+    id: 'apple-watch-ultra',
+    name: 'Apple Watch Ultra 2',
+    category: 'Watch',
+    tagline: 'For leadership, travel, and training days.',
+    description:
+        'A rugged smartwatch with precise health metrics, durable titanium, and long battery life.',
+    basePrice: 799,
+    specs: const ['Titanium case', 'Action button', 'Precision GPS'],
+    accent: const Color(0xFFF28C38),
+    icon: Icons.watch,
+    variants: const [
+      Variant(
+        id: 'titanium-trail',
+        colorName: 'Natural Titanium',
+        color: Color(0xFFC8C2B7),
+        storage: 'Trail Loop',
+        price: 799,
+        stock: 5,
+      ),
+      Variant(
+        id: 'black-ocean',
+        colorName: 'Black Titanium',
+        color: Color(0xFF262626),
+        storage: 'Ocean Band',
+        price: 849,
+        stock: 2,
+      ),
+    ],
+  ),
+  Product(
+    id: 'airpods-pro',
+    name: 'AirPods Pro',
+    category: 'AirPods',
+    tagline: 'Campus focus and office calls, tuned.',
+    description:
+        'Compact earbuds with adaptive audio, active noise cancellation, and effortless ecosystem pairing.',
+    basePrice: 249,
+    specs: const ['Adaptive Audio', 'USB-C case', 'Personalized Spatial Audio'],
+    accent: const Color(0xFFE7E9EA),
+    icon: Icons.earbuds,
+    variants: const [
+      Variant(
+        id: 'white-usbc',
+        colorName: 'White',
+        color: Color(0xFFF4F4F2),
+        storage: 'USB-C Case',
+        price: 249,
+        stock: 18,
+      ),
+      Variant(
+        id: 'white-magsafe',
+        colorName: 'White',
+        color: Color(0xFFF4F4F2),
+        storage: 'MagSafe Case',
+        price: 269,
+        stock: 8,
+      ),
+    ],
+  ),
+];
