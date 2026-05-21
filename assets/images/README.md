@@ -1,13 +1,8 @@
-Put app images in this folder.
+# Product images
 
-Examples:
-- logo.png
-- iphone_hero.png
-- macbook_pro.png
-- airpods_pro.png
+Product photos load from **Apple's official store CDN** at runtime (high-resolution PNG, cached on device).
 
-Use them in Flutter with:
+- Mapping: `lib/data/apple_product_images.dart`
+- Each catalog item has its own image slug (no shared placeholder across Mac / iPhone / iPad / Watch / iMac / AirPods).
 
-```dart
-Image.asset('assets/images/logo.png')
-```
+Local assets in this folder are optional (e.g. `appletech_logo.png` for branding).

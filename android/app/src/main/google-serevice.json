@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "760296893594",
+    "project_id": "appletech-6b722",
+    "storage_bucket": "appletech-6b722.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:760296893594:android:c0949ba4a0f2d9306fc323",
+        "android_client_info": {
+          "package_name": "Apple.Tech"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzwEy3dNe4vlio77Td5PvuHYBBGpc4Q8I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
