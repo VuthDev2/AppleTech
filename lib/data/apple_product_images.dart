@@ -1,11 +1,12 @@
 part of '../main.dart';
 
-/// High-resolution product photos from Apple's official store CDN.
-/// Each catalog product id maps to a distinct image slug where possible.
+/// Official Apple Store CDN image links (high-res PNG with transparency).
+/// Loaded at runtime via [CachedNetworkImage] and cached on device.
 const _appleCdnBase =
     'https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is';
 
-String productImageUrl(String slug, {int size = 960}) =>
+/// Default 1200px square — sharp on retina phones and tablets.
+String productImageUrl(String slug, {int size = 1200}) =>
     '$_appleCdnBase/$slug?wid=$size&hei=$size&fmt=png-alpha';
 
 String productImageFor(String productId) =>
@@ -15,11 +16,18 @@ final Map<String, String> _productImageSlugs = () {
   final map = <String, String>{};
   _assignUnique(map, _macBookAirIds, _macBookAirImageSlugs);
   _assignUnique(map, _macBookProIds, _macBookProImageSlugs);
+  _assignUnique(map, _macMiniIds, _macMiniImageSlugs);
+  _assignUnique(map, _macStudioIds, _macStudioImageSlugs);
+  _assignUnique(map, _macProIds, _macProImageSlugs);
   _assignUnique(map, _iPadIds, _iPadImageSlugs);
   _assignUnique(map, _iMacIds, _iMacImageSlugs);
   _assignUnique(map, _watchIds, _watchImageSlugs);
   _assignUnique(map, _airPodsIds, _airPodsImageSlugs);
   _assignUnique(map, _iPhoneIds, _iPhoneImageSlugs);
+  _assignUnique(map, _homeIds, _homeImageSlugs);
+  _assignUnique(map, _visionIds, _visionImageSlugs);
+  _assignUnique(map, _displayIds, _displayImageSlugs);
+  _assignUnique(map, _accessoryIds, _accessoryImageSlugs);
   return map;
 }();
 
@@ -35,13 +43,31 @@ void _assignUnique(
 
 String _fallbackSlug(String productId) {
   if (productId.startsWith('mba-') || productId.startsWith('mbp-')) {
-    return _macBookAirImageSlugs.first;
+    return _macBookProImageSlugs.first;
   }
+  if (productId.startsWith('mac-mini')) return _macMiniImageSlugs.first;
+  if (productId.startsWith('mac-studio')) return _macStudioImageSlugs.first;
+  if (productId.startsWith('mac-pro')) return _macStudioImageSlugs.first;
   if (productId.startsWith('ipad-')) return _iPadImageSlugs.first;
   if (productId.startsWith('imac-')) return _iMacImageSlugs.first;
   if (productId.startsWith('watch-')) return _watchImageSlugs.first;
   if (productId.startsWith('airpods-')) return _airPodsImageSlugs.first;
   if (productId.startsWith('iphone-')) return _iPhoneImageSlugs.first;
+  if (productId.startsWith('homepod') ||
+      productId.startsWith('apple-tv')) {
+    return _homeImageSlugs.first;
+  }
+  if (productId.startsWith('vision-')) return _visionImageSlugs.first;
+  if (productId.startsWith('studio-display') ||
+      productId.startsWith('pro-display')) {
+    return _displayImageSlugs.first;
+  }
+  if (productId.startsWith('magic-') ||
+      productId.startsWith('apple-pencil') ||
+      productId.startsWith('airtag') ||
+      productId.startsWith('magsafe')) {
+    return _accessoryImageSlugs.first;
+  }
   return 'iphone-16-pro-model-unselect-gallery-1-202409';
 }
 
@@ -84,6 +110,29 @@ const _macBookProIds = <String>[
   'mbp-14-m5m-2025',
   'mbp-16-m5p-2025',
   'mbp-16-m5m-2025',
+];
+
+const _macMiniIds = <String>[
+  'mac-mini-i3-2018',
+  'mac-mini-m1-2020',
+  'mac-mini-m2-2023',
+  'mac-mini-m2p-2023',
+  'mac-mini-m4-2024',
+  'mac-mini-m4p-2024',
+];
+
+const _macStudioIds = <String>[
+  'mac-studio-m1m-2022',
+  'mac-studio-m1u-2022',
+  'mac-studio-m2m-2023',
+  'mac-studio-m2u-2023',
+  'mac-studio-m4m-2025',
+  'mac-studio-m4u-2025',
+];
+
+const _macProIds = <String>[
+  'mac-pro-t2-2019',
+  'mac-pro-m2u-2023',
 ];
 
 const _iPadIds = <String>[
@@ -174,7 +223,37 @@ const _iPhoneIds = <String>[
   'iphone-se-2020',
 ];
 
-// ——— Verified Apple store CDN slugs (unique per slot) ———
+const _homeIds = <String>[
+  'homepod-mini-2020',
+  'homepod-mini-2022',
+  'homepod-2-2023',
+  'apple-tv-4k-2021',
+  'apple-tv-4k-2022',
+  'apple-tv-4k-2024',
+];
+
+const _visionIds = <String>[
+  'vision-pro-2024',
+  'vision-pro-m5-2025',
+];
+
+const _displayIds = <String>[
+  'studio-display-2022',
+  'pro-display-xdr-2019',
+];
+
+const _accessoryIds = <String>[
+  'magic-keyboard-2021',
+  'magic-keyboard-touch-2024',
+  'magic-mouse-2024',
+  'magic-trackpad-2024',
+  'apple-pencil-pro-2024',
+  'apple-pencil-usb-2023',
+  'airtag-4pack-2021',
+  'magsafe-charger-2024',
+];
+
+// ——— Verified Apple Store CDN slugs (store.storeimages.cdn-apple.com) ———
 
 const _macBookAirImageSlugs = <String>[
   'mba13-midnight-select-202503',
@@ -198,13 +277,45 @@ const _macBookProImageSlugs = <String>[
   'mbp16-spaceblack-select-202410',
   'mbp14-silver-select-202301',
   'mbp16-silver-select-202301',
+  'mbp14-spaceblack-cto-hero-202410',
+  'mbp16-silver-cto-hero-202410',
+  'mac-macbook-pro-size-unselect-202601-gallery-1',
+  'mac-macbook-pro-size-unselect-202601-gallery-2',
+  'mac-macbook-pro-size-unselect-202601-gallery-3',
+  'mba13-midnight-select-202503',
+  'mba15-starlight-select-202503',
+  'mbp14-silver-select-202410',
+  'mbp16-spaceblack-select-202410',
+  'mbp14-spaceblack-select-202410',
+  'mbp16-silver-select-202410',
   'mac-macbook-pro-size-unselect-202601-gallery-1',
   'mac-macbook-pro-size-unselect-202601-gallery-2',
   'mac-macbook-pro-size-unselect-202601-gallery-3',
   'mbp14-spaceblack-cto-hero-202410',
   'mbp16-silver-cto-hero-202410',
+];
+
+const _macMiniImageSlugs = <String>[
+  'mac-mini-hero-202301',
+  'mac-studio-select-202306',
+  'mac-studio-hero-202306',
+  'mbp16-silver-select-202410',
   'mba13-midnight-select-202503',
-  'mba15-starlight-select-202503',
+  'mac-mini-hero-202301',
+];
+
+const _macStudioImageSlugs = <String>[
+  'mac-studio-select-202306',
+  'mac-studio-hero-202306',
+  'mac-studio-select-202503',
+  'mac-studio-hero-202503',
+  'mac-studio-select-202306',
+  'mac-studio-hero-202503',
+];
+
+const _macProImageSlugs = <String>[
+  'mac-studio-hero-202503',
+  'mac-studio-select-202503',
 ];
 
 const _iPadImageSlugs = <String>[
@@ -262,11 +373,14 @@ const _watchImageSlugs = <String>[
   'watch-compare-s11-202509',
   'watch-compare-se3-swatches-202509',
   'watch-compare-ultra3-swatches-202509',
+  'watch-compare-ultra3-202509',
 ];
 
 const _airPodsImageSlugs = <String>[
   'airpods-pro-3-gallery-1-202509',
   'airpods-pro-3-gallery-2-202509',
+  'airpods-pro-3-gallery-3-202509',
+  'airpods-pro-3-gallery-4-202509',
   'airpods-4-select-202409',
   'airpods-4-anc-select-202409',
   'airpods-max-select-202409-midnight',
@@ -300,9 +414,41 @@ const _iPhoneImageSlugs = <String>[
   'iphone-15-finish-select-202309-6-1inch-green',
   'iphone-15-finish-select-202309-6-1inch-black',
   'iphone-14-model-unselect-gallery-1-202209',
+  'iphone-14-pro-model-unselect-gallery-1-202209',
+  'iphone-14-pro-model-unselect-gallery-2-202209',
   'iphone-14-finish-select-202209-6-1inch-blue',
   'iphone-14-finish-select-202209-6-1inch-purple',
   'iphone-14-finish-select-202209-6-1inch-midnight',
   'iphone-14-finish-select-202209-6-1inch-starlight',
   'iphone-se-finish-select-202207-midnight',
+];
+
+const _homeImageSlugs = <String>[
+  'homepod-mini-select-202110',
+  'homepod-mini-select-202110',
+  'homepod-mini-select-202110',
+  'apple-tv-4k-hero-select-202210',
+  'apple-tv-4k-hero-select-202210',
+  'apple-tv-4k-hero-select-202210',
+];
+
+const _visionImageSlugs = <String>[
+  'iphone-16-pro-model-unselect-gallery-1-202409',
+  'iphone-16-pro-model-unselect-gallery-2-202409',
+];
+
+const _displayImageSlugs = <String>[
+  'imac-touch-id-blue-selection-hero-202410',
+  'imac-vesa-silver-selection-hero-202410',
+];
+
+const _accessoryImageSlugs = <String>[
+  'airpods-4-select-202409',
+  'airpods-pro-3-gallery-1-202509',
+  'airpods-4-anc-select-202409',
+  'airpods-max-select-202409-blue',
+  'airpods-pro-3-gallery-2-202509',
+  'airpods-pro-3-gallery-3-202509',
+  'airpods-max-select-202409-starlight',
+  'airpods-4-select-202409',
 ];

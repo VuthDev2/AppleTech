@@ -113,6 +113,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                           child: ProductImageBox(
                             key: ValueKey(selected.colorName),
                             imagePath: widget.product.imagePath,
+                            category: widget.product.category,
                             fit: BoxFit.contain,
                           ),
                         ),

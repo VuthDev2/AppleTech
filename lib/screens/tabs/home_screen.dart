@@ -6,10 +6,23 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = AppScope.of(context);
-    final featured = store.products.where((p) => p.featured).toList();
+
+    final Map<String, Product> uniqueCategoryProducts = {};
+    for (final p in store.products.where((p) => p.featured)) {
+      if (!uniqueCategoryProducts.containsKey(p.category)) {
+        uniqueCategoryProducts[p.category] = p;
+      }
+    }
+
+    final preferredOrder = ['Mac', 'iPad', 'AirPods', 'iPhone', 'Watch'];
+    final featured = <Product>[];
+    for (final category in preferredOrder) {
+      if (uniqueCategoryProducts.containsKey(category)) {
+        featured.add(uniqueCategoryProducts[category]!);
+      }
+    }
 
     return Scaffold(
-      // StoreShell draws the mock status bar with height = padding.top — no top SafeArea here.
       body: SafeArea(
         top: false,
         bottom: false,
@@ -42,13 +55,19 @@ class HomeScreen extends StatelessWidget {
                 child: PromoBannerCarousel(),
               ),
             ),
-            
+
             // Categories Title
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.md, AppSpacing.xxl, AppSpacing.md),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xxl,
+                  AppSpacing.md,
+                  AppSpacing.xxl,
+                  AppSpacing.md,
+                ),
                 child: Text(
-                  AppLocalizations.of(context)?.recentCategories ?? 'Recent Categories',
+                  AppLocalizations.of(context)?.recentCategories ??
+                      'Recent Categories',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -57,41 +76,60 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             // Categories Horizontal List
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 120,
                 child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xxl,
+                  ),
                   scrollDirection: Axis.horizontal,
-                  itemCount: 5,
-                  separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.lg),
+                  itemCount: 7,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(width: AppSpacing.lg),
                   itemBuilder: (context, index) {
-                    final recentCategories = ['iPhone', 'Mac', 'iPad', 'Watch', 'AirPods'];
+                    final recentCategories = [
+                      'iPhone',
+                      'Mac',
+                      'iPad',
+                      'Watch',
+                      'AirPods',
+                      'Home',
+                      'Vision',
+                    ];
                     final category = recentCategories[index];
                     return StoreCategoryBubble(category: category);
                   },
                 ),
               ),
             ),
-            
+
             SliverToBoxAdapter(
               child: SectionHeader(
                 title: AppLocalizations.of(context)?.theLatest ?? 'The latest.',
-                subtitle: AppLocalizations.of(context)?.takeCloserLook ?? 'Take a closer look at what is new.',
+                subtitle:
+                    AppLocalizations.of(context)?.takeCloserLook ??
+                    'Take a closer look at what is new.',
               ),
             ),
-            
+
             // Featured Horizontal List
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 388,
                 child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.sm, AppSpacing.xxl, AppSpacing.xxxl),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xxl,
+                    AppSpacing.sm,
+                    AppSpacing.xxl,
+                    AppSpacing.xxxl,
+                  ),
                   scrollDirection: Axis.horizontal,
                   itemCount: featured.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.lg),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(width: AppSpacing.lg),
                   itemBuilder: (context, index) {
                     return TweenAnimationBuilder<double>(
                       key: ValueKey(featured[index].id),
@@ -113,53 +151,80 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             SliverToBoxAdapter(
-                child: SectionHeader(
-                  title: AppLocalizations.of(context)?.appleDifference ?? 'Apple Difference.',
-                  subtitle: AppLocalizations.of(context)?.moreReasonsToShop ?? 'More reasons to shop with us.',
-                ),
+              child: SectionHeader(
+                title:
+                    AppLocalizations.of(context)?.appleDifference ??
+                    'Apple Difference.',
+                subtitle:
+                    AppLocalizations.of(context)?.moreReasonsToShop ??
+                    'More reasons to shop with us.',
               ),
-            
+            ),
+
             // Difference Cards Horizontal List
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 180,
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl, AppSpacing.xxxl),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xxl,
+                    AppSpacing.lg,
+                    AppSpacing.xxl,
+                    AppSpacing.xxxl,
+                  ),
                   scrollDirection: Axis.horizontal,
                   children: [
                     StoreDifferenceCard(
                       icon: CupertinoIcons.person_crop_circle_badge_checkmark,
-                      title: AppLocalizations.of(context)?.shopOneOnOne ?? 'Shop one on one',
-                      body: AppLocalizations.of(context)?.getHelpChoosing ?? 'Get help choosing the right device.',
+                      title:
+                          AppLocalizations.of(context)?.shopOneOnOne ??
+                          'Shop one on one',
+                      body:
+                          AppLocalizations.of(context)?.getHelpChoosing ??
+                          'Get help choosing the right device.',
                       color: AppColors.primary,
                     ),
                     const SizedBox(width: AppSpacing.lg),
                     StoreDifferenceCard(
                       icon: CupertinoIcons.slider_horizontal_3,
-                      title: AppLocalizations.of(context)?.customizeYours ?? 'Customize yours',
-                      body: AppLocalizations.of(context)?.pickFinishes ?? 'Pick finishes, storage, and bands.',
+                      title:
+                          AppLocalizations.of(context)?.customizeYours ??
+                          'Customize yours',
+                      body:
+                          AppLocalizations.of(context)?.pickFinishes ??
+                          'Pick finishes, storage, and bands.',
                       color: Color(0xFFAF52DE),
                     ),
                     const SizedBox(width: AppSpacing.lg),
                     StoreDifferenceCard(
                       icon: CupertinoIcons.cube_box,
-                      title: AppLocalizations.of(context)?.easyDelivery ?? 'Easy delivery',
-                      body: AppLocalizations.of(context)?.trackEveryOrder ?? 'Track every order from checkout.',
+                      title:
+                          AppLocalizations.of(context)?.easyDelivery ??
+                          'Easy delivery',
+                      body:
+                          AppLocalizations.of(context)?.trackEveryOrder ??
+                          'Track every order from checkout.',
                       color: AppColors.success,
                     ),
                   ],
                 ),
               ),
             ),
-            
+
             // All Products List
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl, AppSpacing.xxxl),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xxl,
+                AppSpacing.lg,
+                AppSpacing.xxl,
+                AppSpacing.xxxl,
+              ),
               sliver: SliverList.separated(
                 itemCount: store.products.length,
-                separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
+                separatorBuilder: (_, _) =>
+                    const SizedBox(height: AppSpacing.lg),
                 itemBuilder: (context, index) =>
                     ProductListTile(product: store.products[index]),
               ),
@@ -183,7 +248,7 @@ class StoreHeader extends StatelessWidget {
     final store = AppScope.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final chipBg = isDark
-        ? Colors.white.withOpacity(0.12)
+        ? Colors.white.withValues(alpha: 0.12)
         : AppColors.lightGray.withAlpha(100);
 
     return Column(
@@ -193,8 +258,8 @@ class StoreHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const StoreBrandMark(height: 28),
-            Row(
+            const StoreBrandMark(height: 34),
+            Row(    
               mainAxisSize: MainAxisSize.min,
               children: [
                 _StoreHeaderIconButton(
@@ -235,7 +300,7 @@ class StoreHeader extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
+                const SizedBox(width: AppSpacing.md),
                 _StoreHeaderIconButton(
                   onPressed: onToggleTheme,
                   backgroundColor: chipBg,
@@ -246,7 +311,7 @@ class StoreHeader extends StatelessWidget {
                     size: 20,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
+                const SizedBox(width: AppSpacing.md),
                 _StoreHeaderIconButton(
                   onPressed: () {
                     final store = AppScope.of(context);
@@ -254,7 +319,7 @@ class StoreHeader extends StatelessWidget {
                     if (current == 'en') {
                       store.setLocale(const Locale('km'));
                     } else if (current == 'km') {
-                      store.setLocale(const Locale('zh'));
+                      store.setLocale(const Locale('ch'));
                     } else {
                       store.setLocale(const Locale('en'));
                     }
@@ -263,9 +328,9 @@ class StoreHeader extends StatelessWidget {
                   icon: Text(
                     store.locale?.languageCode == 'km'
                         ? '🇰🇭'
-                        : store.locale?.languageCode == 'zh'
-                            ? '🇨🇳'
-                            : '🇺🇸',
+                        : store.locale?.languageCode == 'ch'
+                        ? '🇨🇳'
+                        : '🇺🇸',
                     style: const TextStyle(fontSize: 18),
                   ),
                 ),
@@ -273,25 +338,24 @@ class StoreHeader extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
+
+
+        const SizedBox(height: AppSpacing.md),
         Text(
-          AppLocalizations.of(context)?.store ?? 'Store',
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
-            color: AppColors.mediumGray,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          AppLocalizations.of(context)?.welcome ?? 'Welcome',
-          style: theme.textTheme.displaySmall?.copyWith(
+          store.user?.name != null
+              ? (AppLocalizations.of(context)?.welcome != null
+                  ? '${AppLocalizations.of(context)!.welcome}, ${store.user!.name.split(' ').first}'
+                  : 'Welcome, ${store.user!.name.split(' ').first}')
+              : (AppLocalizations.of(context)?.welcome ?? 'Welcome'),
+          style: theme.textTheme.headlineLarge?.copyWith(
             fontWeight: FontWeight.w700,
-            height: 1.0,
-            letterSpacing: -1.2,
+            fontSize: 24,
+            height: 1.1,
+            letterSpacing: -0.8,
             color: onSurface,
           ),
         ),
+        const SizedBox(height: 6),
       ],
     );
   }
@@ -304,6 +368,9 @@ class StoreCategoryBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return InkWell(
       borderRadius: BorderRadius.circular(AppRadius.xl),
       onTap: () => Navigator.of(context).push(
@@ -315,22 +382,53 @@ class StoreCategoryBubble extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: theme.cardColor,
               shape: BoxShape.circle,
-              boxShadow: appShadowSm,
-              border: Border.all(color: AppColors.lightGray),
+              boxShadow: isDark ? null : appShadowSm,
+              border: Border.all(color: theme.colorScheme.outline),
             ),
-            child: Icon(categoryIcon(category), size: 24, color: AppColors.black),
+            child: Icon(
+              categoryIcon(category),
+              size: 24,
+              color: theme.colorScheme.onSurface,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             category,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: AppColors.black,
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class CategoryScreen extends StatelessWidget {
+  const CategoryScreen({required this.category, super.key});
+
+  final String category;
+
+  @override
+  Widget build(BuildContext context) {
+    final store = AppScope.of(context);
+    final products = store.products
+        .where((p) => p.category == category)
+        .toList(growable: false);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(category),
+      ),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        itemCount: products.length,
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.lg),
+        itemBuilder: (context, index) =>
+            ProductListTile(product: products[index]),
       ),
     );
   }
@@ -345,7 +443,12 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.xl, AppSpacing.xxl, 0),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xxl,
+        AppSpacing.xl,
+        AppSpacing.xxl,
+        AppSpacing.sm,
+      ),
       child: RichText(
         text: TextSpan(
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -359,7 +462,10 @@ class SectionHeader extends StatelessWidget {
             ),
             TextSpan(
               text: ' $subtitle',
-              style: const TextStyle(color: AppColors.mediumGray),
+              style: const TextStyle(
+                color: AppColors.mediumGray,
+                height: 1.4,
+              ),
             ),
           ],
         ),
@@ -384,14 +490,17 @@ class StoreDifferenceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: 240,
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(AppRadius.xxl),
-        boxShadow: appShadowSm,
-        border: Border.all(color: AppColors.lightGray),
+        boxShadow: isDark ? null : appShadowSm,
+        border: Border.all(color: theme.colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,7 +509,7 @@ class StoreDifferenceCard extends StatelessWidget {
           const Spacer(),
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -439,16 +548,18 @@ class _HomeSearchFieldState extends State<HomeSearchField> {
   @override
   Widget build(BuildContext context) {
     return ProfessionalTextField(
-        controller: _controller,
-        hintText: AppLocalizations.of(context)?.searchHint ?? 'Search MacBook M5, iPad, iMac, RAM, SSD…',
-        prefixIcon: CupertinoIcons.search,
-        onFieldSubmitted: (value) {
-          if (value.trim().isNotEmpty) {
-            final store = AppScope.of(context);
-            store.setTab(1, searchQuery: value.trim());
-            _controller.clear();
-          }
-        },
+      controller: _controller,
+      hintText:
+          AppLocalizations.of(context)?.searchHint ??
+          'Search products…',
+      prefixIcon: CupertinoIcons.search,
+      onFieldSubmitted: (value) {
+        if (value.trim().isNotEmpty) {
+          final store = AppScope.of(context);
+          store.setTab(1, searchQuery: value.trim());
+          _controller.clear();
+        }
+      },
     );
   }
 }
@@ -517,7 +628,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
     return Column(
       children: [
         SizedBox(
-          height: 180,
+          height: 188,
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (page) => setState(() => _currentPage = page),
@@ -565,91 +676,100 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.all(AppSpacing.xl),
-                          child: Row(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.xl,
+                            AppSpacing.xl,
+                            148,
+                            AppSpacing.xl,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(
-                                flex: 3,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.white.withAlpha(50),
-                                        borderRadius: BorderRadius.circular(AppRadius.sm),
-                                      ),
-                                      child: Text(
-                                        AppLocalizations.of(context)?.latestRelease ?? 'LATEST RELEASE',
-                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                          color: AppColors.white,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: AppSpacing.sm),
-                                    Text(
-                                      banner.title,
-                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                        color: AppColors.white,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: -0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      banner.subtitle,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: AppColors.white.withAlpha(200),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: AppSpacing.md),
-                                    InkWell(
-                                      onTap: () {
-                                        final store = AppScope.of(context);
-                                        store.setTab(1, searchQuery: banner.title);
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.white,
-                                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                                        ),
-                                        child: Text(
-                                          banner.actionText == 'Shop MacBook'
-                                              ? AppLocalizations.of(context)?.shopMacBook ?? banner.actionText
-                                              : banner.actionText == 'Learn More'
-                                                  ? AppLocalizations.of(context)?.learnMore ?? banner.actionText
-                                                  : banner.actionText == 'Explore Ultra'
-                                                      ? AppLocalizations.of(context)?.exploreUltra ?? banner.actionText
-                                                      : banner.actionText,
-                                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                            color: banner.colors.first,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.sm,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white.withAlpha(50),
+                                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context)?.latestRelease ??
+                                      'LATEST RELEASE',
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(width: AppSpacing.sm),
-                              Expanded(
-                                flex: 2,
-                                child: Transform.scale(
-                                  scale: 1.2,
-                                  child: Image.asset(
-                                    banner.imagePath,
-                                    fit: BoxFit.contain,
-                                    filterQuality: FilterQuality.high,
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                banner.title,
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: AppColors.white,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                banner.subtitle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.white.withAlpha(200),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              InkWell(
+                                onTap: () {
+                                  final store = AppScope.of(context);
+                                  store.setTab(1, searchQuery: banner.title);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.md,
+                                    vertical: AppSpacing.xs,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                                  ),
+                                  child: Text(
+                                    banner.actionText == 'Shop MacBook'
+                                        ? AppLocalizations.of(context)?.shopMacBook ??
+                                            banner.actionText
+                                        : banner.actionText == 'Learn More'
+                                            ? AppLocalizations.of(context)?.learnMore ??
+                                                banner.actionText
+                                            : banner.actionText == 'Explore Ultra'
+                                                ? AppLocalizations.of(context)?.exploreUltra ??
+                                                    banner.actionText
+                                                : banner.actionText,
+                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                      color: banner.colors.first,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: 155,
+                          child: Image.asset(
+                            banner.imagePath,
+                            fit: BoxFit.cover,
+                            alignment: Alignment.center,
+                            filterQuality: FilterQuality.high,
+                            gaplessPlayback: true,
                           ),
                         ),
                       ],
@@ -671,8 +791,8 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
               height: 6,
               width: _currentPage == index ? 18 : 6,
               decoration: BoxDecoration(
-                color: _currentPage == index 
-                    ? AppColors.primary 
+                color: _currentPage == index
+                    ? AppColors.primary
                     : AppColors.mediumGray.withAlpha(100),
                 borderRadius: BorderRadius.circular(3),
               ),
@@ -764,7 +884,7 @@ void showNotificationsSheet(BuildContext context) {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: AppColors.mediumGray.withOpacity(0.35),
+                          color: AppColors.mediumGray.withValues(alpha: 0.35),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -793,10 +913,7 @@ void showNotificationsSheet(BuildContext context) {
                               ),
                             IconButton(
                               onPressed: () => Navigator.pop(sheetContext),
-                              icon: const Icon(
-                                CupertinoIcons.xmark,
-                                size: 20,
-                              ),
+                              icon: const Icon(CupertinoIcons.xmark, size: 20),
                             ),
                           ],
                         ),
@@ -821,9 +938,8 @@ void showNotificationsSheet(BuildContext context) {
                                   AppSpacing.xxxl,
                                 ),
                                 itemCount: store.notifications.length,
-                                separatorBuilder: (_, _) => const SizedBox(
-                                  height: AppSpacing.md,
-                                ),
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(height: AppSpacing.md),
                                 itemBuilder: (context, index) {
                                   final notification =
                                       store.notifications[index];
@@ -878,7 +994,7 @@ class _NotificationTile extends StatelessWidget {
     return Material(
       color: notification.isRead
           ? theme.cardColor
-          : AppColors.primary.withOpacity(isDark ? 0.12 : 0.06),
+          : AppColors.primary.withValues(alpha: isDark ? 0.12 : 0.06),
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: InkWell(
         onTap: onTap,
@@ -892,7 +1008,7 @@ class _NotificationTile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.15),
+                  color: accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Icon(
@@ -953,7 +1069,7 @@ class _NotificationTile extends StatelessWidget {
                 icon: Icon(
                   CupertinoIcons.xmark_circle_fill,
                   size: 20,
-                  color: AppColors.mediumGray.withOpacity(0.6),
+                  color: AppColors.mediumGray.withValues(alpha: 0.6),
                 ),
               ),
             ],

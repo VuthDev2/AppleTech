@@ -8,6 +8,10 @@ const List<String> categories = <String>[
   'Watch',
   'AirPods',
   'iMac',
+  'Home',
+  'Vision',
+  'Display',
+  'Accessories',
 ];
 
 final List<Product> sampleProducts = buildProductCatalog();

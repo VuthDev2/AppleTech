@@ -1,7 +1,14 @@
 part of '../../main.dart';
 
-class WishlistScreen extends StatelessWidget {
+class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
+
+  @override
+  State<WishlistScreen> createState() => _WishlistScreenState();
+}
+
+class _WishlistScreenState extends State<WishlistScreen> {
+  bool _isGridView = false;
 
   @override
   Widget build(BuildContext context) {
@@ -12,6 +19,14 @@ class WishlistScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)?.wishlist ?? 'Wishlist'),
         actions: [
+          IconButton(
+            icon: Icon(
+              _isGridView
+                  ? CupertinoIcons.list_bullet
+                  : CupertinoIcons.square_grid_2x2,
+            ),
+            onPressed: () => setState(() => _isGridView = !_isGridView),
+          ),
           if (saved.isNotEmpty)
             TextButton.icon(
               style: TextButton.styleFrom(
@@ -21,10 +36,11 @@ class WishlistScreen extends StatelessWidget {
               onPressed: () {
                 for (final prod in saved) {
                   store.addToBag(prod, prod.variants.first);
+                  store.toggleWishlist(prod.id);
                 }
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Added all ${saved.length} items to Bag'),
+                    content: Text('Moved all ${saved.length} items to Bag'),
                     behavior: SnackBarBehavior.floating,
                     action: SnackBarAction(
                       label: 'View Bag',
@@ -36,7 +52,7 @@ class WishlistScreen extends StatelessWidget {
               },
               icon: const Icon(CupertinoIcons.bag_fill, size: 16),
               label: const Text(
-                'Add All',
+                'Move All',
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
               ),
             ),
@@ -45,9 +61,26 @@ class WishlistScreen extends StatelessWidget {
       body: saved.isEmpty
           ? EmptyState(
               icon: CupertinoIcons.heart,
-              title: AppLocalizations.of(context)?.emptyWishlist ?? 'Nothing Saved Yet',
-              subtitle: AppLocalizations.of(context)?.wishlistEmptyDesc ?? 'Tap the heart on any product to save it here for later.',
+              title:
+                  AppLocalizations.of(context)?.emptyWishlist ??
+                  'Nothing Saved Yet',
+              subtitle:
+                  AppLocalizations.of(context)?.wishlistEmptyDesc ??
+                  'Tap the heart on any product to save it here for later.',
               customArt: const WishlistEmptyArt(),
+            )
+          : _isGridView
+          ? GridView.builder(
+              padding: const EdgeInsets.all(AppSpacing.xxl),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.7,
+                crossAxisSpacing: AppSpacing.lg,
+                mainAxisSpacing: AppSpacing.lg,
+              ),
+              itemCount: saved.length,
+              itemBuilder: (context, index) =>
+                  WishlistGridTile(product: saved[index]),
             )
           : ListView.builder(
               padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -68,7 +101,9 @@ class WishlistScreen extends StatelessWidget {
                   },
                   background: Container(
                     margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xxl,
+                    ),
                     alignment: Alignment.centerRight,
                     decoration: BoxDecoration(
                       color: Colors.redAccent.shade700,
@@ -77,7 +112,11 @@ class WishlistScreen extends StatelessWidget {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Icon(CupertinoIcons.trash, color: Colors.white, size: 20),
+                        Icon(
+                          CupertinoIcons.trash,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                         SizedBox(width: 8),
                         Text(
                           'Remove',
@@ -98,6 +137,101 @@ class WishlistScreen extends StatelessWidget {
   }
 }
 
+void _showVariantSelector(BuildContext context, Product product) {
+  final store = AppScope.of(context);
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (sheetContext) {
+      final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
+      return Container(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.xxl,
+          AppSpacing.xl,
+          AppSpacing.xxl,
+          MediaQuery.of(sheetContext).padding.bottom + AppSpacing.xxl,
+        ),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkGray : AppColors.white,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xxl),
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: AppColors.mediumGray.withAlpha(100),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Text(
+                'Select Variant',
+                style: Theme.of(
+                  sheetContext,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              ...product.variants.map(
+                (v) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    '${v.colorName} • ${v.storage}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    '\$${v.price}',
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  trailing: FilledButton.icon(
+                    onPressed: () {
+                      store.addToBag(product, v);
+                      store.toggleWishlist(product.id);
+                      Navigator.pop(sheetContext);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Moved ${product.name} to Bag'),
+                          behavior: SnackBarBehavior.floating,
+                          action: SnackBarAction(
+                            label: 'View Bag',
+                            textColor: AppColors.primary,
+                            onPressed: () => store.setTab(3),
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(CupertinoIcons.bag_badge_plus, size: 16),
+                    label: const Text('Add'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
 class WishlistItemTile extends StatelessWidget {
   const WishlistItemTile({required this.product, super.key});
 
@@ -105,7 +239,6 @@ class WishlistItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final store = AppScope.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final variant = product.variants.first;
 
@@ -115,7 +248,9 @@ class WishlistItemTile extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: isDark ? AppColors.darkGray.withAlpha(80) : AppColors.lightGray,
+          color: isDark
+              ? AppColors.darkGray.withAlpha(80)
+              : AppColors.lightGray,
         ),
         boxShadow: appShadowSm,
       ),
@@ -132,6 +267,7 @@ class WishlistItemTile extends StatelessWidget {
                   tag: 'product-image-wishlist-${product.id}',
                   child: ProductImageBox(
                     imagePath: product.imagePath,
+                    category: product.category,
                     fit: BoxFit.contain,
                     animate: false,
                   ),
@@ -193,31 +329,11 @@ class WishlistItemTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(AppRadius.lg),
                           ),
                         ),
-                        onPressed: () {
-                          store.addToBag(product, variant);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: AppColors.success,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(AppRadius.lg),
-                              ),
-                              content: Row(
-                                children: [
-                                  const Icon(CupertinoIcons.checkmark_alt, color: AppColors.white),
-                                  const SizedBox(width: AppSpacing.md),
-                                  Text('Added ${product.name} to Bag'),
-                                ],
-                              ),
-                              action: SnackBarAction(
-                                label: 'View Bag',
-                                textColor: AppColors.white,
-                                onPressed: () => store.setTab(3),
-                              ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(CupertinoIcons.bag_badge_plus, size: 20),
+                        onPressed: () => _showVariantSelector(context, product),
+                        icon: const Icon(
+                          CupertinoIcons.bag_badge_plus,
+                          size: 20,
+                        ),
                       ),
                     ],
                   ),
@@ -226,6 +342,118 @@ class WishlistItemTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class WishlistGridTile extends StatelessWidget {
+  const WishlistGridTile({required this.product, super.key});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    final store = AppScope.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final variant = product.variants.first;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkGray.withAlpha(80)
+              : AppColors.lightGray,
+        ),
+        boxShadow: appShadowSm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(AppRadius.xl),
+              ),
+              child: Stack(
+                children: [
+                  Hero(
+                    tag: 'product-image-wishlist-grid-${product.id}',
+                    child: ProductImageBox(
+                      imagePath: product.imagePath,
+                      category: product.category,
+                      fit: BoxFit.contain,
+                      animate: false,
+                    ),
+                  ),
+                  Positioned(
+                    top: AppSpacing.sm,
+                    right: AppSpacing.sm,
+                    child: IconButton.filledTonal(
+                      onPressed: () {
+                        store.toggleWishlist(product.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Removed ${product.name} from Wishlist',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      icon: const Icon(CupertinoIcons.trash, size: 16),
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.lightGray.withAlpha(200),
+                        foregroundColor: AppColors.error,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '\$${variant.price}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    IconButton.filledTonal(
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.primary.withAlpha(20),
+                        foregroundColor: AppColors.primary,
+                        padding: const EdgeInsets.all(8),
+                        minimumSize: Size.zero,
+                      ),
+                      onPressed: () => _showVariantSelector(context, product),
+                      icon: const Icon(CupertinoIcons.bag_badge_plus, size: 16),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

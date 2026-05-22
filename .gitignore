@@ -46,3 +46,17 @@ app.*.map.json
 
 # Firebase local app config
 /android/app/google-services.json
+
+# Local environment and secret files
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Firebase/admin credentials
+**/google-service.json
+**/service-account*.json
+**/*serviceAccount*.json
+**/GoogleService-Info.plist

@@ -3,34 +3,54 @@ part of '../main.dart';
 /// Professional Apple-inspired color palette
 class AppColors {
   // Primary colors
-  static const Color primary = Color(0xFF0071E3); // Apple Blue
-  static const Color secondary = Color(0xFF30B0C0); // Teal
-  static const Color accent = Color(0xFFFF9500); // Orange
-  static const Color success = Color(0xFF34C759); // Green
+  static const Color primary = Color(
+    0xFF0A84FF,
+  ); // Apple Blue (brighter for dark mode readability)
+  static const Color primaryLight = Color(
+    0xFF0071E3,
+  ); // Apple Blue (light mode)
+  static const Color secondary = Color(0xFF30D5C8); // Teal
+  static const Color accent = Color(0xFFFF9F0A); // Orange
+
+  // Success / Semantic
+  static const Color success = Color(0xFF30D158); // Apple Green
 
   // Neutrals
-  static const Color black = Color(0xFF1F1F1F);
+  static const Color black = Color(0xFF1D1D1F);
   static const Color white = Color(0xFFFFFFFF);
-  static const Color darkGray = Color(0xFF3A3A3C);
+  static const Color darkGray = Color(0xFF2C2C2E);
   static const Color mediumGray = Color(0xFF8E8E93);
   static const Color lightGray = Color(0xFFF5F5F7);
   static const Color ultraLightGray = Color(0xFFFAFAFC);
 
+  // Dark‐mode surface elevations (Apple HIG inspired)
+  static const Color darkSurface0 = Color(0xFF000000); // pure black base
+  static const Color darkSurface1 = Color(0xFF1C1C1E); // cards, sheets
+  static const Color darkSurface2 = Color(0xFF2C2C2E); // elevated cards
+  static const Color darkSurface3 = Color(0xFF3A3A3C); // highest elevation
+  static const Color darkSeparator = Color(0xFF38383A); // dividers/borders
+
   // Error & Warning
-  static const Color error = Color(0xFFFF3B30);
-  static const Color warning = Color(0xFFFF9500);
+  static const Color error = Color(0xFFFF453A); // brighter red for dark
+  static const Color warning = Color(0xFFFF9F0A);
 
   // Gradients
   static const LinearGradient appleGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF0071E3), Color(0xFF30B0C0)],
+    colors: [Color(0xFF0A84FF), Color(0xFF30D5C8)],
   );
 
   static const LinearGradient productGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFF0071E3), Color(0xFF4DA6FF)],
+    colors: [Color(0xFF0A84FF), Color(0xFF5AC8FA)],
+  );
+
+  static const LinearGradient darkGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF1C1C1E), Color(0xFF2C2C2E)],
   );
 }
 
@@ -73,11 +93,11 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: const ColorScheme.light(
-        primary: AppColors.primary,
+        primary: AppColors.primaryLight,
         secondary: AppColors.secondary,
         tertiary: AppColors.accent,
         surface: AppColors.white,
-        error: AppColors.error,
+        error: Color(0xFFFF3B30),
         onPrimary: AppColors.white,
         onSecondary: AppColors.white,
         onSurface: AppColors.black,
@@ -102,7 +122,7 @@ class AppTheme {
       // Button styling
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.primaryLight,
           foregroundColor: AppColors.white,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,
@@ -122,8 +142,8 @@ class AppTheme {
       // Outlined button styling
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          foregroundColor: AppColors.primaryLight,
+          side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,
             vertical: AppSpacing.lg,
@@ -207,15 +227,15 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+          borderSide: const BorderSide(color: Color(0xFFFF3B30), width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
+          borderSide: const BorderSide(color: Color(0xFFFF3B30), width: 2),
         ),
         hintStyle: const TextStyle(
           color: AppColors.mediumGray,
@@ -242,8 +262,8 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.lightGray,
         disabledColor: AppColors.lightGray,
-        selectedColor: AppColors.primary,
-        secondarySelectedColor: AppColors.primary,
+        selectedColor: AppColors.primaryLight,
+        secondarySelectedColor: AppColors.primaryLight,
         labelPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.xs,
@@ -267,14 +287,14 @@ class AppTheme {
         ),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: AppColors.primary, size: 24);
+            return const IconThemeData(color: AppColors.primaryLight, size: 24);
           }
           return const IconThemeData(color: AppColors.mediumGray, size: 24);
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const TextStyle(
-              color: AppColors.primary,
+              color: AppColors.primaryLight,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             );
@@ -336,22 +356,65 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         tertiary: AppColors.accent,
-        surface: AppColors.darkGray,
+        surface: AppColors.darkSurface1,
+        surfaceContainerHighest: AppColors.darkSurface3,
         error: AppColors.error,
         onPrimary: AppColors.white,
         onSecondary: AppColors.white,
         onSurface: AppColors.white,
-        outline: AppColors.darkGray,
+        outline: AppColors.darkSeparator,
       ),
-      scaffoldBackgroundColor: AppColors.black,
+      scaffoldBackgroundColor: AppColors.darkSurface0,
       fontFamily: 'Inter',
 
-      // AppBar styling
+      // AppBar — pure black with subtle border
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.darkGray,
+        backgroundColor: AppColors.darkSurface0,
         foregroundColor: AppColors.white,
-        elevation: 0.5,
+        elevation: 0,
         centerTitle: false,
+        titleTextStyle: TextStyle(
+          color: AppColors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+        surfaceTintColor: Colors.transparent,
+      ),
+
+      // Filled buttons keep the blue accent
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.white,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.lg,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+
+      // Outlined buttons
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.darkSeparator, width: 1.5),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.lg,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
       ),
 
       // Text styling with higher contrast
@@ -387,19 +450,19 @@ class AppTheme {
         bodyLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          color: AppColors.white,
+          color: Color(0xFFE5E5EA), // slightly softened white
           height: 1.5,
         ),
         bodyMedium: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: AppColors.lightGray,
+          color: Color(0xFF98989D), // mid-tone for secondary text
           height: 1.5,
         ),
         bodySmall: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
-          color: AppColors.lightGray,
+          color: Color(0xFF98989D),
         ),
         labelLarge: TextStyle(
           fontSize: 14,
@@ -411,18 +474,24 @@ class AppTheme {
       // Input decoration for dark mode
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.darkGray,
+        fillColor: AppColors.darkSurface2,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.lg,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(color: AppColors.mediumGray, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.darkSeparator,
+            width: 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(color: AppColors.mediumGray, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.darkSeparator,
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -445,11 +514,118 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
       ),
+
+      // Card styling — elevated dark surfaces
+      cardTheme: CardThemeData(
+        color: AppColors.darkSurface1,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          side: const BorderSide(color: AppColors.darkSeparator, width: 0.5),
+        ),
+        margin: EdgeInsets.zero,
+      ),
+
+      // Chip styling
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.darkSurface2,
+        disabledColor: AppColors.darkSurface2,
+        selectedColor: AppColors.primary,
+        secondarySelectedColor: AppColors.primary,
+        labelPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        brightness: Brightness.dark,
+      ),
+
+      // Navigation bar
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.darkSurface1,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        indicatorColor: AppColors.primary.withAlpha(30),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: AppColors.primary, size: 24);
+          }
+          return const IconThemeData(color: AppColors.mediumGray, size: 24);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: AppColors.primary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            );
+          }
+          return const TextStyle(
+            color: AppColors.mediumGray,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          );
+        }),
+      ),
+
+      // Dialog theme
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.darkSurface2,
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+        ),
+        titleTextStyle: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: AppColors.white,
+        ),
+      ),
+
+      // Snackbar theme
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.darkSurface3,
+        contentTextStyle: const TextStyle(
+          color: AppColors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+      ),
+
+      // Bottom sheet theme
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: AppColors.darkSurface1,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xxl),
+          ),
+        ),
+        showDragHandle: true,
+      ),
+
+      // Divider theme
+      dividerTheme: const DividerThemeData(
+        color: AppColors.darkSeparator,
+        thickness: 0.5,
+      ),
     );
   }
 }
 
-/// Card shadow
+/// Card shadow — adapts by being used conditionally
 const BoxShadow appCardShadow = BoxShadow(
   color: Color(0x1A000000),
   blurRadius: 8,

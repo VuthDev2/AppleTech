@@ -1,6 +1,8 @@
 part of '../../main.dart';
 
-enum AuthView { signIn, signUp, forgotPassword, verifyCode }
+enum AuthView { signIn, signUp, forgotPassword, verifyCode, resetPassword }
+
+enum AuthAction { credentials, google, resetRequest, verifyCode, newPassword }
 
 class WelcomeAuthScreen extends StatefulWidget {
   const WelcomeAuthScreen({super.key});
@@ -14,19 +16,58 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
   final nameController = TextEditingController(text: 'Saravuth ');
   final emailController = TextEditingController(text: '');
   final passwordController = TextEditingController(text: '');
-  final codeControllers = List.generate(5, (_) => TextEditingController());
+  final confirmPasswordController = TextEditingController(text: '');
+  final codeControllers = List.generate(6, (_) => TextEditingController());
   AuthView view = AuthView.signIn;
   bool hidePassword = true;
+  bool hideConfirmPassword = true;
+  String? resetCode;
+  AuthAction? loadingAction;
 
   bool get isSignUp => view == AuthView.signUp;
   bool get isForgot => view == AuthView.forgotPassword;
   bool get isVerify => view == AuthView.verifyCode;
+  bool get isResetPassword => view == AuthView.resetPassword;
+  bool get isBusy => loadingAction != null;
+
+  bool isLoading(AuthAction action) => loadingAction == action;
+
+  Future<void> runAuthAction(
+    AuthAction action,
+    Future<void> Function() callback,
+  ) async {
+    if (isBusy) return;
+    setState(() => loadingAction = action);
+    try {
+      await callback();
+    } finally {
+      if (mounted) {
+        setState(() => loadingAction = null);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final link = Uri.base;
+    final mode = link.queryParameters['mode'];
+    final oobCode = link.queryParameters['oobCode'];
+    final email = link.queryParameters['email'];
+
+    if (mode == 'resetPassword' && oobCode != null && oobCode.isNotEmpty) {
+      resetCode = oobCode;
+      emailController.text = email ?? '';
+      view = AuthView.resetPassword;
+    }
+  }
 
   @override
   void dispose() {
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     for (final controller in codeControllers) {
       controller.dispose();
     }
@@ -34,33 +75,35 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
   }
 
   Future<void> submitAuth(AppStore store) async {
-    if (!formKey.currentState!.validate() || store.isAuthLoading) return;
+    if (!formKey.currentState!.validate()) return;
 
-    final success = isSignUp
-        ? await store.signUp(
-            name: nameController.text,
-            email: emailController.text,
-            password: passwordController.text,
-          )
-        : await store.signIn(
-            email: emailController.text,
-            password: passwordController.text,
-          );
+    await runAuthAction(AuthAction.credentials, () async {
+      final success = isSignUp
+          ? await store.signUp(
+              name: nameController.text,
+              email: emailController.text,
+              password: passwordController.text,
+            )
+          : await store.signIn(
+              email: emailController.text,
+              password: passwordController.text,
+            );
 
-    if (!success && mounted) {
-      showAuthError(store.authError);
-    }
+      if (!success && mounted) {
+        showAuthError(store.authError);
+      }
+    });
   }
 
   /// Google creates the account on first use — same flow for sign-in and sign-up.
   Future<void> submitGoogleAuth(AppStore store) async {
-    if (store.isAuthLoading) return;
+    await runAuthAction(AuthAction.google, () async {
+      final success = await store.signInWithGoogle();
 
-    final success = await store.signInWithGoogle();
-
-    if (!success && mounted && store.authError != null) {
-      showAuthError(store.authError);
-    }
+      if (!success && mounted && store.authError != null) {
+        showAuthError(store.authError);
+      }
+    });
   }
 
   void submitAppleAuth() {
@@ -68,55 +111,99 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
   }
 
   Future<void> requestPasswordReset(AppStore store) async {
-    if (store.isAuthLoading) return;
-
     final email = emailController.text.trim();
     if (!email.contains('@')) {
       showAuthError('Enter a valid email.');
       return;
     }
 
-    final success = await store.requestPasswordReset(email: email);
-    if (!mounted) return;
+    await runAuthAction(AuthAction.resetRequest, () async {
+      final success = await store.requestPasswordReset(email: email);
+      if (!mounted) return;
 
-    if (success) {
-      if (store.authService is FirebaseAuthService) {
-        setState(() => view = AuthView.signIn);
-      } else {
-        setState(() => view = AuthView.verifyCode);
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            store.authService is FirebaseAuthService
-                ? 'Password reset email sent.'
-                : 'Verification code sent. Use 12345 for demo.',
+      if (success) {
+        if (store.authService is FirebaseAuthService) {
+          setState(() => view = AuthView.signIn);
+        } else {
+          setState(() => view = AuthView.verifyCode);
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              store.authService is FirebaseAuthService
+                  ? 'Password reset email sent.'
+                  : 'Verification code sent. Use 123456 for demo.',
+            ),
           ),
-        ),
-      );
-    } else {
-      showAuthError(store.authError);
-    }
+        );
+      } else {
+        showAuthError(store.authError);
+      }
+    });
   }
 
   Future<void> verifyResetCode(AppStore store) async {
-    if (store.isAuthLoading) return;
-
     final code = codeControllers.map((controller) => controller.text).join();
-    final success = await store.verifyPasswordResetCode(
-      email: emailController.text,
-      code: code,
-    );
-    if (!mounted) return;
-
-    if (success) {
-      setState(() => view = AuthView.signIn);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Code verified. You can sign in now.')),
+    await runAuthAction(AuthAction.verifyCode, () async {
+      final success = await store.verifyPasswordResetCode(
+        email: emailController.text,
+        code: code,
       );
-    } else {
-      showAuthError(store.authError);
+      if (!mounted) return;
+
+      if (success) {
+        setState(() {
+          resetCode = code;
+          passwordController.clear();
+          confirmPasswordController.clear();
+          view = AuthView.resetPassword;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Code verified. Create a new password.'),
+          ),
+        );
+      } else {
+        showAuthError(store.authError);
+      }
+    });
+  }
+
+  Future<void> submitNewPassword(AppStore store) async {
+    if (!formKey.currentState!.validate()) return;
+    final code = resetCode;
+    if (code == null || code.isEmpty) {
+      showAuthError('Reset code is missing. Request a new password reset.');
+      return;
     }
+
+    await runAuthAction(AuthAction.newPassword, () async {
+      final success = await store.confirmPasswordReset(
+        email: emailController.text,
+        code: code,
+        newPassword: passwordController.text,
+      );
+      if (!mounted) return;
+
+      if (success) {
+        setState(() {
+          resetCode = null;
+          passwordController.clear();
+          confirmPasswordController.clear();
+          for (final controller in codeControllers) {
+            controller.clear();
+          }
+          view = AuthView.signIn;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password updated. You can sign in now.'),
+          ),
+        );
+      } else {
+        showAuthError(store.authError);
+      }
+    });
   }
 
   void showAuthError(String? message) {
@@ -157,7 +244,11 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
           },
           backgroundColor: chipBg,
           icon: Text(
-            current == 'km' ? '🇰🇭' : current == 'zh' ? '🇨🇳' : '🇺🇸',
+            current == 'km'
+                ? '🇰🇭'
+                : current == 'zh'
+                ? '🇨🇳'
+                : '🇺🇸',
             style: const TextStyle(fontSize: 18),
           ),
         ),
@@ -186,27 +277,13 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
                 Center(
                   child: Column(
                     children: [
-                      // Professional logo: monochromatic and clean
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.sm),
-                        decoration: BoxDecoration(
-                          color: AppColors.black.withAlpha(8),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Image.asset(
-                          'assets/images/appletech_logo.png',
-                          width: 56,
-                          height: 56,
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.high,
-                        ),
-                      ),
+                      const StoreBrandMark(height: 64, compact: true),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         'AppleTech',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w900,
-                            ),
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ],
                   ),
@@ -223,6 +300,7 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
                       child: isForgot
                           ? ForgotPasswordPanel(
                               emailController: emailController,
+                              isLoading: isLoading(AuthAction.resetRequest),
                               onBack: () =>
                                   setState(() => view = AuthView.signIn),
                               onReset: () => requestPasswordReset(store),
@@ -231,9 +309,30 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
                           ? VerifyCodePanel(
                               email: emailController.text,
                               controllers: codeControllers,
-                              onBack: () =>
-                                  setState(() => view = AuthView.forgotPassword),
+                              isLoading: isLoading(AuthAction.verifyCode),
+                              onBack: () => setState(
+                                () => view = AuthView.forgotPassword,
+                              ),
                               onVerify: () => verifyResetCode(store),
+                            )
+                          : isResetPassword
+                          ? ResetPasswordPanel(
+                              emailController: emailController,
+                              passwordController: passwordController,
+                              confirmPasswordController:
+                                  confirmPasswordController,
+                              hidePassword: hidePassword,
+                              hideConfirmPassword: hideConfirmPassword,
+                              isLoading: isLoading(AuthAction.newPassword),
+                              onTogglePassword: () =>
+                                  setState(() => hidePassword = !hidePassword),
+                              onToggleConfirmPassword: () => setState(
+                                () =>
+                                    hideConfirmPassword = !hideConfirmPassword,
+                              ),
+                              onBack: () =>
+                                  setState(() => view = AuthView.signIn),
+                              onSubmit: () => submitNewPassword(store),
                             )
                           : _buildAuthForm(store),
                     ),
@@ -253,8 +352,9 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          isSignUp 
-              ? (AppLocalizations.of(context)?.createAccount ?? 'Create an account') 
+          isSignUp
+              ? (AppLocalizations.of(context)?.createAccount ??
+                    'Create an account')
               : (AppLocalizations.of(context)?.welcomeBack ?? 'Welcome back!'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -270,30 +370,34 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
           ProfessionalTextField(
             controller: nameController,
             label: AppLocalizations.of(context)?.fullName ?? 'Full name',
-            hintText: AppLocalizations.of(context)?.enterFullName ?? 'Enter your full name',
-            validator: (value) =>
-                value!.trim().isEmpty ? '' : null,
+            hintText:
+                AppLocalizations.of(context)?.enterFullName ??
+                'Enter your full name',
+            validator: (value) => value!.trim().isEmpty ? '' : null,
           ),
           const SizedBox(height: AppSpacing.lg),
         ],
 
         ProfessionalTextField(
           controller: emailController,
-          label: isSignUp 
-              ? (AppLocalizations.of(context)?.email ?? 'Email') 
+          label: isSignUp
+              ? (AppLocalizations.of(context)?.email ?? 'Email')
               : (AppLocalizations.of(context)?.yourEmail ?? 'Your Email'),
           hintText: 'yourname@gmail.com',
           keyboardType: TextInputType.emailAddress,
           validator: (value) => value != null && value.contains('@')
               ? null
-              : (AppLocalizations.of(context)?.enterEmail ?? 'Enter a valid email'),
+              : (AppLocalizations.of(context)?.enterEmail ??
+                    'Enter a valid email'),
         ),
         const SizedBox(height: AppSpacing.lg),
 
         ProfessionalTextField(
           controller: passwordController,
           label: AppLocalizations.of(context)?.password ?? 'Password',
-          hintText: AppLocalizations.of(context)?.enterPassword ?? 'Enter your password',
+          hintText:
+              AppLocalizations.of(context)?.enterPassword ??
+              'Enter your password',
           obscureText: hidePassword,
 
           suffixIcon: IconButton(
@@ -307,7 +411,8 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
           ),
           validator: (value) => value != null && value.length >= 6
               ? null
-              : (AppLocalizations.of(context)?.useAtLeast6Digits ?? 'Use at least 6 digits'),
+              : (AppLocalizations.of(context)?.useAtLeast6Digits ??
+                    'Use at least 6 digits'),
         ),
         const SizedBox(height: AppSpacing.md),
 
@@ -318,7 +423,8 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
               onPressed: () => setState(() => view = AuthView.forgotPassword),
               style: TextButton.styleFrom(foregroundColor: AppColors.primary),
               child: Text(
-                AppLocalizations.of(context)?.forgotPassword ?? 'Forgot password?',
+                AppLocalizations.of(context)?.forgotPassword ??
+                    'Forgot password?',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w700,
@@ -329,7 +435,7 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
         const SizedBox(height: AppSpacing.lg),
 
         FilledButton(
-          onPressed: store.isAuthLoading ? null : () => submitAuth(store),
+          onPressed: isBusy ? null : () => submitAuth(store),
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             backgroundColor: AppColors.black,
@@ -338,7 +444,7 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: store.isAuthLoading
+          child: isLoading(AuthAction.credentials)
               ? const SizedBox(
                   width: 20,
                   height: 20,
@@ -347,13 +453,17 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
                     color: AppColors.white,
                   ),
                 )
-                : Text(
-                    isSignUp ? (AppLocalizations.of(context)?.createAccountButton ?? 'Create Account') : (AppLocalizations.of(context)?.continueButton ?? 'Continue'),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                    ),
+              : Text(
+                  isSignUp
+                      ? (AppLocalizations.of(context)?.createAccountButton ??
+                            'Create Account')
+                      : (AppLocalizations.of(context)?.continueButton ??
+                            'Continue'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
                   ),
+                ),
         ),
 
         const SizedBox(height: AppSpacing.xl),
@@ -366,9 +476,10 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Text(
-                  AppLocalizations.of(context)?.orContinueWith ?? 'Or continue with',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                AppLocalizations.of(context)?.orContinueWith ??
+                    'Or continue with',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
             const Expanded(
               child: Divider(color: AppColors.lightGray, thickness: 1),
@@ -384,28 +495,22 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
               child: SocialAuthButton(
                 logo: const Icon(Icons.apple, size: 22, color: Colors.black),
                 label: 'Apple',
-                onPressed: store.isAuthLoading ? null : submitAppleAuth,
+                onPressed: isBusy ? null : submitAppleAuth,
               ),
             ),
             const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: SocialAuthButton(
-                logo: Image.network(
-                  'https://developers.google.com/identity/images/g-logo.png',
-                  width: 22,
-                  height: 22,
-                  errorBuilder: (context, error, stackTrace) => const Text(
-                    'G',
-                    style: TextStyle(
-                      color: Color(0xFF4285F4),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+                logo: Image.asset(
+                  'assets/images/google_icon.png',
+                  width: 30,
+                  height: 30,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
                 ),
                 label: 'Google',
-                isLoading: store.isAuthLoading,
-                onPressed: store.isAuthLoading ? null : () => submitGoogleAuth(store),
+                isLoading: isLoading(AuthAction.google),
+                onPressed: isBusy ? null : () => submitGoogleAuth(store),
               ),
             ),
           ],
@@ -420,8 +525,10 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
           children: [
             Text(
               isSignUp
-                  ? (AppLocalizations.of(context)?.alreadyHaveAccount ?? 'Already have an account? ')
-                  : (AppLocalizations.of(context)?.dontHaveAccount ?? "Don't have an account yet? "),
+                  ? (AppLocalizations.of(context)?.alreadyHaveAccount ??
+                        'Already have an account? ')
+                  : (AppLocalizations.of(context)?.dontHaveAccount ??
+                        "Don't have an account yet? "),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             TextButton(
@@ -433,7 +540,9 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
                 padding: EdgeInsets.zero,
               ),
               child: Text(
-                isSignUp ? (AppLocalizations.of(context)?.signIn ?? 'Sign In') : (AppLocalizations.of(context)?.signUp ?? 'Sign Up'),
+                isSignUp
+                    ? (AppLocalizations.of(context)?.signIn ?? 'Sign In')
+                    : (AppLocalizations.of(context)?.signUp ?? 'Sign Up'),
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w700,
@@ -471,7 +580,7 @@ class SocialAuthButton extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.lightGray, width: 1.5),
           borderRadius: BorderRadius.circular(16),
-          color: disabled ? AppColors.lightGray : AppColors.white,
+          color: disabled ? AppColors.lightGray : AppColors.white,      
         ),
         child: InkWell(
           onTap: onPressed,
@@ -511,12 +620,14 @@ class SocialAuthButton extends StatelessWidget {
 class ForgotPasswordPanel extends StatelessWidget {
   const ForgotPasswordPanel({
     required this.emailController,
+    required this.isLoading,
     required this.onBack,
     required this.onReset,
     super.key,
   });
 
   final TextEditingController emailController;
+  final bool isLoading;
   final VoidCallback onBack;
   final VoidCallback onReset;
 
@@ -541,14 +652,16 @@ class ForgotPasswordPanel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppLocalizations.of(context)?.resetPassword ?? 'Reset Password',
+                    AppLocalizations.of(context)?.resetPassword ??
+                        'Reset Password',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    AppLocalizations.of(context)?.resetInstructions ?? 'Enter your registered email to receive reset instructions',
+                    AppLocalizations.of(context)?.resetInstructions ??
+                        'Enter your registered email to receive reset instructions',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -566,12 +679,13 @@ class ForgotPasswordPanel extends StatelessWidget {
           prefixIcon: Icons.mail_outline,
           validator: (value) => value != null && value.contains('@')
               ? null
-              : (AppLocalizations.of(context)?.enterEmail ?? 'Enter a valid email'),
+              : (AppLocalizations.of(context)?.enterEmail ??
+                    'Enter a valid email'),
         ),
         const SizedBox(height: AppSpacing.xl),
 
         FilledButton(
-          onPressed: onReset,
+          onPressed: isLoading ? null : onReset,
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             backgroundColor: AppColors.black,
@@ -579,7 +693,164 @@ class ForgotPasswordPanel extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
           ),
-          child: Text(AppLocalizations.of(context)?.submit ?? 'Submit'),
+          child: isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.white,
+                  ),
+                )
+              : Text(AppLocalizations.of(context)?.submit ?? 'Submit'),
+        ),
+      ],
+    );
+  }
+}
+
+/// New password panel for reset links and verified demo codes.
+class ResetPasswordPanel extends StatelessWidget {
+  const ResetPasswordPanel({
+    required this.emailController,
+    required this.passwordController,
+    required this.confirmPasswordController,
+    required this.hidePassword,
+    required this.hideConfirmPassword,
+    required this.isLoading,
+    required this.onTogglePassword,
+    required this.onToggleConfirmPassword,
+    required this.onBack,
+    required this.onSubmit,
+    super.key,
+  });
+
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
+  final bool hidePassword;
+  final bool hideConfirmPassword;
+  final bool isLoading;
+  final VoidCallback onTogglePassword;
+  final VoidCallback onToggleConfirmPassword;
+  final VoidCallback onBack;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backBg = isDark ? AppColors.darkSurface2 : AppColors.lightGray;
+    final backFg = theme.colorScheme.onSurface;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            IconButton.filledTonal(
+              onPressed: onBack,
+              icon: const Icon(Icons.arrow_back),
+              style: IconButton.styleFrom(
+                backgroundColor: backBg,
+                foregroundColor: backFg,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Create new password',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Enter and confirm your new AppleTech password',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        ProfessionalTextField(
+          controller: emailController,
+          label: AppLocalizations.of(context)?.emailAddress ?? 'Email Address',
+          hintText: 'yourname@gmail.com',
+          keyboardType: TextInputType.emailAddress,
+          prefixIcon: Icons.mail_outline,
+          validator: (value) => value != null && value.contains('@')
+              ? null
+              : (AppLocalizations.of(context)?.enterEmail ??
+                    'Enter a valid email'),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        ProfessionalTextField(
+          controller: passwordController,
+          label: AppLocalizations.of(context)?.password ?? 'Password',
+          hintText: 'Enter new password',
+          obscureText: hidePassword,
+          prefixIcon: Icons.lock_outline,
+          suffixIcon: IconButton(
+            onPressed: onTogglePassword,
+            icon: Icon(
+              hidePassword
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              color: AppColors.mediumGray,
+            ),
+          ),
+          validator: (value) => value != null && value.length >= 6
+              ? null
+              : (AppLocalizations.of(context)?.useAtLeast6Digits ??
+                    'Use at least 6 digits'),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        ProfessionalTextField(
+          controller: confirmPasswordController,
+          label: 'Confirm Password',
+          hintText: 'Confirm new password',
+          obscureText: hideConfirmPassword,
+          prefixIcon: Icons.lock_reset,
+          suffixIcon: IconButton(
+            onPressed: onToggleConfirmPassword,
+            icon: Icon(
+              hideConfirmPassword
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              color: AppColors.mediumGray,
+            ),
+          ),
+          validator: (value) => value == passwordController.text
+              ? null
+              : 'Passwords do not match',
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        FilledButton(
+          onPressed: isLoading ? null : onSubmit,
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+            backgroundColor: AppColors.black,
+            foregroundColor: AppColors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+            ),
+          ),
+          child: isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.white,
+                  ),
+                )
+              : const Text('Update Password'),
         ),
       ],
     );
@@ -591,6 +862,7 @@ class VerifyCodePanel extends StatefulWidget {
   const VerifyCodePanel({
     required this.email,
     required this.controllers,
+    required this.isLoading,
     required this.onBack,
     required this.onVerify,
     super.key,
@@ -598,11 +870,12 @@ class VerifyCodePanel extends StatefulWidget {
 
   final String email;
   final List<TextEditingController> controllers;
+  final bool isLoading;
   final VoidCallback onBack;
   final VoidCallback onVerify;
 
   @override
-  State<VerifyCodePanel> createState()  => _VerifyCodePanelState();
+  State<VerifyCodePanel> createState() => _VerifyCodePanelState();
 }
 
 class _VerifyCodePanelState extends State<VerifyCodePanel> {
@@ -650,7 +923,8 @@ class _VerifyCodePanelState extends State<VerifyCodePanel> {
         ? '${widget.email.split('@').first.characters.take(3).toString()}...@${widget.email.split('@').last}'
         : 'your email';
     final resendText = canResend
-        ? (AppLocalizations.of(context)?.resendCode ?? "Didn't receive the code? Resend")
+        ? (AppLocalizations.of(context)?.resendCode ??
+              "Didn't receive the code? Resend")
         : AppLocalizations.of(context)!.resendInSeconds(secondsRemaining);
 
     return Column(
@@ -679,7 +953,8 @@ class _VerifyCodePanelState extends State<VerifyCodePanel> {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    AppLocalizations.of(context)?.checkInbox ?? 'Check your inbox for verification code',
+                    AppLocalizations.of(context)?.checkInbox ??
+                        'Check your inbox for verification code',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -717,7 +992,7 @@ class _VerifyCodePanelState extends State<VerifyCodePanel> {
         const SizedBox(height: AppSpacing.xl),
 
         FilledButton(
-          onPressed: widget.onVerify,
+          onPressed: widget.isLoading ? null : widget.onVerify,
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             backgroundColor: AppColors.black,
@@ -725,7 +1000,16 @@ class _VerifyCodePanelState extends State<VerifyCodePanel> {
               borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
           ),
-          child: const Text('Verify Code'),
+          child: widget.isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.white,
+                  ),
+                )
+              : const Text('Verify Code'),
         ),
         const SizedBox(height: AppSpacing.lg),
 

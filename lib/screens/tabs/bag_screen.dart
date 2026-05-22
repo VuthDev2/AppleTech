@@ -22,14 +22,30 @@ class BagScreen extends StatelessWidget {
               padding: const EdgeInsets.only(right: AppSpacing.md),
               child: TextButton(
                 onPressed: () {
-                  // Clear bag or something
+                  showDialog<void>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Clear Bag'),
+                      content: const Text('Are you sure you want to remove all items from your bag?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            store.clearBag();
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Clear All', style: TextStyle(color: AppColors.error)),
+                        ),
+                      ],
+                    ),
+                  );
                 },
-                child: Text(
-                  'Edit',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
-                  ),
+                child: const Text(
+                  'Clear',
+                  style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.error),
                 ),
               ),
             ),
@@ -49,7 +65,32 @@ class BagScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl, 250),
                 itemCount: store.bag.length,
                 separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.lg),
-                itemBuilder: (context, index) => CartItemTile(item: store.bag[index]),
+                itemBuilder: (context, index) {
+                  final item = store.bag[index];
+                  return Dismissible(
+                    key: ValueKey('${item.productId}-${item.variantId}'),
+                    direction: DismissDirection.endToStart,
+                    onDismissed: (_) {
+                      store.removeFromBag(item);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Item removed from Bag'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    background: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                      alignment: Alignment.centerRight,
+                      decoration: BoxDecoration(
+                        color: AppColors.error,
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                      ),
+                      child: const Icon(CupertinoIcons.trash, color: Colors.white),
+                    ),
+                    child: CartItemTile(item: item),
+                  );
+                },
               ),
       ),
       bottomSheet: store.bag.isEmpty ? null : const CheckoutSummarySheet(),
@@ -91,6 +132,7 @@ class CartItemTile extends StatelessWidget {
                   tag: 'product-image-${product.id}-${variant.id}',
                   child: ProductImageBox(
                     imagePath: product.imagePath,
+                    category: product.category,
                     fit: BoxFit.contain,
                     animate: false,
                   ),
@@ -126,13 +168,42 @@ class CartItemTile extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            '\$${variant.price}',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 18,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                '\$${variant.price}',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              IconButton(
+                                icon: Icon(
+                                  store.wishlist.contains(product.id)
+                                      ? CupertinoIcons.heart_fill
+                                      : CupertinoIcons.heart,
+                                  size: 18,
+                                  color: store.wishlist.contains(product.id)
+                                      ? AppColors.primary
+                                      : AppColors.mediumGray,
+                                ),
+                                tooltip: 'Save for later',
+                                onPressed: () {
+                                  store.removeFromBag(item);
+                                  if (!store.wishlist.contains(product.id)) {
+                                    store.toggleWishlist(product.id);
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Moved ${product.name} to Wishlist'),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: AppSpacing.md),
@@ -298,7 +369,7 @@ class CheckoutSummarySheet extends StatelessWidget {
               builder: (_) => const MultiStepCheckoutSheet(),
             ),
             style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(64),
+              minimumSize: const Size.fromHeight(56),
               backgroundColor: AppColors.black,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -307,9 +378,31 @@ class CheckoutSummarySheet extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(CupertinoIcons.creditcard_fill, size: 20),
+                const Text(' Pay', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          OutlinedButton(
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => const MultiStepCheckoutSheet(),
+            ),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(56),
+              side: BorderSide(color: isDark ? AppColors.darkGray : AppColors.lightGray, width: 2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.creditcard, size: 18, color: isDark ? AppColors.white : AppColors.black),
                 const SizedBox(width: AppSpacing.md),
-                Text('${AppLocalizations.of(context)?.checkout ?? 'Checkout'} - \$${store.total}'),
+                Text('Checkout - \$${store.total}', style: TextStyle(color: isDark ? AppColors.white : AppColors.black)),
               ],
             ),
           ),

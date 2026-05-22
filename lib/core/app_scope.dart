@@ -15,7 +15,14 @@ class AppScope extends InheritedNotifier<AppStore> {
 
 class AppStore extends ChangeNotifier {
   AppStore({AuthService? authService})
-    : authService = authService ?? LocalAuthService();
+    : authService = authService ?? LocalAuthService() {
+    // Restore session if available (helps with Hot Restart)
+    final existingUser = this.authService.currentUser;
+    if (existingUser != null) {
+      user = existingUser;
+      isAuthenticated = true;
+    }
+  }
 
   final AuthService authService;
 
@@ -97,6 +104,14 @@ class AppStore extends ChangeNotifier {
 
   int selectedTabIndex = 0;
   String exploreSearchQuery = '';
+  bool isScrolling = false;
+
+  void setScrolling(bool scrolling) {
+    if (isScrolling != scrolling) {
+      isScrolling = scrolling;
+      notifyListeners();
+    }
+  }
 
   void setTab(int index, {String? searchQuery}) {
     selectedTabIndex = index;
@@ -184,13 +199,16 @@ class AppStore extends ChangeNotifier {
     final index = products.indexWhere((p) => p.id == productId);
     if (index != -1) {
       final oldProduct = products[index];
-      final newReviews = List<Review>.from(oldProduct.reviews)..insert(0, review);
-      
+      final newReviews = List<Review>.from(oldProduct.reviews)
+        ..insert(0, review);
+
       final newReviewCount = oldProduct.reviewCount + 1;
       final newRating = double.parse(
-        ((oldProduct.rating * oldProduct.reviewCount + review.rating) / newReviewCount).toStringAsFixed(1)
+        ((oldProduct.rating * oldProduct.reviewCount + review.rating) /
+                newReviewCount)
+            .toStringAsFixed(1),
       );
-      
+
       products[index] = Product(
         id: oldProduct.id,
         name: oldProduct.name,
@@ -223,7 +241,12 @@ class AppStore extends ChangeNotifier {
   double demoBatteryLevel = 1.0;
   bool demoWifiConnected = true;
 
-  void updateDemoStatus({String? time, String? date, double? battery, bool? wifi}) {
+  void updateDemoStatus({
+    String? time,
+    String? date,
+    double? battery,
+    bool? wifi,
+  }) {
     if (time != null) demoTime = time;
     if (date != null) demoDate = date;
     if (battery != null) demoBatteryLevel = battery;
@@ -231,10 +254,7 @@ class AppStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> signIn({required String email, required String password}) async {
     return _runAuthAction(() async {
       final result = await authService.signIn(email: email, password: password);
       user = result.user;
@@ -279,6 +299,20 @@ class AppStore extends ChangeNotifier {
   }) async {
     return _runAuthAction(() {
       return authService.verifyPasswordResetCode(email: email, code: code);
+    });
+  }
+
+  Future<bool> confirmPasswordReset({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    return _runAuthAction(() {
+      return authService.confirmPasswordReset(
+        email: email,
+        code: code,
+        newPassword: newPassword,
+      );
     });
   }
 
@@ -405,6 +439,11 @@ class AppStore extends ChangeNotifier {
 
   void removeFromBag(CartItem item) {
     bag.remove(item);
+    notifyListeners();
+  }
+
+  void clearBag() {
+    bag.clear();
     notifyListeners();
   }
 

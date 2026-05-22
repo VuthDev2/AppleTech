@@ -20,6 +20,7 @@ part 'data/auth_service.dart';
 part 'models/app_models.dart';
 part 'data/apple_product_images.dart';
 part 'data/product_catalog.dart';
+part 'data/product_catalog_expansion.dart';
 part 'data/sample_products.dart';
 part 'screens/auth/welcome_auth_screen.dart';
 part 'screens/store_shell.dart';

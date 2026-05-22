@@ -777,24 +777,3 @@ class _ExploreCollectionCardState extends State<ExploreCollectionCard> {
   }
 }
 
-class CategoryScreen extends StatelessWidget {
-  const CategoryScreen({required this.category, super.key});
-
-  final String category;
-
-  @override
-  Widget build(BuildContext context) {
-    final store = AppScope.of(context);
-    final products = store.products.where((product) => product.category == category).toList();
-
-    return Scaffold(
-      appBar: AppBar(title: Text(category)),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        itemBuilder: (context, index) => ProductListTile(product: products[index]),
-        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
-        itemCount: products.length,
-      ),
-    );
-  }
-}

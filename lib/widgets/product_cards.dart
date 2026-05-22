@@ -12,28 +12,14 @@ class HeroProductCard extends StatefulWidget {
 class _HeroProductCardState extends State<HeroProductCard> {
   bool _isHovered = false;
 
-  /// Prefer bundled hero assets for a clean product shot in the carousel.
-  String get _heroImagePath {
-    switch (widget.product.category) {
-      case 'Mac':
-        return 'assets/images/macbook_pro.png';
-      case 'iPhone':
-        return 'assets/images/iphone_16_pro.png';
-      case 'iPad':
-        return 'assets/images/ipad_pro.png';
-      case 'Watch':
-        return 'assets/images/watch_ultra.png';
-      case 'AirPods':
-        return 'assets/images/airpods_pro.png';
-      default:
-        return widget.product.imagePath;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final onSurface = theme.colorScheme.onSurface;
+    final primary = theme.colorScheme.primary;
+    final secondaryText =
+        theme.textTheme.bodySmall?.color ?? AppColors.mediumGray;
 
     return GestureDetector(
       onTap: () => openProduct(context, widget.product),
@@ -48,11 +34,11 @@ class _HeroProductCardState extends State<HeroProductCard> {
           decoration: BoxDecoration(
             color: theme.cardColor,
             borderRadius: BorderRadius.circular(AppRadius.xxl),
-            boxShadow: _isHovered ? appShadowMd : appShadowSm,
+            boxShadow: isDark ? null : (_isHovered ? appShadowMd : appShadowSm),
             border: Border.all(
               color: _isHovered
-                  ? AppColors.primary.withValues(alpha: 0.45)
-                  : AppColors.primary.withValues(alpha: 0.22),
+                  ? primary.withValues(alpha: isDark ? 0.55 : 0.45)
+                  : primary.withValues(alpha: isDark ? 0.28 : 0.22),
               width: 1.5,
             ),
           ),
@@ -69,7 +55,8 @@ class _HeroProductCardState extends State<HeroProductCard> {
                     duration: AppAnimations.normal,
                     curve: AppAnimations.smooth,
                     child: ProductImageBox(
-                      imagePath: _heroImagePath,
+                      imagePath: widget.product.imagePath,
+                      category: widget.product.category,
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -79,13 +66,15 @@ class _HeroProductCardState extends State<HeroProductCard> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
+                  color: primary.withValues(alpha: isDark ? 0.18 : 0.12),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Text(
-                  widget.product.featured ? 'FEATURED' : widget.product.category.toUpperCase(),
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  widget.product.featured
+                      ? 'FEATURED'
+                      : widget.product.category.toUpperCase(),
+                  style: TextStyle(
+                    color: primary,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.8,
@@ -110,7 +99,7 @@ class _HeroProductCardState extends State<HeroProductCard> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.mediumGray,
+                  color: secondaryText,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -118,13 +107,16 @@ class _HeroProductCardState extends State<HeroProductCard> {
               Row(
                 children: [
                   RatingStars(rating: widget.product.rating, size: 12),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    '${widget.product.rating.toStringAsFixed(2)} (${widget.product.reviewCount})',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.mediumGray,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      '${widget.product.rating} (${widget.product.reviewCount})',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: secondaryText,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -146,12 +138,13 @@ class _HeroProductCardState extends State<HeroProductCard> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.black,
+                      color: isDark ? primary : AppColors.black,
                       shape: BoxShape.circle,
                       boxShadow: _isHovered
                           ? [
                               BoxShadow(
-                                color: AppColors.black.withValues(alpha: 0.25),
+                                color: (isDark ? primary : AppColors.black)
+                                    .withValues(alpha: 0.25),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -188,8 +181,14 @@ class _ProductListTileState extends State<ProductListTile> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final store = AppScope.of(context);
     final isSaved = store.wishlist.contains(widget.product.id);
+    final primary = theme.colorScheme.primary;
+    final onSurface = theme.colorScheme.onSurface;
+    final secondaryText =
+        theme.textTheme.bodySmall?.color ?? AppColors.mediumGray;
 
     return GestureDetector(
       onTap: () => openProduct(context, widget.product),
@@ -197,38 +196,55 @@ class _ProductListTileState extends State<ProductListTile> {
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() => _isHovered = false),
         child: AnimatedContainer(
-          duration: AppAnimations.normal,
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.fastOutSlowIn,
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(AppRadius.xl),
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: _isHovered ? AppColors.primary.withAlpha(100) : AppColors.lightGray,
+              color: _isHovered
+                  ? primary.withValues(alpha: isDark ? 0.5 : 0.3)
+                  : (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04)),
               width: 1.5,
             ),
-            boxShadow: _isHovered ? appShadowMd : appShadowSm,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                blurRadius: _isHovered ? 16 : 8,
+                offset: Offset(0, _isHovered ? 8 : 4),
+              ),
+            ],
           ),
           child: Row(
             children: [
-              // Product Image
-              SizedBox(
-                width: 110,
-                height: 110,
+              // Premium Product Image Container
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Hero(
                   tag: 'product-image-${widget.product.id}',
                   child: AnimatedScale(
-                    scale: _isHovered ? 1.06 : 1.0,
-                    duration: AppAnimations.normal,
-                    curve: AppAnimations.smooth,
-                    child: ProductImageBox(
-                      imagePath: widget.product.imagePath,
-                      fit: BoxFit.contain,
+                    scale: _isHovered ? 1.08 : 1.0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutQuart,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: ProductImageBox(
+                        imagePath: widget.product.imagePath,
+                        category: widget.product.category,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.lg),
-              
+              const SizedBox(width: 16),
+
               // Product Info
               Expanded(
                 child: Column(
@@ -237,123 +253,127 @@ class _ProductListTileState extends State<ProductListTile> {
                   children: [
                     // Category Badge
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: 2,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withAlpha(15),
-                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                        color: primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         widget.product.category.toUpperCase(),
                         style: TextStyle(
-                          color: AppColors.primary,
+                          color: primary,
                           fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-                    
+                    const SizedBox(height: 6),
+
                     // Product Name
                     Text(
                       widget.product.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        fontSize: 16,
+                        fontSize: 17,
                         letterSpacing: -0.3,
+                        color: onSurface,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    
-                    // Tagline
+                    const SizedBox(height: 4),
+
+                    // Tagline (only if not too crowded)
                     Text(
                       widget.product.tagline,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.mediumGray,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: secondaryText,
+                        fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-                    
-                    // Rating
-                    Row(
-                      children: [
-                        RatingStars(rating: widget.product.rating, size: 12),
-                        const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          '${widget.product.rating} (${widget.product.reviewCount})',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.mediumGray,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    
+                    const SizedBox(height: 8),
+
                     // Price
                     Text(
-                      'From \$${widget.product.basePrice}',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                      '\$${widget.product.basePrice}',
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               // Actions Column
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.lightGray, width: 1),
-                    ),
-                    child: IconButton(
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _SmallCircleButton(
                       onPressed: () => store.toggleWishlist(widget.product.id),
-                      icon: Icon(
-                        isSaved ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
-                        color: isSaved ? AppColors.primary : AppColors.mediumGray,
-                        size: 20,
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      constraints: const BoxConstraints(),
+                      icon: isSaved ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
+                      color: isSaved ? Colors.redAccent : secondaryText.withValues(alpha: 0.7),
+                      isDark: isDark,
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
+                    const SizedBox(height: 12),
+                    _SmallCircleButton(
                       onPressed: () => openProduct(context, widget.product),
-                      icon: const Icon(
-                        CupertinoIcons.arrow_right,
-                        color: AppColors.white,
-                        size: 16,
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      constraints: const BoxConstraints(),
+                      icon: CupertinoIcons.arrow_right,
+                      color: primary,
+                      isDark: isDark,
+                      isPrimary: true,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SmallCircleButton extends StatelessWidget {
+  const _SmallCircleButton({
+    required this.onPressed,
+    required this.icon,
+    required this.color,
+    required this.isDark,
+    this.isPrimary = false,
+  });
+
+  final VoidCallback onPressed;
+  final IconData icon;
+  final Color color;
+  final bool isDark;
+  final bool isPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: isPrimary 
+              ? color 
+              : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04)),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: isPrimary ? Colors.white : color,
+          size: 16,
         ),
       ),
     );

@@ -14,95 +14,138 @@ class _ProductGridCardState extends State<ProductGridCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.primary;
+    final onSurface = theme.colorScheme.onSurface;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: AppAnimations.normal,
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          boxShadow: _isHovered ? appShadowMd : appShadowSm,
-          border: Border.all(
-            color: _isHovered 
-                ? AppColors.primary.withAlpha(100) 
-                : (isDark ? AppColors.darkGray.withAlpha(50) : AppColors.lightGray),
-            width: 1.5,
+      child: GestureDetector(
+        onTap: () => openProduct(context, widget.product),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            color: isDark ? Colors.white.withValues(alpha: 0.05) : theme.cardColor,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: _isHovered 
+                  ? primary.withValues(alpha: isDark ? 0.6 : 0.4) 
+                  : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                blurRadius: _isHovered ? 24 : 12,
+                offset: Offset(0, _isHovered ? 12 : 6),
+              ),
+            ],
           ),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          onTap: () => openProduct(context, widget.product),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Product Image with refined container
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark 
+                        ? Colors.white.withValues(alpha: 0.03) 
+                        : Colors.black.withValues(alpha: 0.02),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Hero(
                     tag: 'product-image-${widget.product.id}',
                     child: AnimatedScale(
-                      scale: _isHovered ? 1.06 : 1.0,
-                      duration: AppAnimations.normal,
-                      curve: AppAnimations.smooth,
-                      child: ProductImageBox(
-                        imagePath: widget.product.imagePath,
-                        fit: BoxFit.contain,
+                      scale: _isHovered ? 1.08 : 1.0,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOutBack,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: ProductImageBox(
+                          imagePath: widget.product.imagePath,
+                          category: widget.product.category,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withAlpha(15),
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                  ),
-                  child: Text(
-                    widget.product.category.toUpperCase(),
-                    style: TextStyle(
-                      letterSpacing: 0.5,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 8,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  widget.product.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ),
+              
+              // Product Details
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'From \$${widget.product.basePrice}',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                    // Category Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        widget.product.category.toUpperCase(),
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                     ),
-                    Icon(
-                      CupertinoIcons.plus_circle_fill,
-                      color: _isHovered ? AppColors.primary : AppColors.mediumGray.withAlpha(100),
-                      size: 20,
+                    const SizedBox(height: 10),
+                    // Product Name
+                    Text(
+                      widget.product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 17,
+                        height: 1.2,
+                        letterSpacing: -0.3,
+                        color: onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Price and Action
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '\$${widget.product.basePrice}',
+                          style: TextStyle(
+                            color: onSurface,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: _isHovered ? primary : primary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            CupertinoIcons.arrow_right,
+                            color: _isHovered ? Colors.white : primary,
+                            size: 16,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

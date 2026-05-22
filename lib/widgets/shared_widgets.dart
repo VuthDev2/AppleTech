@@ -44,11 +44,7 @@ class EmptyState extends StatelessWidget {
                     color: AppColors.primary.withAlpha(15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    icon,
-                    size: 64,
-                    color: AppColors.primary,
-                  ),
+                  child: Icon(icon, size: 64, color: AppColors.primary),
                 ),
               const SizedBox(height: AppSpacing.xxl),
               Text(
@@ -79,14 +75,41 @@ class EmptyState extends StatelessWidget {
 /// Full-color logo for app chrome. Do not use `Image.asset(..., color:)` here:
 /// `logo_apt.png` is not an alpha-only glyph, so a color filter draws a solid block.
 class StoreBrandMark extends StatelessWidget {
-  const StoreBrandMark({super.key, this.height = 26});
+  const StoreBrandMark({super.key, this.height = 26, this.compact = false});
 
   final double height;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    if (compact) {
+      return Container(
+        width: height,
+        height: height,
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface2 : AppColors.white,
+          shape: BoxShape.circle,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Transform.translate(
+          offset: Offset(0, height * 0.08),
+          child: Transform.scale(
+            scale: 1.85,
+            child: Image.asset(
+              'assets/images/appletech_logo.png',
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Image.asset(
-      'assets/images/appletech_logo.png',
+      'assets/images/logo_apt.png',
       height: height,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.high,
@@ -101,7 +124,8 @@ class WishlistEmptyArt extends StatefulWidget {
   State<WishlistEmptyArt> createState() => _WishlistEmptyArtState();
 }
 
-class _WishlistEmptyArtState extends State<WishlistEmptyArt> with SingleTickerProviderStateMixin {
+class _WishlistEmptyArtState extends State<WishlistEmptyArt>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -130,7 +154,10 @@ class _WishlistEmptyArtState extends State<WishlistEmptyArt> with SingleTickerPr
       builder: (context, _) {
         return CustomPaint(
           size: const Size(180, 180),
-          painter: WishlistEmptyPainter(_controller.value * 2 * math.pi, primary),
+          painter: WishlistEmptyPainter(
+            _controller.value * 2 * math.pi,
+            primary,
+          ),
         );
       },
     );
@@ -150,7 +177,10 @@ class WishlistEmptyPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
       ..shader = LinearGradient(
-        colors: [primaryColor.withValues(alpha: 0.4), primaryColor.withValues(alpha: 0.02)],
+        colors: [
+          primaryColor.withValues(alpha: 0.4),
+          primaryColor.withValues(alpha: 0.02),
+        ],
       ).createShader(Rect.fromCircle(center: center, radius: size.width / 2));
 
     // Outer circle
@@ -161,7 +191,7 @@ class WishlistEmptyPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..color = primaryColor.withValues(alpha: 0.25);
-    
+
     double radius = size.width / 2.8;
     int dashCount = 24;
     double dashLength = (2 * math.pi * radius) / (dashCount * 2);
@@ -181,21 +211,36 @@ class WishlistEmptyPainter extends CustomPainter {
     final heartPaint = Paint()
       ..style = PaintingStyle.fill
       ..shader = const RadialGradient(
-        colors: [
-          Colors.pinkAccent,
-          Colors.deepOrangeAccent,
-        ],
+        colors: [Colors.pinkAccent, Colors.deepOrangeAccent],
       ).createShader(Rect.fromCircle(center: center, radius: 24));
 
     final path = Path();
     final width = 48.0;
     final height = 48.0;
     final x = center.dx - width / 2;
-    final y = center.dy - height / 2 + 4 + (math.sin(progress) * 3); // floating offset
+    final y =
+        center.dy -
+        height / 2 +
+        4 +
+        (math.sin(progress) * 3); // floating offset
 
     path.moveTo(x + width / 2, y + height / 4);
-    path.cubicTo(x + width * 6 / 7, y + height * 0, x + width * 13 / 14, y + height * 2 / 5, x + width / 2, y + height * 7 / 8);
-    path.cubicTo(x + width * 1 / 14, y + height * 2 / 5, x + width * 1 / 7, y + height * 0, x + width / 2, y + height / 4);
+    path.cubicTo(
+      x + width * 6 / 7,
+      y + height * 0,
+      x + width * 13 / 14,
+      y + height * 2 / 5,
+      x + width / 2,
+      y + height * 7 / 8,
+    );
+    path.cubicTo(
+      x + width * 1 / 14,
+      y + height * 2 / 5,
+      x + width * 1 / 7,
+      y + height * 0,
+      x + width / 2,
+      y + height / 4,
+    );
     path.close();
 
     // Heart shadow
@@ -206,12 +251,12 @@ class WishlistEmptyPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
     );
     canvas.drawPath(path, heartPaint);
-    
+
     // Sparkles
     final starPaint = Paint()
       ..color = Colors.amberAccent.withValues(alpha: 0.85)
       ..style = PaintingStyle.fill;
-    
+
     double sp1X = center.dx - 32 + (math.cos(progress * 1.5) * 4);
     double sp1Y = center.dy - 32 + (math.sin(progress * 1.5) * 4);
     canvas.drawCircle(Offset(sp1X, sp1Y), 2.5, starPaint);
@@ -223,7 +268,8 @@ class WishlistEmptyPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant WishlistEmptyPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.primaryColor != primaryColor;
+      oldDelegate.progress != progress ||
+      oldDelegate.primaryColor != primaryColor;
 }
 
 class BagEmptyArt extends StatefulWidget {
@@ -233,7 +279,8 @@ class BagEmptyArt extends StatefulWidget {
   State<BagEmptyArt> createState() => _BagEmptyArtState();
 }
 
-class _BagEmptyArtState extends State<BagEmptyArt> with SingleTickerProviderStateMixin {
+class _BagEmptyArtState extends State<BagEmptyArt>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -282,7 +329,10 @@ class BagEmptyPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
       ..shader = LinearGradient(
-        colors: [primaryColor.withValues(alpha: 0.4), primaryColor.withValues(alpha: 0.02)],
+        colors: [
+          primaryColor.withValues(alpha: 0.4),
+          primaryColor.withValues(alpha: 0.02),
+        ],
       ).createShader(Rect.fromCircle(center: center, radius: size.width / 2));
 
     // Outer circle
@@ -293,7 +343,7 @@ class BagEmptyPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..color = primaryColor.withValues(alpha: 0.25);
-    
+
     double radius = size.width / 2.8;
     int dashCount = 24;
     double dashLength = (2 * math.pi * radius) / (dashCount * 2);
@@ -313,14 +363,18 @@ class BagEmptyPainter extends CustomPainter {
     final bagWidth = 36.0;
     final bagHeight = 40.0;
     final x = center.dx - bagWidth / 2;
-    final y = center.dy - bagHeight / 2 + 5 + (math.cos(progress) * 3); // floating offset
+    final y =
+        center.dy -
+        bagHeight / 2 +
+        5 +
+        (math.cos(progress) * 3); // floating offset
 
     // Bag Handle
     final handlePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3
       ..color = primaryColor.withValues(alpha: 0.85);
-    
+
     canvas.drawArc(
       Rect.fromLTWH(x + 8, y - 8, bagWidth - 16, 16),
       math.pi,
@@ -335,7 +389,12 @@ class BagEmptyPainter extends CustomPainter {
       ..lineTo(x + 4, y + bagHeight)
       ..quadraticBezierTo(x + 5, y + bagHeight + 3, x + 8, y + bagHeight + 3)
       ..lineTo(x + bagWidth - 8, y + bagHeight + 3)
-      ..quadraticBezierTo(x + bagWidth - 5, y + bagHeight + 3, x + bagWidth - 4, y + bagHeight)
+      ..quadraticBezierTo(
+        x + bagWidth - 5,
+        y + bagHeight + 3,
+        x + bagWidth - 4,
+        y + bagHeight,
+      )
       ..lineTo(x + bagWidth, y)
       ..close();
 
@@ -367,9 +426,9 @@ class BagEmptyPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant BagEmptyPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.primaryColor != primaryColor;
+      oldDelegate.progress != progress ||
+      oldDelegate.primaryColor != primaryColor;
 }
-
 
 String ensureTransparentImageUrl(String path) {
   if (!path.startsWith('http')) return path;
@@ -380,38 +439,65 @@ String ensureTransparentImageUrl(String path) {
   return '$path${path.contains('?') ? '&' : '?'}fmt=png-alpha';
 }
 
+/// Local hero asset when CDN images fail or are still loading offline.
+String categoryImageAsset(String category) {
+  return switch (category) {
+    'Mac' => 'assets/images/macbook_pro.png',
+    'iPhone' => 'assets/images/iphone_16_pro.png',
+    'iPad' => 'assets/images/ipad_pro.png',
+    'Watch' => 'assets/images/watch_ultra.png',
+    'AirPods' => 'assets/images/airpods_pro.png',
+    'iMac' => 'assets/images/ipad_pro.png',
+    'Home' => 'assets/images/airpods_pro.png',
+    'Vision' => 'assets/images/iphone_16_pro.png',
+    'Display' => 'assets/images/ipad_pro.png',
+    'Accessories' => 'assets/images/airpods_pro.png',
+    _ => 'assets/images/macbook_pro.png',
+  };
+}
+
 /// Fills its parent and keeps the product PNG centered with a transparent backdrop.
 class ProductImageBox extends StatelessWidget {
   const ProductImageBox({
     required this.imagePath,
+    this.category,
+    this.fallbackAsset,
     this.fit = BoxFit.contain,
     this.animate = true,
     super.key,
   });
 
   final String imagePath;
+  final String? category;
+  final String? fallbackAsset;
   final BoxFit fit;
   final bool animate;
+
+  String? get _resolvedFallback =>
+      fallbackAsset ??
+      (category != null ? categoryImageAsset(category!) : null);
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final w = constraints.maxWidth;
-        final h = constraints.maxHeight;
-        if (!w.isFinite || !h.isFinite || w <= 0 || h <= 0) {
-          return ProductImage(
-            imagePath: imagePath,
-            fit: fit,
-            animate: animate,
-          );
-        }
-        return ProductImage(
-          imagePath: imagePath,
-          width: w,
-          height: h,
-          fit: fit,
-          animate: animate,
+        final w = constraints.hasBoundedWidth ? constraints.maxWidth : null;
+        final h = constraints.hasBoundedHeight ? constraints.maxHeight : null;
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          child: ColoredBox(
+            color: Colors.transparent,
+            child: Center(
+              child: ProductImage(
+                imagePath: imagePath,
+                fallbackAsset: _resolvedFallback,
+                width: w,
+                height: h,
+                fit: fit,
+                animate: animate,
+              ),
+            ),
+          ),
         );
       },
     );
@@ -421,6 +507,7 @@ class ProductImageBox extends StatelessWidget {
 class ProductImage extends StatefulWidget {
   const ProductImage({
     required this.imagePath,
+    this.fallbackAsset,
     this.width,
     this.height,
     this.size,
@@ -430,8 +517,10 @@ class ProductImage extends StatefulWidget {
   });
 
   final String imagePath;
+  final String? fallbackAsset;
   final double? width;
   final double? height;
+
   /// Legacy single dimension — applied when [width]/[height] are null.
   final double? size;
   final BoxFit fit;
@@ -441,9 +530,9 @@ class ProductImage extends StatefulWidget {
   State<ProductImage> createState() => _ProductImageState();
 }
 
-class _ProductImageState extends State<ProductImage> with SingleTickerProviderStateMixin {
+class _ProductImageState extends State<ProductImage>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _floatController;
-  bool _loaded = false;
 
   double? get _width => widget.width ?? widget.size;
   double? get _height => widget.height ?? widget.size;
@@ -466,17 +555,14 @@ class _ProductImageState extends State<ProductImage> with SingleTickerProviderSt
     super.dispose();
   }
 
-  void _markLoaded() {
-    if (!_loaded && mounted) {
-      setState(() => _loaded = true);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final isNetwork =
-        widget.imagePath.startsWith('http://') || widget.imagePath.startsWith('https://');
-    final url = isNetwork ? ensureTransparentImageUrl(widget.imagePath) : widget.imagePath;
+        widget.imagePath.startsWith('http://') ||
+        widget.imagePath.startsWith('https://');
+    final url = isNetwork
+        ? ensureTransparentImageUrl(widget.imagePath)
+        : widget.imagePath;
 
     Widget image = isNetwork
         ? CachedNetworkImage(
@@ -487,29 +573,8 @@ class _ProductImageState extends State<ProductImage> with SingleTickerProviderSt
             fadeInDuration: AppAnimations.normal,
             fadeOutDuration: AppAnimations.fast,
             filterQuality: FilterQuality.high,
-            placeholder: (context, _) => SizedBox(
-              width: _width,
-              height: _height,
-              child: const Center(
-                child: SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            ),
-            errorWidget: (context, _, _) => _errorPlaceholder(),
-            imageBuilder: (context, imageProvider) {
-              _markLoaded();
-              return Image(
-                image: imageProvider,
-                width: _width,
-                height: _height,
-                fit: widget.fit,
-                filterQuality: FilterQuality.high,
-                gaplessPlayback: true,
-              );
-            },
+            placeholder: (context, _) => _loadingPlaceholder(),
+            errorWidget: (context, _, _) => _fallbackOrError(),
           )
         : Image.asset(
             url,
@@ -518,25 +583,8 @@ class _ProductImageState extends State<ProductImage> with SingleTickerProviderSt
             fit: widget.fit,
             filterQuality: FilterQuality.high,
             gaplessPlayback: true,
-            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-              if (wasSynchronouslyLoaded || frame != null) {
-                _markLoaded();
-              }
-              return child;
-            },
-            errorBuilder: (context, error, stackTrace) => _errorPlaceholder(),
+            errorBuilder: (context, error, stackTrace) => _fallbackOrError(),
           );
-
-    if (!isNetwork && !_loaded) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _markLoaded());
-    }
-
-    image = AnimatedOpacity(
-      opacity: _loaded ? 1 : 0,
-      duration: AppAnimations.normal,
-      curve: AppAnimations.easeOut,
-      child: image,
-    );
 
     if (widget.animate) {
       image = AnimatedBuilder(
@@ -549,13 +597,35 @@ class _ProductImageState extends State<ProductImage> with SingleTickerProviderSt
       );
     }
 
-    return ColoredBox(
-      color: Colors.transparent,
-      child: image,
+    return ColoredBox(color: Colors.transparent, child: image);
+  }
+
+  Widget _loadingPlaceholder() {
+    return SizedBox(
+      width: _width,
+      height: _height,
+      child: const Center(
+        child: SizedBox(
+          width: 22,
+          height: 22,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
     );
   }
 
-  Widget _errorPlaceholder() {
+  Widget _fallbackOrError() {
+    final asset = widget.fallbackAsset;
+    if (asset != null) {
+      return Image.asset(
+        asset,
+        width: _width,
+        height: _height,
+        fit: widget.fit,
+        filterQuality: FilterQuality.high,
+        gaplessPlayback: true,
+      );
+    }
     return SizedBox(
       width: _width,
       height: _height,
@@ -603,14 +673,12 @@ class ProductGlyph extends StatelessWidget {
                 )
               : null,
           child: Center(
-            child: Padding(
-              padding: EdgeInsets.all(size * 0.08),
-              child: ProductImage(
-                imagePath: product.imagePath,
-                width: size * (showBackground ? 0.82 : 0.96),
-                height: size * (showBackground ? 0.82 : 0.96),
-                fit: BoxFit.contain,
-              ),
+            child: ProductImage(
+              imagePath: product.imagePath,
+              fallbackAsset: categoryImageAsset(product.category),
+              width: size,
+              height: size,
+              fit: BoxFit.contain,
             ),
           ),
         ),
@@ -627,6 +695,10 @@ IconData categoryIcon(String category) {
     'Watch' => Icons.watch,
     'AirPods' => Icons.earbuds,
     'iMac' => Icons.desktop_mac_outlined,
+    'Home' => Icons.speaker_group_outlined,
+    'Vision' => Icons.view_in_ar_outlined,
+    'Display' => Icons.monitor_outlined,
+    'Accessories' => Icons.keyboard_outlined,
     _ => CupertinoIcons.square_grid_2x2,
   };
 }
@@ -637,7 +709,10 @@ void openProduct(BuildContext context, Product product) {
       pageBuilder: (context, animation, secondaryAnimation) =>
           ProductDetailScreen(product: product),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final curved = CurvedAnimation(parent: animation, curve: AppAnimations.easeOut);
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: AppAnimations.easeOut,
+        );
         return FadeTransition(
           opacity: curved,
           child: SlideTransition(

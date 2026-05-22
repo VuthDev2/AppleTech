@@ -7,10 +7,9 @@ class AuthResult {
 }
 
 abstract class AuthService {
-  Future<AuthResult> signIn({
-    required String email,
-    required String password,
-  });
+  UserProfile? get currentUser;
+
+  Future<AuthResult> signIn({required String email, required String password});
 
   /// Sign in with Google (or other federated providers)
   Future<AuthResult> signInWithGoogle();
@@ -26,6 +25,12 @@ abstract class AuthService {
   Future<void> verifyPasswordResetCode({
     required String email,
     required String code,
+  });
+
+  Future<void> confirmPasswordReset({
+    required String email,
+    required String code,
+    required String newPassword,
   });
 
   Future<void> signOut();
@@ -45,6 +50,11 @@ class LocalAuthService implements AuthService {
         ),
       };
 
+  UserProfile? _currentUser;
+
+  @override
+  UserProfile? get currentUser => _currentUser;
+
   @override
   Future<AuthResult> signInWithGoogle() async {
     await _simulateNetworkDelay();
@@ -54,6 +64,7 @@ class LocalAuthService implements AuthService {
       email: 'google_demo@example.com',
       createdAt: DateTime.now(),
     );
+    _currentUser = mockUser;
     return AuthResult(user: mockUser);
   }
 
@@ -73,6 +84,7 @@ class LocalAuthService implements AuthService {
       throw const AuthException('Invalid email or password.');
     }
 
+    _currentUser = account.profile;
     return AuthResult(user: account.profile);
   }
 
@@ -100,6 +112,7 @@ class LocalAuthService implements AuthService {
       password: password,
     );
 
+    _currentUser = user;
     return AuthResult(user: user);
   }
 
@@ -112,7 +125,7 @@ class LocalAuthService implements AuthService {
       throw const AuthException('No account found with that email.');
     }
 
-    _resetCodesByEmail[normalizedEmail] = '12345';
+    _resetCodesByEmail[normalizedEmail] = '123456';
   }
 
   @override
@@ -127,13 +140,40 @@ class LocalAuthService implements AuthService {
     if (expectedCode == null || code != expectedCode) {
       throw const AuthException('Invalid verification code.');
     }
+  }
 
+  @override
+  Future<void> confirmPasswordReset({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    await _simulateNetworkDelay();
+    final normalizedEmail = _normalizeEmail(email);
+    final expectedCode = _resetCodesByEmail[normalizedEmail];
+    final account = _usersByEmail[normalizedEmail];
+
+    if (account == null) {
+      throw const AuthException('No account found with that email.');
+    }
+    if (expectedCode == null || code != expectedCode) {
+      throw const AuthException('Invalid verification code.');
+    }
+    if (newPassword.length < 6) {
+      throw const AuthException('Use at least 6 digits.');
+    }
+
+    _usersByEmail[normalizedEmail] = _StoredAuthUser(
+      profile: account.profile,
+      password: newPassword,
+    );
     _resetCodesByEmail.remove(normalizedEmail);
   }
 
   @override
   Future<void> signOut() async {
     await _simulateNetworkDelay();
+    _currentUser = null;
   }
 
   String _normalizeEmail(String email) => email.trim().toLowerCase();
@@ -148,6 +188,13 @@ class FirebaseAuthService implements AuthService {
     : firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance;
 
   final firebase_auth.FirebaseAuth firebaseAuth;
+
+  @override
+  UserProfile? get currentUser {
+    final user = firebaseAuth.currentUser;
+    if (user == null) return null;
+    return _profileFromFirebaseUser(user);
+  }
 
   @override
   Future<AuthResult> signIn({
@@ -191,7 +238,9 @@ class FirebaseAuthService implements AuthService {
         accessToken: accessToken,
         idToken: idToken,
       );
-      final userCredential = await firebaseAuth.signInWithCredential(credential);
+      final userCredential = await firebaseAuth.signInWithCredential(
+        credential,
+      );
       return AuthResult(user: _profileFromFirebaseUser(userCredential.user));
     } on AuthCancelledException {
       rethrow;
@@ -235,7 +284,9 @@ class FirebaseAuthService implements AuthService {
       }
 
       return AuthResult(
-        user: _profileFromFirebaseUser(firebaseAuth.currentUser ?? firebaseUser),
+        user: _profileFromFirebaseUser(
+          firebaseAuth.currentUser ?? firebaseUser,
+        ),
       );
     } on firebase_auth.FirebaseAuthException catch (error) {
       throw AuthException(_messageForFirebaseError(error));
@@ -259,8 +310,32 @@ class FirebaseAuthService implements AuthService {
     try {
       final accountEmail = await firebaseAuth.verifyPasswordResetCode(code);
       if (accountEmail.toLowerCase() != email.trim().toLowerCase()) {
-        throw const AuthException('This reset code belongs to a different email.');
+        throw const AuthException(
+          'This reset code belongs to a different email.',
+        );
       }
+    } on firebase_auth.FirebaseAuthException catch (error) {
+      throw AuthException(_messageForFirebaseError(error));
+    }
+  }
+
+  @override
+  Future<void> confirmPasswordReset({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      final accountEmail = await firebaseAuth.verifyPasswordResetCode(code);
+      if (accountEmail.toLowerCase() != email.trim().toLowerCase()) {
+        throw const AuthException(
+          'This reset link belongs to a different email.',
+        );
+      }
+      await firebaseAuth.confirmPasswordReset(
+        code: code,
+        newPassword: newPassword,
+      );
     } on firebase_auth.FirebaseAuthException catch (error) {
       throw AuthException(_messageForFirebaseError(error));
     }
@@ -355,7 +430,8 @@ class AuthCancelledException implements Exception {
 /// Web OAuth 2.0 client ID from Firebase Console (Authentication → Google → Web SDK).
 /// Required on Android for Firebase ID tokens. Set when `oauth_client` is in
 /// `google-services.json`; leave null to use platform defaults where possible.
-const String? kGoogleWebClientId = null;
+const String kGoogleWebClientId =
+    '760296893594-9csrat0in1cf8972dlkvue9ajesaam2u.apps.googleusercontent.com';
 
 class GoogleSignInCoordinator {
   GoogleSignInCoordinator._();

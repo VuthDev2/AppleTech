@@ -4,6 +4,7 @@ part of '../main.dart';
 List<Product> buildProductCatalog() {
   return <Product>[
     ..._buildMacBooks(),
+    ...buildExpandedAppleCatalog(),
     ..._buildIPads(),
     ..._buildIMacs(),
     ..._buildAppleWatches(),
