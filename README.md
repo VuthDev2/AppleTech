@@ -1,40 +1,163 @@
-# appletech
+# 🍎 AppleTech
 
-A new Flutter project.
+A modern Flutter e-commerce application inspired by Apple’s ecosystem design.  
+AppleTech provides a smooth shopping experience with Firebase authentication, Cloud Firestore integration, wishlist management, cart persistence, profile management, and optional Express backend support.
 
-## Backend and database
+---
 
-User data (bag, wishlist, orders, addresses, cards, notifications, profile) is stored in **Cloud Firestore**.
+## ✨ Features
 
-By default the Flutter app talks to Firestore **directly** (Firebase Auth + security rules). No Express server is required for day-to-day use.
+- 🔐 Firebase Authentication
+  - Email & Password
+  - Google Sign-In
 
-### 1. Firebase setup
+- 🛍️ E-Commerce Functionality
+  - Product catalog
+  - Shopping cart
+  - Wishlist
+  - Order management
 
-1. Create or use the Firebase project `appletech-6b722` (see `lib/firebase_options.dart`).
-2. Enable **Authentication** → Email/Password and Google.
-3. Create a **Firestore** database.
-4. Deploy security rules from this repo:
+- 👤 User Profile System
+  - Address management
+  - Payment cards
+  - Notifications
+  - Profile photo upload
+
+- ☁️ Cloud Firestore Integration
+  - Real-time data persistence
+  - Secure user data storage
+
+- ⚡ Optional Express Backend
+  - Firebase Admin SDK
+  - REST APIs
+  - Product seeding support
+
+- 📱 Cross Platform Support
+  - Android
+  - iOS
+  - Web
+  - macOS
+  - Windows
+  - Linux
+
+---
+
+# 📸 Screenshots
+
+## Home Screen
+![Home Screen](Screenshot%202026-05-23%20at%204.03.33%20PM.png)
+
+## Product View
+![Product View](Screenshot%202026-05-23%20at%204.09.20%20PM.png)
+
+---
+
+# 🛠️ Tech Stack
+
+## Frontend
+- Flutter
+- Dart
+
+## Backend
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Storage (optional)
+- Express.js (optional backend)
+
+## Tools & Services
+- Firebase
+- Node.js
+- Cloudflare R2 (optional)
+
+---
+
+# 📂 Project Structure
+
+```bash
+AppleTech/
+│
+├── lib/                 # Flutter source code
+├── assets/              # Images and assets
+├── auth-backend/        # Optional Express backend
+├── android/             # Android configuration
+├── ios/                 # iOS configuration
+├── web/                 # Web support
+├── windows/             # Windows support
+├── macos/               # macOS support
+├── linux/               # Linux support
+└── test/                # Test files
+```
+
+---
+
+# 🔥 Firebase Setup
+
+## 1. Create Firebase Project
+
+Create or use the Firebase project:
+
+```bash
+appletech-6b722
+```
+
+---
+
+## 2. Enable Authentication
+
+Enable:
+- Email/Password Authentication
+- Google Sign-In
+
+---
+
+## 3. Create Firestore Database
+
+Create a Cloud Firestore database in Firebase Console.
+
+---
+
+## 4. Deploy Firebase Rules
 
 ```bash
 npm run firebase:rules:deploy
 ```
 
-### 2. Run the app (direct Firestore — default)
+---
+
+# 🚀 Run The Application
+
+## Default Mode (Direct Firestore)
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-Sign up or sign in; cart, wishlist, and profile changes persist per account in Firestore.
+The app will connect directly to Firebase using Firestore + Firebase Authentication.
 
-### 3. Optional: Express backend (`USE_BACKEND_API=true`)
+---
 
-The `auth-backend` folder provides the same APIs via Express + Firebase Admin SDK.
+# 🧠 Optional Express Backend
 
-1. In [Firebase Console](https://console.firebase.google.com) → Project settings → Service accounts → **Generate new private key**.
-2. Save the file as `auth-backend/google-service.json` (replace the revoked key).
-3. Start the API:
+The `auth-backend` folder provides REST APIs using Express.js and Firebase Admin SDK.
+
+## Setup Backend
+
+### 1. Generate Firebase Admin SDK Key
+
+Go to:
+
+Firebase Console → Project Settings → Service Accounts → Generate New Private Key
+
+Save the key as:
+
+```bash
+auth-backend/google-service.json
+```
+
+---
+
+### 2. Start Backend Server
 
 ```bash
 cd auth-backend
@@ -42,56 +165,101 @@ npm install
 npm run dev
 ```
 
-4. Seed demo data (after the new key works):
+---
+
+### 3. Seed Demo Products
 
 ```bash
 npm run seed
 ```
 
-5. Run Flutter with the backend:
+---
+
+### 4. Run Flutter With Backend
 
 ```bash
 flutter run --dart-define=USE_BACKEND_API=true --dart-define=API_BASE_URL=http://localhost:4000
 ```
 
-For an Android emulator, use `http://10.0.2.2:4000` instead of `localhost`.
+For Android Emulator:
 
-### Profile photo (free on Spark — default)
+```bash
+http://10.0.2.2:4000
+```
 
-By default, profile photos are **compressed and stored in Firestore** on the `photoUrl` field (no Firebase Storage, no Cloudflare, no credit card).
+---
+
+# 🖼️ Profile Photo Storage
+
+By default, profile photos are compressed and stored directly in Firestore.
+
+No Firebase Storage or billing required.
 
 ```bash
 flutter run
 ```
 
-Keep images under ~400 KB (the picker compresses automatically). Works with direct Firestore + Firebase Auth on the **Spark** plan.
+---
 
-**Optional paid / external storage** (only if you want URLs instead of inline data):
+## Optional Storage Providers
 
-| Mode | Command | Notes |
-|------|---------|--------|
-| Cloudflare R2 | `--dart-define=PROFILE_STORAGE=r2` + running `auth-backend` | May require billing on Cloudflare |
-| Firebase Storage | `--dart-define=PROFILE_STORAGE=firebase` | Requires Blaze (pay-as-you-go, not a monthly subscription) |
+| Storage Provider | Configuration |
+|------------------|---------------|
+| Cloudflare R2 | `--dart-define=PROFILE_STORAGE=r2` |
+| Firebase Storage | `--dart-define=PROFILE_STORAGE=firebase` |
 
-Redeploy Firestore rules (includes `photoUrl`):
+---
 
-```bash
-npm run firebase:rules:deploy
-```
+# 🔐 Security
 
-### Product catalog
+- Firestore security rules included
+- Firebase Authentication secured
+- Optional backend verification using Firebase Admin SDK
 
-Product listings still ship in the app (`lib/data/product_catalog.dart`). Firestore `products` collection is used for optional catalog sync via `npm run seed` in `auth-backend`.
+---
 
-## Getting Started
+# 📦 Dependencies
 
-This project is a starting point for a Flutter application.
+Main dependencies used in this project:
 
-A few resources to get you started if this is your first Flutter project:
+- firebase_auth
+- cloud_firestore
+- google_sign_in
+- flutter_bloc
+- provider
+- cached_network_image
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# 🎯 Future Improvements
+
+- ✅ Payment gateway integration
+- ✅ Admin dashboard
+- ✅ Push notifications
+- ✅ AI product recommendations
+- ✅ Dark mode support
+- ✅ Product reviews & ratings
+
+---
+
+# 👨‍💻 Author
+
+Developed by :contentReference[oaicite:1]{index=1}
+
+GitHub: :contentReference[oaicite:2]{index=2}
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+# ⭐ Support
+
+If you like this project:
+
+- Give it a ⭐ on GitHub
+- Fork the repository
+- Share feedback and suggestions
