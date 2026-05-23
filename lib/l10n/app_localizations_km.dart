@@ -18,10 +18,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get explore => 'ស្វែងរក';
 
   @override
-  String get wishlist => 'បញ្ជីបំណង';
+  String get wishlist => 'ការពេញចិត្ត';
 
   @override
-  String get bag => 'កាបូប';
+  String get bag => 'ការរើសទុកសម្រាប់មកហាង';
 
   @override
   String get profile => 'ប្រវត្តិរូប';
@@ -177,10 +177,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get pickFinishes => 'ជ្រើសរើសការបញ្ចប់ ទំហំផ្ទុក និងខ្សែ។';
 
   @override
-  String get easyDelivery => 'ការដឹកជញ្ជូនងាយស្រួល';
+  String get easyDelivery => 'ការកក់មកហាង';
 
   @override
-  String get trackEveryOrder => 'តាមដានរាល់ការបញ្ជាទិញចាប់ពីការទូទាត់ប្រាក់។';
+  String get trackEveryOrder => 'មើលការកក់ដែលបានកំណត់របស់អ្នក។';
 
   @override
   String get shopMacBook => 'ទិញ MacBook';
@@ -201,19 +201,19 @@ class AppLocalizationsKm extends AppLocalizations {
   String get nameEmailProfile => 'ឈ្មោះ អ៊ីមែល និងប្រវត្តិរូបអតិថិជន';
 
   @override
-  String get deliveryAddresses => 'អាសយដ្ឋានដឹកជញ្ជូន';
+  String get deliveryAddresses => 'ការមកកាន់ហាង';
 
   @override
-  String get defaultShipping => 'ទីតាំងដឹកជញ្ជូនលំនាំដើម និងទូរស័ព្ទទំនាក់ទំនង';
+  String get defaultShipping => 'ការមកហាងដែលបានកំណត់ និងព័ត៌មានទំនាក់ទំនង';
 
   @override
   String get saved => 'បានរក្សាទុក';
 
   @override
-  String get secureCheckout => 'ការទូទាត់សុវត្ថិភាព';
+  String get secureCheckout => 'កក់ការមកហាង';
 
   @override
-  String get requireFaceId => 'ទាមទារ Face ID ឬលេខកូដមុនពេលបង់ប្រាក់';
+  String get requireFaceId => 'ការពារការកក់របស់អ្នក';
 
   @override
   String get preferences => 'ចំណូលចិត្ត';
@@ -228,11 +228,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get lightModeEnabled => 'បានបើករបៀបពន្លឺ';
 
   @override
-  String get orderUpdates => 'បច្ចុប្បន្នភាពការបញ្ជាទិញ';
+  String get orderUpdates => 'បច្ចុប្បន្នភាពការមកហាង';
 
   @override
-  String get deliveryAlerts =>
-      'ការជូនដំណឹងអំពីការដឹកជញ្ជូន បង្កាន់ដៃ និងស្ថានភាពការទទួលយក';
+  String get deliveryAlerts => 'ការរំលឹក និងការបញ្ជាក់ពីការមកហាង';
 
   @override
   String get offersAndNews => 'ការផ្តល់ជូន និងព័ត៌មានផលិតផល';
@@ -255,25 +254,23 @@ class AppLocalizationsKm extends AppLocalizations {
   String get contactSupport => 'ទាក់ទងជំនួយ';
 
   @override
-  String get getHelpWithOrders =>
-      'ទទួលបានជំនួយជាមួយការបញ្ជាទិញ ការត្រឡប់មកវិញ និងការរៀបចំ';
+  String get getHelpWithOrders => 'ទទួលបានជំនួយជាមួយការមកហាង និងការរៀបចំ';
 
   @override
   String get privacyAndTerms => 'ឯកជនភាព និងលក្ខខណ្ឌ';
 
   @override
-  String get dataUse =>
-      'ការប្រើប្រាស់ទិន្នន័យ លក្ខខណ្ឌទិញ និងគោលការណ៍ត្រឡប់មកវិញ';
+  String get dataUse => 'ការប្រើប្រាស់ទិន្នន័យ និងគោលការណ៍មកហាង';
 
   @override
-  String get orderHistory => 'ប្រវត្តិនៃការបញ្ជាទិញ';
+  String get orderHistory => 'ប្រវត្តិនៃការមកហាង';
 
   @override
-  String get noOrdersYet => 'មិនទាន់មានការបញ្ជាទិញនៅឡើយទេ';
+  String get noOrdersYet => 'មិនទាន់មានការកក់នៅឡើយទេ';
 
   @override
   String get orderHistoryAppearHere =>
-      'ប្រវត្តិនៃការបញ្ជាទិញរបស់អ្នកនឹងបង្ហាញនៅទីនេះនៅពេលដែលអ្នកធ្វើការទិញ។';
+      'ប្រវត្តិនៃការមកហាងរបស់អ្នកនឹងបង្ហាញនៅទីនេះនៅពេលដែលអ្នកកក់ការមកហាង។';
 
   @override
   String get frequentlyAskedQuestions => 'សំណួរដែលសួរញឹកញាប់';
@@ -315,21 +312,20 @@ class AppLocalizationsKm extends AppLocalizations {
   String get searchPlaceholder => 'ស្វែងរកផលិតផល...';
 
   @override
-  String get emptyWishlist => 'បញ្ជីបំណងទទេ';
+  String get emptyWishlist => 'មិនទាន់មានការរក្សាទុក';
 
   @override
   String get wishlistEmptyDesc =>
-      'ទំនិញដែលបានបន្ថែមទៅក្នុងបញ្ជីបំណងរបស់អ្នកនឹងបង្ហាញនៅទីនេះ។';
+      'ផលិតផលដែលអ្នកស្រឡាញ់ ឬចង់កត់ចំណាំនឹងបង្ហាញនៅទីនេះ។';
 
   @override
-  String get yourBag => 'កាបូបរបស់អ្នក';
+  String get yourBag => 'ផលិតផលដែលត្រូវទិញនៅហាង';
 
   @override
-  String get emptyBag => 'កាបូបរបស់អ្នកគឺទទេ';
+  String get emptyBag => 'មិនទាន់មានការជ្រើសរើស';
 
   @override
-  String get bagEmptyDesc =>
-      'បន្ថែមទំនិញដើម្បីចាប់ផ្តើមបង្កើតការរៀបចំ AppleTech របស់អ្នក។';
+  String get bagEmptyDesc => 'បន្ថែមផលិតផលដែលអ្នកចង់សាកល្បង និងទិញនៅហាង។';
 
   @override
   String get subtotal => 'សរុបរង';
@@ -347,5 +343,5 @@ class AppLocalizationsKm extends AppLocalizations {
   String get total => 'សរុប';
 
   @override
-  String get checkout => 'បន្តទៅការទូទាត់ប្រាក់';
+  String get checkout => 'បញ្ជាក់ការមកហាង';
 }

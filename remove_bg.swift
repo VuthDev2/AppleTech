@@ -17,51 +17,41 @@ guard let image = NSImage(contentsOfFile: inputPath),
 }
 
 if #available(macOS 14.0, *) {
-    let request = VNGenerateForegroundInstanceMaskRequest()
-    let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-    
-    do {
-        try handler.perform([request])
-        guard let result = request.results?.first else {
-            print("No mask generated.")
-            exit(1)
-        }
+        let request = VNGenerateForegroundInstanceMaskRequest()
+        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
         
-        let mask = try result.generateScaledMaskForImage(forInstances: result.allInstances, from: handler)
-        
-        let ciImage = CIImage(cgImage: cgImage)
-        let maskImage = CIImage(cvPixelBuffer: mask)
-        
-        let filter = CIFilter(name: "CIBlendWithMask")!
-        filter.setValue(ciImage, forKey: kCIInputImageKey)
-        // Note: The mask returned by Vision usually represents the foreground.
-        // We use it directly as the mask.
-        filter.setValue(maskImage, forKey: kCIInputMaskImageKey)
-        
-        // Background should be transparent, so we don't set kCIInputBackgroundImageKey (defaults to transparent)
-        
-        guard let outputCI = filter.outputImage else {
-            print("Failed to apply mask.")
-            exit(1)
-        }
-        
-        let context = CIContext()
-        guard let outputCG = context.createCGImage(outputCI, from: outputCI.extent) else {
-            print("Failed to create CGImage.")
-            exit(1)
-        }
-        
-        let outImage = NSImage(cgImage: outputCG, size: NSSize(width: outputCG.width, height: outputCG.height))
-        
-        guard let tiffData = outImage.tiffRepresentation,
-              let bitmap = NSBitmapImageRep(data: tiffData),
-              let pngData = bitmap.representation(using: .png, properties: [:]) else {
-            print("Failed to create PNG.")
-            exit(1)
-        }
-        
-        try pngData.write(to: URL(fileURLWithPath: outputPath))
-        print("Success: \(outputPath)")
+        do {
+            try handler.perform([request])
+            guard let result = request.results?.first else {
+                print("No mask generated.")
+                exit(1)
+            }
+            
+            // Generate masked image directly using the built-in Vision API with cropping enabled
+            let maskedBuffer = try result.generateMaskedImage(
+                ofInstances: result.allInstances,
+                from: handler,
+                croppedToInstancesExtent: true
+            )
+            
+            let ciImage = CIImage(cvPixelBuffer: maskedBuffer)
+            let context = CIContext()
+            guard let outputCG = context.createCGImage(ciImage, from: ciImage.extent) else {
+                print("Failed to create CGImage.")
+                exit(1)
+            }
+            
+            let outImage = NSImage(cgImage: outputCG, size: NSSize(width: outputCG.width, height: outputCG.height))
+            
+            guard let tiffData = outImage.tiffRepresentation,
+                  let bitmap = NSBitmapImageRep(data: tiffData),
+                  let pngData = bitmap.representation(using: .png, properties: [:]) else {
+                print("Failed to create PNG.")
+                exit(1)
+            }
+            
+            try pngData.write(to: URL(fileURLWithPath: outputPath))
+            print("Success: \(outputPath)")
         
     } catch {
         print("Error: \(error)")

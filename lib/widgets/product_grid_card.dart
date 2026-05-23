@@ -119,26 +119,37 @@ class _ProductGridCardState extends State<ProductGridCard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '\$${widget.product.basePrice}',
-                          style: TextStyle(
-                            color: onSurface,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '\$${widget.product.basePrice}',
+                              style: TextStyle(
+                                color: onSurface,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: _isHovered ? primary : primary.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            CupertinoIcons.arrow_right,
-                            color: _isHovered ? Colors.white : primary,
-                            size: 16,
-                          ),
+                        Row(
+                          children: [
+                            _SmallHeartButton(product: widget.product),
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: _isHovered ? primary : primary.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                CupertinoIcons.arrow_right,
+                                color: _isHovered ? Colors.white : primary,
+                                size: 16,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -147,6 +158,47 @@ class _ProductGridCardState extends State<ProductGridCard> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SmallHeartButton extends StatelessWidget {
+  const _SmallHeartButton({required this.product});
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    final store = AppScope.of(context);
+    final isSaved = store.wishlist.contains(product.id);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: () {
+        store.toggleWishlist(product.id);
+        final isSavedNow = store.wishlist.contains(product.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isSavedNow ? 'Added ${product.name} to Favorites' : 'Removed from Favorites'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      },
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: isSaved 
+              ? Colors.redAccent.withAlpha(30) 
+              : (isDark ? Colors.white.withAlpha(20) : Colors.black.withAlpha(10)),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          isSaved ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
+          color: isSaved ? Colors.redAccent : (isDark ? Colors.white70 : Colors.black54),
+          size: 16,
         ),
       ),
     );

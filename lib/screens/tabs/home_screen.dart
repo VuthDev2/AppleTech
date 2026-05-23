@@ -195,7 +195,7 @@ class HomeScreen extends StatelessWidget {
                       body:
                           AppLocalizations.of(context)?.pickFinishes ??
                           'Pick finishes, storage, and bands.',
-                      color: Color(0xFFAF52DE),
+                      color: const Color(0xFFAF52DE),
                     ),
                     const SizedBox(width: AppSpacing.lg),
                     StoreDifferenceCard(
@@ -259,7 +259,7 @@ class StoreHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const StoreBrandMark(height: 34),
-            Row(    
+            Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 _StoreHeaderIconButton(
@@ -319,7 +319,7 @@ class StoreHeader extends StatelessWidget {
                     if (current == 'en') {
                       store.setLocale(const Locale('km'));
                     } else if (current == 'km') {
-                      store.setLocale(const Locale('ch'));
+                      store.setLocale(const Locale('zh'));
                     } else {
                       store.setLocale(const Locale('en'));
                     }
@@ -328,7 +328,7 @@ class StoreHeader extends StatelessWidget {
                   icon: Text(
                     store.locale?.languageCode == 'km'
                         ? '🇰🇭'
-                        : store.locale?.languageCode == 'ch'
+                        : store.locale?.languageCode == 'zh'
                         ? '🇨🇳'
                         : '🇺🇸',
                     style: const TextStyle(fontSize: 18),
@@ -339,13 +339,12 @@ class StoreHeader extends StatelessWidget {
           ],
         ),
 
-
         const SizedBox(height: AppSpacing.md),
         Text(
           store.user?.name != null
               ? (AppLocalizations.of(context)?.welcome != null
-                  ? '${AppLocalizations.of(context)!.welcome}, ${store.user!.name.split(' ').first}'
-                  : 'Welcome, ${store.user!.name.split(' ').first}')
+                    ? '${AppLocalizations.of(context)!.welcome}, ${store.user!.name.split(' ').first}'
+                    : 'Welcome, ${store.user!.name.split(' ').first}')
               : (AppLocalizations.of(context)?.welcome ?? 'Welcome'),
           style: theme.textTheme.headlineLarge?.copyWith(
             fontWeight: FontWeight.w700,
@@ -420,13 +419,11 @@ class CategoryScreen extends StatelessWidget {
         .toList(growable: false);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(category),
-      ),
+      appBar: AppBar(title: Text(category)),
       body: ListView.separated(
         padding: const EdgeInsets.all(AppSpacing.xxl),
         itemCount: products.length,
-        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.lg),
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
         itemBuilder: (context, index) =>
             ProductListTile(product: products[index]),
       ),
@@ -462,10 +459,7 @@ class SectionHeader extends StatelessWidget {
             ),
             TextSpan(
               text: ' $subtitle',
-              style: const TextStyle(
-                color: AppColors.mediumGray,
-                height: 1.4,
-              ),
+              style: const TextStyle(color: AppColors.mediumGray, height: 1.4),
             ),
           ],
         ),
@@ -549,9 +543,7 @@ class _HomeSearchFieldState extends State<HomeSearchField> {
   Widget build(BuildContext context) {
     return ProfessionalTextField(
       controller: _controller,
-      hintText:
-          AppLocalizations.of(context)?.searchHint ??
-          'Search products…',
+      hintText: AppLocalizations.of(context)?.searchHint ?? 'Search products…',
       prefixIcon: CupertinoIcons.search,
       onFieldSubmitted: (value) {
         if (value.trim().isNotEmpty) {
@@ -583,6 +575,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
       imagePath: 'assets/images/macbook_pro.png',
       colors: [const Color(0xFF2E2E3A), const Color(0xFF0F0F14)],
       actionText: 'Shop MacBook',
+      imageHeightFactor: 0.88,
     ),
     PromoBannerData(
       title: 'iPhone 16 Pro',
@@ -590,6 +583,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
       imagePath: 'assets/images/iphone_16_pro.png',
       colors: [const Color(0xFF3C3B3F), const Color(0xFF605C5E)],
       actionText: 'Learn More',
+      imageHeightFactor: 0.98,
     ),
     PromoBannerData(
       title: 'Watch Ultra 2',
@@ -597,6 +591,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
       imagePath: 'assets/images/watch_ultra.png',
       colors: [const Color(0xFFD35400), const Color(0xFF2C3E50)],
       actionText: 'Explore Ultra',
+      imageHeightFactor: 0.98,
     ),
   ];
 
@@ -627,158 +622,44 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 188,
-          child: PageView.builder(
-            controller: _pageController,
-            onPageChanged: (page) => setState(() => _currentPage = page),
-            itemCount: _banners.length,
-            itemBuilder: (context, index) {
-              final banner = _banners[index];
-              return AnimatedBuilder(
-                animation: _pageController,
-                builder: (context, child) {
-                  double value = 1.0;
-                  if (_pageController.position.haveDimensions) {
-                    value = (_pageController.page! - index).abs();
-                    value = (1 - (value * 0.15)).clamp(0.0, 1.0);
-                  }
-                  return Transform.scale(
-                    scale: value,
-                    child: child,
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontalPadding = AppSpacing.xxl * 2;
+            final cardWidth = math.max(
+              0.0,
+              constraints.maxWidth - horizontalPadding,
+            );
+            final carouselHeight = (cardWidth * 0.42).clamp(218.0, 292.0);
+
+            return SizedBox(
+              height: carouselHeight,
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (page) => setState(() => _currentPage = page),
+                itemCount: _banners.length,
+                itemBuilder: (context, index) {
+                  final banner = _banners[index];
+                  return AnimatedBuilder(
+                    animation: _pageController,
+                    builder: (context, child) {
+                      double value = 1.0;
+                      if (_pageController.position.haveDimensions) {
+                        value = (_pageController.page! - index).abs();
+                        value = (1 - (value * 0.06)).clamp(0.0, 1.0);
+                      }
+                      return Transform.scale(scale: value, child: child);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xxl,
+                      ),
+                      child: _PromoBannerCard(banner: banner),
+                    ),
                   );
                 },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: banner.colors,
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(AppRadius.xxl),
-                      boxShadow: appShadowMd,
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          right: -30,
-                          top: -30,
-                          child: Container(
-                            width: 150,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.white.withAlpha(20),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.xl,
-                            AppSpacing.xl,
-                            148,
-                            AppSpacing.xl,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.sm,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.white.withAlpha(50),
-                                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                                ),
-                                child: Text(
-                                  AppLocalizations.of(context)?.latestRelease ??
-                                      'LATEST RELEASE',
-                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppColors.white,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.sm),
-                              Text(
-                                banner.title,
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  color: AppColors.white,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                banner.subtitle,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.white.withAlpha(200),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              InkWell(
-                                onTap: () {
-                                  final store = AppScope.of(context);
-                                  store.setTab(1, searchQuery: banner.title);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.md,
-                                    vertical: AppSpacing.xs,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.white,
-                                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                                  ),
-                                  child: Text(
-                                    banner.actionText == 'Shop MacBook'
-                                        ? AppLocalizations.of(context)?.shopMacBook ??
-                                            banner.actionText
-                                        : banner.actionText == 'Learn More'
-                                            ? AppLocalizations.of(context)?.learnMore ??
-                                                banner.actionText
-                                            : banner.actionText == 'Explore Ultra'
-                                                ? AppLocalizations.of(context)?.exploreUltra ??
-                                                    banner.actionText
-                                                : banner.actionText,
-                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                      color: banner.colors.first,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: 155,
-                          child: Image.asset(
-                            banner.imagePath,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.center,
-                            filterQuality: FilterQuality.high,
-                            gaplessPlayback: true,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
         const SizedBox(height: AppSpacing.md),
         Row(
@@ -804,6 +685,195 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
   }
 }
 
+class _PromoBannerCard extends StatelessWidget {
+  const _PromoBannerCard({required this.banner});
+
+  final PromoBannerData banner;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: banner.colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppRadius.xxl),
+        boxShadow: appShadowMd,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned(
+            right: -42,
+            top: -54,
+            child: Container(
+              width: 190,
+              height: 190,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.white.withAlpha(22),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 36,
+            bottom: -70,
+            child: Container(
+              width: 170,
+              height: 170,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.white.withAlpha(14),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 10, 20),
+              child: Row(
+                children: [
+                  Expanded(flex: 11, child: _PromoBannerCopy(banner: banner)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 10,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: FractionallySizedBox(
+                        widthFactor: 1,
+                        heightFactor: banner.imageHeightFactor,
+                        child: Image.asset(
+                          banner.imagePath,
+                          fit: BoxFit.contain,
+                          alignment: Alignment.centerRight,
+                          filterQuality: FilterQuality.high,
+                          gaplessPlayback: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PromoBannerCopy extends StatelessWidget {
+  const _PromoBannerCopy({required this.banner});
+
+  final PromoBannerData banner;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 230;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 3,
+              ),
+              constraints: const BoxConstraints(maxWidth: 170),
+              decoration: BoxDecoration(
+                color: AppColors.white.withAlpha(54),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+              child: Text(
+                AppLocalizations.of(context)?.latestRelease ?? 'LATEST RELEASE',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.w800,
+                  height: 1.15,
+                ),
+              ),
+            ),
+            SizedBox(height: compact ? 8 : 10),
+            Text(
+              banner.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: AppColors.white,
+                fontSize: compact ? 22 : 28,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0,
+                height: 1.04,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              banner.subtitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: AppColors.white.withAlpha(210),
+                fontWeight: FontWeight.w600,
+                height: 1.25,
+              ),
+            ),
+            SizedBox(height: compact ? 12 : 18),
+            InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              onTap: () {
+                final store = AppScope.of(context);
+                store.setTab(1, searchQuery: banner.title);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: 8,
+                ),
+                constraints: const BoxConstraints(maxWidth: 150),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                ),
+                child: Text(
+                  _localizedActionText(context, banner.actionText),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: banner.colors.first,
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _localizedActionText(BuildContext context, String actionText) {
+    if (actionText == 'Shop MacBook') {
+      return AppLocalizations.of(context)?.shopMacBook ?? actionText;
+    }
+    if (actionText == 'Learn More') {
+      return AppLocalizations.of(context)?.learnMore ?? actionText;
+    }
+    if (actionText == 'Explore Ultra') {
+      return AppLocalizations.of(context)?.exploreUltra ?? actionText;
+    }
+    return actionText;
+  }
+}
+
 class PromoBannerData {
   PromoBannerData({
     required this.title,
@@ -811,6 +881,7 @@ class PromoBannerData {
     required this.imagePath,
     required this.colors,
     required this.actionText,
+    required this.imageHeightFactor,
   });
 
   final String title;
@@ -818,6 +889,7 @@ class PromoBannerData {
   final String imagePath;
   final List<Color> colors;
   final String actionText;
+  final double imageHeightFactor;
 }
 
 class _StoreHeaderIconButton extends StatelessWidget {
@@ -850,259 +922,3 @@ class _StoreHeaderIconButton extends StatelessWidget {
   }
 }
 
-void showNotificationsSheet(BuildContext context) {
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (sheetContext) {
-      final store = AppScope.of(sheetContext);
-      final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
-      final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.82;
-
-      return ListenableBuilder(
-        listenable: store,
-        builder: (context, _) {
-          return Padding(
-            padding: EdgeInsets.only(
-              top: MediaQuery.paddingOf(sheetContext).top + AppSpacing.lg,
-            ),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Material(
-                color: isDark ? AppColors.darkGray : Colors.white,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(AppRadius.xxl),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: SizedBox(
-                  height: maxHeight,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: AppSpacing.md),
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.mediumGray.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.xxl,
-                          AppSpacing.xl,
-                          AppSpacing.lg,
-                          AppSpacing.md,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Notifications',
-                                style: Theme.of(sheetContext)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.w800),
-                              ),
-                            ),
-                            if (store.unreadNotificationCount > 0)
-                              TextButton(
-                                onPressed: store.markAllNotificationsRead,
-                                child: const Text('Mark all read'),
-                              ),
-                            IconButton(
-                              onPressed: () => Navigator.pop(sheetContext),
-                              icon: const Icon(CupertinoIcons.xmark, size: 20),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Divider(height: 1),
-                      Expanded(
-                        child: store.notifications.isEmpty
-                            ? const Padding(
-                                padding: EdgeInsets.all(AppSpacing.xxxl),
-                                child: EmptyState(
-                                  icon: CupertinoIcons.bell_slash,
-                                  title: 'All caught up',
-                                  subtitle:
-                                      'You have no notifications right now.',
-                                ),
-                              )
-                            : ListView.separated(
-                                padding: const EdgeInsets.fromLTRB(
-                                  AppSpacing.xxl,
-                                  AppSpacing.lg,
-                                  AppSpacing.xxl,
-                                  AppSpacing.xxxl,
-                                ),
-                                itemCount: store.notifications.length,
-                                separatorBuilder: (_, _) =>
-                                    const SizedBox(height: AppSpacing.md),
-                                itemBuilder: (context, index) {
-                                  final notification =
-                                      store.notifications[index];
-                                  return _NotificationTile(
-                                    notification: notification,
-                                    onTap: () {
-                                      store.markNotificationRead(
-                                        notification.id,
-                                      );
-                                      if (notification.kind ==
-                                          NotificationKind.order) {
-                                        store.setTab(4);
-                                        Navigator.pop(sheetContext);
-                                      }
-                                    },
-                                    onDismiss: () => store.removeNotification(
-                                      notification.id,
-                                    ),
-                                  );
-                                },
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}
-
-class _NotificationTile extends StatelessWidget {
-  const _NotificationTile({
-    required this.notification,
-    required this.onTap,
-    required this.onDismiss,
-  });
-
-  final AppNotification notification;
-  final VoidCallback onTap;
-  final VoidCallback onDismiss;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final accent = _notificationAccent(notification.kind);
-
-    return Material(
-      color: notification.isRead
-          ? theme.cardColor
-          : AppColors.primary.withValues(alpha: isDark ? 0.12 : 0.06),
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: Icon(
-                  _notificationIcon(notification.kind),
-                  color: accent,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            notification.title,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: notification.isRead
-                                  ? FontWeight.w600
-                                  : FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        if (!notification.isRead)
-                          Container(
-                            width: 8,
-                            height: 8,
-                            margin: const EdgeInsets.only(left: AppSpacing.sm),
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      notification.body,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.mediumGray,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      _formatNotificationTime(notification.createdAt),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: AppColors.mediumGray,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                onPressed: onDismiss,
-                icon: Icon(
-                  CupertinoIcons.xmark_circle_fill,
-                  size: 20,
-                  color: AppColors.mediumGray.withValues(alpha: 0.6),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-IconData _notificationIcon(NotificationKind kind) {
-  return switch (kind) {
-    NotificationKind.order => CupertinoIcons.cube_box_fill,
-    NotificationKind.promo => CupertinoIcons.tag_fill,
-    NotificationKind.product => CupertinoIcons.device_phone_portrait,
-    NotificationKind.system => CupertinoIcons.shield_lefthalf_fill,
-  };
-}
-
-Color _notificationAccent(NotificationKind kind) {
-  return switch (kind) {
-    NotificationKind.order => AppColors.success,
-    NotificationKind.promo => AppColors.accent,
-    NotificationKind.product => AppColors.primary,
-    NotificationKind.system => AppColors.secondary,
-  };
-}
-
-String _formatNotificationTime(DateTime time) {
-  final diff = DateTime.now().difference(time);
-  if (diff.inMinutes < 1) return 'Just now';
-  if (diff.inHours < 1) return '${diff.inMinutes}m ago';
-  if (diff.inHours < 24) return '${diff.inHours}h ago';
-  if (diff.inDays < 7) return '${diff.inDays}d ago';
-  return '${time.month}/${time.day}/${time.year}';
-}

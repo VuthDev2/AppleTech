@@ -18,10 +18,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get explore => 'Explore';
 
   @override
-  String get wishlist => 'Wishlist';
+  String get wishlist => 'Favorites';
 
   @override
-  String get bag => 'Bag';
+  String get bag => 'Store Selection';
 
   @override
   String get profile => 'Profile';
@@ -176,10 +176,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickFinishes => 'Pick finishes, storage, and bands.';
 
   @override
-  String get easyDelivery => 'Easy delivery';
+  String get easyDelivery => 'Visit Planning';
 
   @override
-  String get trackEveryOrder => 'Track every order from checkout.';
+  String get trackEveryOrder => 'View your scheduled visits.';
 
   @override
   String get shopMacBook => 'Shop MacBook';
@@ -200,19 +200,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nameEmailProfile => 'Name, email, and customer profile';
 
   @override
-  String get deliveryAddresses => 'Delivery addresses';
+  String get deliveryAddresses => 'Store Visits';
 
   @override
-  String get defaultShipping => 'Default shipping location and contact phone';
+  String get defaultShipping => 'Scheduled visits and contact details';
 
   @override
   String get saved => 'saved';
 
   @override
-  String get secureCheckout => 'Secure checkout';
+  String get secureCheckout => 'Plan Visit';
 
   @override
-  String get requireFaceId => 'Require Face ID or passcode before payment';
+  String get requireFaceId => 'Secure your visit reservation';
 
   @override
   String get preferences => 'Preferences';
@@ -227,10 +227,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lightModeEnabled => 'Light mode enabled';
 
   @override
-  String get orderUpdates => 'Order updates';
+  String get orderUpdates => 'Visit updates';
 
   @override
-  String get deliveryAlerts => 'Delivery alerts, receipts, and pickup status';
+  String get deliveryAlerts => 'Visit reminders and confirmation';
 
   @override
   String get offersAndNews => 'Offers and product news';
@@ -252,23 +252,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contactSupport => 'Contact support';
 
   @override
-  String get getHelpWithOrders => 'Get help with orders, returns, and setup';
+  String get getHelpWithOrders => 'Get help with visits and setup';
 
   @override
   String get privacyAndTerms => 'Privacy and terms';
 
   @override
-  String get dataUse => 'Data use, purchase terms, and return policy';
+  String get dataUse => 'Data use and visit policy';
 
   @override
-  String get orderHistory => 'Order History';
+  String get orderHistory => 'Visit History';
 
   @override
-  String get noOrdersYet => 'No Orders Yet';
+  String get noOrdersYet => 'No Visits Scheduled';
 
   @override
   String get orderHistoryAppearHere =>
-      'Your order history will appear here once you make a purchase.';
+      'Your visit history will appear here once you schedule a visit.';
 
   @override
   String get frequentlyAskedQuestions => 'Frequently Asked Questions';
@@ -310,21 +310,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchPlaceholder => 'Search for products...';
 
   @override
-  String get emptyWishlist => 'Empty Wishlist';
+  String get emptyWishlist => 'Nothing Saved Yet';
 
   @override
   String get wishlistEmptyDesc =>
-      'Items added to your wishlist will appear here.';
+      'Products you love or want to keep track of will appear here.';
 
   @override
-  String get yourBag => 'Your Bag';
+  String get yourBag => 'Items to Buy at Store';
 
   @override
-  String get emptyBag => 'Your bag is empty';
+  String get emptyBag => 'Your selection is empty';
 
   @override
   String get bagEmptyDesc =>
-      'Add items to start building your AppleTech setup.';
+      'Add items you intend to test and buy at the store.';
 
   @override
   String get subtotal => 'Subtotal';
@@ -342,5 +342,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get total => 'Total';
 
   @override
-  String get checkout => 'Proceed to Checkout';
+  String get checkout => 'Finalize Visit Selection';
 }

@@ -6,12 +6,14 @@ class UserProfile {
     required this.name,
     required this.email,
     required this.createdAt,
+    this.photoUrl,
   });
 
   final String uid;
   final String name;
   final String email;
   final DateTime createdAt;
+  final String? photoUrl;
 }
 
 class Review {
@@ -145,6 +147,10 @@ class OrderRecord {
     required this.total,
     required this.items,
     required this.status,
+    this.customerName,
+    this.customerPhone,
+    this.customerAddress,
+    this.visitTime,
   });
 
   final String id;
@@ -152,6 +158,10 @@ class OrderRecord {
   final int total;
   final List<CartItem> items;
   final String status;
+  final String? customerName;
+  final String? customerPhone;
+  final String? customerAddress;
+  final DateTime? visitTime;
 }
 
 enum NotificationKind { order, promo, product, system }

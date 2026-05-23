@@ -1,14 +1,22 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:appletech/l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +25,9 @@ import 'firebase_options.dart';
 part 'core/app_scope.dart';
 part 'core/app_theme.dart';
 part 'data/auth_service.dart';
+part 'data/firestore_service.dart';
+part 'data/profile_storage_service.dart';
+part 'data/photo_picker_helper.dart';
 part 'models/app_models.dart';
 part 'data/apple_product_images.dart';
 part 'data/product_catalog.dart';
@@ -34,35 +45,72 @@ part 'screens/tabs/wishlist_screen.dart';
 part 'screens/tabs/bag_screen.dart';
 part 'screens/tabs/profile_screen.dart';
 part 'widgets/shared_widgets.dart';
+part 'widgets/notification_sheet.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final authService = await createAuthService();
+  final (authService, firestoreService, profileStorage) = await _createServices();
 
   runApp(
     DevicePreview(
       enabled: !kReleaseMode,
-      builder: (context) => AppleTechApp(authService: authService),
+      builder: (context) => AppleTechApp(
+        authService: authService,
+        firestoreService: firestoreService,
+        profileStorage: profileStorage,
+      ),
     ),
   );
 }
 
-Future<AuthService> createAuthService() async {
+/// When true, user data goes through the Express API (`auth-backend`).
+/// When false (default), the app writes directly to Firestore using security rules.
+const bool kUseBackendApi = bool.fromEnvironment(
+  'USE_BACKEND_API',
+  defaultValue: false,
+);
+
+/// Profile photos: `firestore` (default, free on Spark), `r2`, or `firebase`.
+const String kProfileStorage = String.fromEnvironment(
+  'PROFILE_STORAGE',
+  defaultValue: 'firestore',
+);
+
+Future<(
+  AuthService,
+  UserDataRepository?,
+  ProfilePhotoStorage?,
+)> _createServices() async {
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    return FirebaseAuthService();
+    final UserDataRepository dataRepository = kUseBackendApi
+        ? FirestoreService()
+        : DirectFirestoreService();
+    final ProfilePhotoStorage profileStorage = createProfilePhotoStorage();
+    return (
+      FirebaseAuthService(),
+      dataRepository,
+      profileStorage,
+    );
   } catch (e) {
-    // If Firebase initialization fails (e.g., missing config), fall back to mock service.
-    return LocalAuthService();
+    debugPrint('Firebase init failed, using local auth: $e');
+    return (LocalAuthService(), null, null);
   }
 }
 
 class AppleTechApp extends StatefulWidget {
-  const AppleTechApp({required this.authService, super.key});
+  const AppleTechApp({
+    required this.authService,
+    this.firestoreService,
+    this.profileStorage,
+    super.key,
+  });
 
   final AuthService authService;
+  final UserDataRepository? firestoreService;
+  final ProfilePhotoStorage? profileStorage;
 
   @override
   State<AppleTechApp> createState() => _AppleTechAppState();
@@ -74,7 +122,13 @@ class _AppleTechAppState extends State<AppleTechApp> {
   @override
   void initState() {
     super.initState();
-    store = AppStore(authService: widget.authService);
+    store = AppStore(
+      authService: widget.authService,
+      firestoreService: widget.firestoreService,
+      profileStorage: widget.profileStorage,
+    );
+    // Restore persisted session from Firestore on cold start
+    store.initialize();
   }
 
   @override

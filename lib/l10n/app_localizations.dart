@@ -121,13 +121,13 @@ abstract class AppLocalizations {
   /// No description provided for @wishlist.
   ///
   /// In en, this message translates to:
-  /// **'Wishlist'**
+  /// **'Favorites'**
   String get wishlist;
 
   /// No description provided for @bag.
   ///
   /// In en, this message translates to:
-  /// **'Bag'**
+  /// **'Store Selection'**
   String get bag;
 
   /// No description provided for @profile.
@@ -427,13 +427,13 @@ abstract class AppLocalizations {
   /// No description provided for @easyDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Easy delivery'**
+  /// **'Visit Planning'**
   String get easyDelivery;
 
   /// No description provided for @trackEveryOrder.
   ///
   /// In en, this message translates to:
-  /// **'Track every order from checkout.'**
+  /// **'View your scheduled visits.'**
   String get trackEveryOrder;
 
   /// No description provided for @shopMacBook.
@@ -475,13 +475,13 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryAddresses.
   ///
   /// In en, this message translates to:
-  /// **'Delivery addresses'**
+  /// **'Store Visits'**
   String get deliveryAddresses;
 
   /// No description provided for @defaultShipping.
   ///
   /// In en, this message translates to:
-  /// **'Default shipping location and contact phone'**
+  /// **'Scheduled visits and contact details'**
   String get defaultShipping;
 
   /// No description provided for @saved.
@@ -493,13 +493,13 @@ abstract class AppLocalizations {
   /// No description provided for @secureCheckout.
   ///
   /// In en, this message translates to:
-  /// **'Secure checkout'**
+  /// **'Plan Visit'**
   String get secureCheckout;
 
   /// No description provided for @requireFaceId.
   ///
   /// In en, this message translates to:
-  /// **'Require Face ID or passcode before payment'**
+  /// **'Secure your visit reservation'**
   String get requireFaceId;
 
   /// No description provided for @preferences.
@@ -529,13 +529,13 @@ abstract class AppLocalizations {
   /// No description provided for @orderUpdates.
   ///
   /// In en, this message translates to:
-  /// **'Order updates'**
+  /// **'Visit updates'**
   String get orderUpdates;
 
   /// No description provided for @deliveryAlerts.
   ///
   /// In en, this message translates to:
-  /// **'Delivery alerts, receipts, and pickup status'**
+  /// **'Visit reminders and confirmation'**
   String get deliveryAlerts;
 
   /// No description provided for @offersAndNews.
@@ -577,7 +577,7 @@ abstract class AppLocalizations {
   /// No description provided for @getHelpWithOrders.
   ///
   /// In en, this message translates to:
-  /// **'Get help with orders, returns, and setup'**
+  /// **'Get help with visits and setup'**
   String get getHelpWithOrders;
 
   /// No description provided for @privacyAndTerms.
@@ -589,25 +589,25 @@ abstract class AppLocalizations {
   /// No description provided for @dataUse.
   ///
   /// In en, this message translates to:
-  /// **'Data use, purchase terms, and return policy'**
+  /// **'Data use and visit policy'**
   String get dataUse;
 
   /// No description provided for @orderHistory.
   ///
   /// In en, this message translates to:
-  /// **'Order History'**
+  /// **'Visit History'**
   String get orderHistory;
 
   /// No description provided for @noOrdersYet.
   ///
   /// In en, this message translates to:
-  /// **'No Orders Yet'**
+  /// **'No Visits Scheduled'**
   String get noOrdersYet;
 
   /// No description provided for @orderHistoryAppearHere.
   ///
   /// In en, this message translates to:
-  /// **'Your order history will appear here once you make a purchase.'**
+  /// **'Your visit history will appear here once you schedule a visit.'**
   String get orderHistoryAppearHere;
 
   /// No description provided for @frequentlyAskedQuestions.
@@ -691,31 +691,31 @@ abstract class AppLocalizations {
   /// No description provided for @emptyWishlist.
   ///
   /// In en, this message translates to:
-  /// **'Empty Wishlist'**
+  /// **'Nothing Saved Yet'**
   String get emptyWishlist;
 
   /// No description provided for @wishlistEmptyDesc.
   ///
   /// In en, this message translates to:
-  /// **'Items added to your wishlist will appear here.'**
+  /// **'Products you love or want to keep track of will appear here.'**
   String get wishlistEmptyDesc;
 
   /// No description provided for @yourBag.
   ///
   /// In en, this message translates to:
-  /// **'Your Bag'**
+  /// **'Items to Buy at Store'**
   String get yourBag;
 
   /// No description provided for @emptyBag.
   ///
   /// In en, this message translates to:
-  /// **'Your bag is empty'**
+  /// **'Your selection is empty'**
   String get emptyBag;
 
   /// No description provided for @bagEmptyDesc.
   ///
   /// In en, this message translates to:
-  /// **'Add items to start building your AppleTech setup.'**
+  /// **'Add items you intend to test and buy at the store.'**
   String get bagEmptyDesc;
 
   /// No description provided for @subtotal.
@@ -751,7 +751,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkout.
   ///
   /// In en, this message translates to:
-  /// **'Proceed to Checkout'**
+  /// **'Finalize Visit Selection'**
   String get checkout;
 }
 

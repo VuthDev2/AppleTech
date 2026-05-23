@@ -53,32 +53,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Row(
               children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    gradient: AppColors.appleGradient,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withAlpha(80),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      user?.name.isNotEmpty == true
-                          ? user!.name.substring(0, 1).toUpperCase()
-                          : 'A',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
+                _ProfileAvatar(
+                  name: user?.name ?? 'AppleTech Customer',
+                  photoUrl: user?.photoUrl,
+                  size: 72,
+                  onTap: store.canChangeProfilePhoto
+                      ? () => _showEditProfileSheet(context, store)
+                      : null,
                 ),
                 const SizedBox(width: AppSpacing.lg),
                 Expanded(
@@ -140,11 +121,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             onManageAddresses: () => _showSettingsMessage(
               context,
-              'Address management will be available from checkout.',
+              'Visit management is available in your history.',
             ),
             onSupport: () => _showSettingsMessage(
               context,
-              'AppleTech Support is ready to help with orders and devices.',
+              'AppleTech Support is ready to help with your visit and devices.',
             ),
             onPrivacy: () => _showSettingsMessage(
               context,
@@ -156,7 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           // Orders Section
           Text(
-            'Order History',
+            AppLocalizations.of(context)?.orderHistory ?? 'Visit History',
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -164,13 +145,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: AppSpacing.md),
 
           if (store.orders.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(top: 20, bottom: 40),
+            Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 40),
               child: EmptyState(
                 icon: CupertinoIcons.clock,
-                title: 'No Orders Yet',
-                subtitle:
-                    'Your order history will appear here once you make a purchase.',
+                title: AppLocalizations.of(context)?.noOrdersYet ?? 'No Scheduled Visits',
+                subtitle: AppLocalizations.of(context)?.orderHistoryAppearHere ??
+                    'Your visit history will appear here once you schedule a visit.',
               ),
             )
           else
@@ -191,127 +172,279 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final nameController = TextEditingController(text: store.user?.name);
     final emailController = TextEditingController(text: store.user?.email);
     final formKey = GlobalKey<FormState>();
+    Uint8List? pickedPhotoBytes;
+    final picker = ImagePicker();
 
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkGray : Colors.white,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(AppRadius.xxl),
+      builder: (sheetContext) {
+        return AnimatedBuilder(
+          animation: store,
+          builder: (context, _) {
+            return StatefulBuilder(
+              builder: (context, setSheetState) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final previewPhotoUrl = store.user?.photoUrl;
+            final canChangePhoto = store.canChangeProfilePhoto;
+
+            Future<void> pickPhoto() async {
+              try {
+                final file = await pickProfileImage(picker);
+                if (file == null) return;
+                final bytes = await file.readAsBytes();
+                setSheetState(() => pickedPhotoBytes = bytes);
+              } on PhotoPermissionException catch (error) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(error.toString()),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              } on PlatformException catch (error) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      error.message ?? 'Could not open photo library.',
+                    ),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              } catch (error) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Could not open photo library: $error'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
-            ),
-            padding: const EdgeInsets.all(AppSpacing.xxl),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.lightGray,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkGray : Colors.white,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(AppRadius.xxl),
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Text(
-                    'Edit Profile',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxl),
-                  ProfessionalTextField(
-                    controller: nameController,
-                    hintText: 'Enter your name',
-                    label: 'Full Name',
-                    prefixIcon: CupertinoIcons.person,
-                    validator: (v) => v == null || v.trim().isEmpty
-                        ? 'Name cannot be empty'
-                        : null,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  ProfessionalTextField(
-                    controller: emailController,
-                    hintText: 'Enter your email',
-                    label: 'Email Address',
-                    prefixIcon: CupertinoIcons.mail,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) {
-                        return 'Email cannot be empty';
-                      }
-                      if (!v.contains('@')) return 'Invalid email address';
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.xxxl),
-                  Row(
+                ),
+                padding: const EdgeInsets.all(AppSpacing.xxl),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: AppSpacing.lg,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.lg),
-                            ),
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: AppColors.lightGray,
+                            borderRadius: BorderRadius.circular(2),
                           ),
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancel'),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.lg),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: AppSpacing.lg,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.lg),
+                      const SizedBox(height: AppSpacing.xl),
+                      Text(
+                        'Edit Profile',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xxl),
+                      Center(
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            pickedPhotoBytes != null
+                                ? ClipOval(
+                                    child: Image.memory(
+                                      pickedPhotoBytes!,
+                                      width: 96,
+                                      height: 96,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : _ProfileAvatar(
+                                    name: nameController.text.isNotEmpty
+                                        ? nameController.text
+                                        : store.user?.name ?? 'A',
+                                    photoUrl: previewPhotoUrl,
+                                    size: 96,
+                                  ),
+                            if (canChangePhoto)
+                              Positioned(
+                                right: -4,
+                                bottom: -4,
+                                child: Material(
+                                  color: AppColors.primary,
+                                  shape: const CircleBorder(),
+                                  child: InkWell(
+                                    customBorder: const CircleBorder(),
+                                    onTap: pickPhoto,
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(8),
+                                      child: Icon(
+                                        CupertinoIcons.camera_fill,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (canChangePhoto) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        Center(
+                          child: TextButton(
+                            onPressed: pickPhoto,
+                            child: const Text('Change photo'),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.xl),
+                      ProfessionalTextField(
+                        controller: nameController,
+                        hintText: 'Enter your name',
+                        label: 'Full Name',
+                        prefixIcon: CupertinoIcons.person,
+                        validator: (v) => v == null || v.trim().isEmpty
+                            ? 'Name cannot be empty'
+                            : null,
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      ProfessionalTextField(
+                        controller: emailController,
+                        hintText: 'Enter your email',
+                        label: 'Email Address',
+                        prefixIcon: CupertinoIcons.mail,
+                        keyboardType: TextInputType.emailAddress,
+                        readOnly: !store.canEditEmail,
+                        validator: (v) {
+                          if (!store.canEditEmail) return null;
+                          if (v == null || v.trim().isEmpty) {
+                            return 'Email cannot be empty';
+                          }
+                          if (!v.contains('@')) return 'Invalid email address';
+                          return null;
+                        },
+                      ),
+                      if (!store.canEditEmail) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          'Email is linked to your sign-in account and cannot be changed here.',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.mediumGray,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.xxxl),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.lg,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.lg,
+                                  ),
+                                ),
+                              ),
+                              onPressed: store.isProfileUpdating
+                                  ? null
+                                  : () => Navigator.pop(context),
+                              child: const Text('Cancel'),
                             ),
                           ),
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              store.updateUserProfile(
-                                name: nameController.text,
-                                email: emailController.text,
-                              );
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Profile updated successfully'),
-                                  behavior: SnackBarBehavior.floating,
+                          const SizedBox(width: AppSpacing.lg),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.lg,
                                 ),
-                              );
-                            }
-                          },
-                          child: const Text('Save'),
-                        ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.lg,
+                                  ),
+                                ),
+                              ),
+                              onPressed: store.isProfileUpdating
+                                  ? null
+                                  : () async {
+                                      if (!formKey.currentState!.validate()) {
+                                        return;
+                                      }
+                                      final ok = await store.updateUserProfile(
+                                        name: nameController.text,
+                                        email: emailController.text,
+                                        photoBytes: pickedPhotoBytes,
+                                      );
+                                      if (!context.mounted) return;
+                                      if (ok) {
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(
+                                          sheetContext,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Profile updated successfully',
+                                            ),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      } else {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              store.authError ??
+                                                  'Could not update profile.',
+                                            ),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    },
+                              child: store.isProfileUpdating
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text('Save'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+              },
+            );
+          },
         );
       },
     );
@@ -875,6 +1008,7 @@ class OrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.lg),
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -882,9 +1016,7 @@ class OrderTile extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? AppColors.darkGray
-              : AppColors.lightGray,
+          color: isDark ? AppColors.darkGray : AppColors.lightGray,
         ),
       ),
       child: Column(
@@ -897,7 +1029,7 @@ class OrderTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ORDER ID',
+                    'RESERVATION ID',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1,
@@ -910,58 +1042,57 @@ class OrderTile extends StatelessWidget {
                   ),
                 ],
               ),
-              Text(
-                '\$${order.total}',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w800,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withAlpha(20),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  order.status,
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
+          if (order.visitTime != null) ...[
+            Row(
+              children: [
+                const Icon(CupertinoIcons.calendar, size: 14, color: AppColors.mediumGray),
+                const SizedBox(width: 8),
+                Text(
+                  'Visit: ${DateFormat('MMM dd, yyyy').format(order.visitTime!)} at ${order.visitTime!.hour.toString().padLeft(2, '0')}:${order.visitTime!.minute.toString().padLeft(2, '0')}',
+                  style: const TextStyle(
+                    color: AppColors.mediumGray,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
           Row(
             children: [
-              const Icon(
-                CupertinoIcons.cube_box,
-                size: 16,
-                color: AppColors.mediumGray,
-              ),
+              const Icon(CupertinoIcons.cube_box, size: 14, color: AppColors.mediumGray),
               const SizedBox(width: 8),
               Text(
-                '${order.items.length} items • ${order.status}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                '${order.items.length} items shortlisted',
+                style: const TextStyle(
                   color: AppColors.mediumGray,
                   fontWeight: FontWeight.w500,
+                  fontSize: 13,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xl),
-          const DeliveryTimeline(),
         ],
       ),
-    );
-  }
-}
-
-class DeliveryTimeline extends StatelessWidget {
-  const DeliveryTimeline({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            const _TimelineStep(label: 'Ordered', isActive: true),
-            _TimelineDivider(isActive: true),
-            const _TimelineStep(label: 'Packed', isActive: true),
-            _TimelineDivider(isActive: false),
-            const _TimelineStep(label: 'Shipped', isActive: false),
-          ],
-        ),
-      ],
     );
   }
 }
@@ -1022,6 +1153,90 @@ class _TimelineDivider extends StatelessWidget {
         child: Container(
           height: 2,
           color: isActive ? AppColors.primary : AppColors.lightGray,
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({
+    required this.name,
+    this.photoUrl,
+    this.size = 72,
+    this.onTap,
+  });
+
+  final String name;
+  final String? photoUrl;
+  final double size;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : 'A';
+    final inlineBytes = FirestoreInlineProfileStorage.bytesFromPhotoUrl(photoUrl);
+    Widget avatar;
+    if (inlineBytes != null) {
+      avatar = ClipOval(
+        child: Image.memory(
+          inlineBytes,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        ),
+      );
+    } else if (photoUrl != null &&
+        photoUrl!.isNotEmpty &&
+        photoUrl!.startsWith('http')) {
+      avatar = ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: photoUrl!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => _initials(initial, size),
+          errorWidget: (_, __, ___) => _initials(initial, size),
+        ),
+      );
+    } else {
+      avatar = _initials(initial, size);
+    }
+
+    if (onTap == null) return avatar;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: avatar,
+      ),
+    );
+  }
+
+  Widget _initials(String initial, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: AppColors.appleGradient,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withAlpha(80),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: size * 0.38,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );

@@ -133,34 +133,81 @@ class _HeroProductCardState extends State<HeroProductCard> {
                       color: onSurface,
                     ),
                   ),
-                  AnimatedContainer(
-                    duration: AppAnimations.fast,
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: isDark ? primary : AppColors.black,
-                      shape: BoxShape.circle,
-                      boxShadow: _isHovered
-                          ? [
-                              BoxShadow(
-                                color: (isDark ? primary : AppColors.black)
-                                    .withValues(alpha: 0.25),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: const Icon(
-                      CupertinoIcons.arrow_right,
-                      color: Colors.white,
-                      size: 18,
-                    ),
+                  Row(
+                    children: [
+                      _GridHeartButton(product: widget.product),
+                      const SizedBox(width: AppSpacing.sm),
+                      AnimatedContainer(
+                        duration: AppAnimations.fast,
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: isDark ? primary : AppColors.black,
+                          shape: BoxShape.circle,
+                          boxShadow: _isHovered
+                              ? [
+                                  BoxShadow(
+                                    color: (isDark ? primary : AppColors.black)
+                                        .withValues(alpha: 0.25),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.arrow_right,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GridHeartButton extends StatelessWidget {
+  const _GridHeartButton({required this.product});
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    final store = AppScope.of(context);
+    final isSaved = store.wishlist.contains(product.id);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: () {
+        store.toggleWishlist(product.id);
+        final isSavedNow = store.wishlist.contains(product.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isSavedNow ? 'Added ${product.name} to Favorites' : 'Removed from Favorites'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      },
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: isSaved 
+              ? Colors.redAccent.withAlpha(25) 
+              : (isDark ? Colors.white.withAlpha(15) : Colors.black.withAlpha(8)),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          isSaved ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
+          color: isSaved ? Colors.redAccent : (isDark ? Colors.white70 : Colors.black54),
+          size: 18,
         ),
       ),
     );

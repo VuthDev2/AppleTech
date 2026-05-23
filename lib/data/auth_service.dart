@@ -34,6 +34,9 @@ abstract class AuthService {
   });
 
   Future<void> signOut();
+
+  /// Updates display name and profile photo on the auth provider when supported.
+  Future<void> updateAuthProfile({String? displayName, String? photoUrl});
 }
 
 class LocalAuthService implements AuthService {
@@ -174,6 +177,21 @@ class LocalAuthService implements AuthService {
   Future<void> signOut() async {
     await _simulateNetworkDelay();
     _currentUser = null;
+  }
+
+  @override
+  Future<void> updateAuthProfile({String? displayName, String? photoUrl}) async {
+    await _simulateNetworkDelay();
+    if (_currentUser == null) return;
+    _currentUser = UserProfile(
+      uid: _currentUser!.uid,
+      name: displayName?.trim().isNotEmpty == true
+          ? displayName!.trim()
+          : _currentUser!.name,
+      email: _currentUser!.email,
+      createdAt: _currentUser!.createdAt,
+      photoUrl: photoUrl ?? _currentUser!.photoUrl,
+    );
   }
 
   String _normalizeEmail(String email) => email.trim().toLowerCase();
@@ -349,6 +367,24 @@ class FirebaseAuthService implements AuthService {
     ]);
   }
 
+  @override
+  Future<void> updateAuthProfile({String? displayName, String? photoUrl}) async {
+    final firebaseUser = firebaseAuth.currentUser;
+    if (firebaseUser == null) return;
+
+    try {
+      if (displayName != null && displayName.trim().isNotEmpty) {
+        await firebaseUser.updateDisplayName(displayName.trim());
+      }
+      if (photoUrl != null) {
+        await firebaseUser.updatePhotoURL(photoUrl);
+      }
+      await firebaseUser.reload();
+    } on firebase_auth.FirebaseAuthException catch (error) {
+      throw AuthException(_messageForFirebaseError(error));
+    }
+  }
+
   UserProfile _profileFromFirebaseUser(firebase_auth.User? firebaseUser) {
     if (firebaseUser == null) {
       throw const AuthException('Unable to load your account.');
@@ -361,6 +397,7 @@ class FirebaseAuthService implements AuthService {
           : 'AppleTech Customer',
       email: firebaseUser.email ?? '',
       createdAt: firebaseUser.metadata.creationTime ?? DateTime.now(),
+      photoUrl: firebaseUser.photoURL,
     );
   }
 

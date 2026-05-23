@@ -60,40 +60,109 @@ class BagScreen extends StatelessWidget {
                 subtitle: AppLocalizations.of(context)?.bagEmptyDesc ?? 'Items you add to your bag will appear here. They will stay here until you are ready to checkout.',
                 customArt: const BagEmptyArt(),
               )
-            : ListView.separated(
-                key: const ValueKey('bag_list'),
-                padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl, 250),
-                itemCount: store.bag.length,
-                separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.lg),
-                itemBuilder: (context, index) {
-                  final item = store.bag[index];
-                  return Dismissible(
-                    key: ValueKey('${item.productId}-${item.variantId}'),
-                    direction: DismissDirection.endToStart,
-                    onDismissed: (_) {
-                      store.removeFromBag(item);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Item removed from Bag'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                    background: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-                      alignment: Alignment.centerRight,
+            : Column(
+                children: [
+                  if (store.orders.isNotEmpty && store.orders.any((o) => o.status == 'Visit Scheduled'))
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl, 0),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: AppColors.error,
-                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                        color: AppColors.success.withAlpha(20),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        border: Border.all(color: AppColors.success.withAlpha(50)),
                       ),
-                      child: const Icon(CupertinoIcons.trash, color: Colors.white),
+                      child: Row(
+                        children: [
+                          const Icon(CupertinoIcons.checkmark_seal_fill, color: AppColors.success, size: 18),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Visit Scheduled',
+                                  style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.success, fontSize: 13),
+                                ),
+                                Text(
+                                  'You can still edit your selection or details.',
+                                  style: TextStyle(color: AppColors.success.withAlpha(200), fontSize: 11),
+                                ),
+                              ],
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              showModalBottomSheet<void>(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (_) => const MultiStepCheckoutSheet(),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.success,
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: const Text('Edit Info', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                          ),
+                          const SizedBox(width: 4),
+                          IconButton(
+                            onPressed: () {
+                              final visit = store.orders.firstWhere((o) => o.status == 'Visit Scheduled');
+                              store.cancelVisit(visit.id);
+                            },
+                            icon: const Icon(CupertinoIcons.xmark_circle, color: AppColors.error, size: 18),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            visualDensity: VisualDensity.compact,
+                            tooltip: 'Cancel Visit',
+                          ),
+                        ],
+                      ),
                     ),
-                    child: CartItemTile(item: item),
-                  );
-                },
+                  Expanded(
+                    child: ListView.separated(
+                      key: const ValueKey('bag_list'),
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl, 250),
+                      itemCount: store.bag.length,
+                      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.lg),
+                      itemBuilder: (context, index) {
+                        final item = store.bag[index];
+                        return Dismissible(
+                          key: ValueKey('${item.productId}-${item.variantId}'),
+                          direction: DismissDirection.endToStart,
+                          onDismissed: (_) {
+                            store.removeFromBag(item);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Item removed from Selection'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          },
+                          background: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                            alignment: Alignment.centerRight,
+                            decoration: BoxDecoration(
+                              color: AppColors.error,
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
+                            ),
+                            child: const Icon(CupertinoIcons.trash, color: Colors.white),
+                          ),
+                          child: CartItemTile(item: item),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
       ),
-      bottomSheet: store.bag.isEmpty ? null : const CheckoutSummarySheet(),
+      bottomSheet: (store.bag.isEmpty || (store.orders.isNotEmpty && store.orders.any((o) => o.status == 'Visit Scheduled'))) 
+          ? null 
+          : const CheckoutSummarySheet(),
     );
   }
 }
@@ -370,41 +439,12 @@ class CheckoutSummarySheet extends StatelessWidget {
             ),
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(56),
-              backgroundColor: AppColors.black,
+              backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.xl),
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(' Pay', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          OutlinedButton(
-            onPressed: () => showModalBottomSheet<void>(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (_) => const MultiStepCheckoutSheet(),
-            ),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(56),
-              side: BorderSide(color: isDark ? AppColors.darkGray : AppColors.lightGray, width: 2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.xl),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(CupertinoIcons.creditcard, size: 18, color: isDark ? AppColors.white : AppColors.black),
-                const SizedBox(width: AppSpacing.md),
-                Text('Checkout - \$${store.total}', style: TextStyle(color: isDark ? AppColors.white : AppColors.black)),
-              ],
-            ),
+            child: const Text('Plan Store Visit', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
           ),
         ],
       ),
@@ -576,59 +616,96 @@ class MultiStepCheckoutSheet extends StatefulWidget {
 }
 
 class _MultiStepCheckoutSheetState extends State<MultiStepCheckoutSheet> {
-  int _currentStep = 1; // 1: Shipping, 2: Payment, 3: Face ID, 4: Success
-  ShippingAddress? _selectedAddress;
-  PaymentCard? _selectedCard;
-  String _paymentMethod = 'Apple Pay'; // 'Apple Pay' or 'Credit Card'
-  
-  bool _isAddingAddress = false;
-  bool _isAddingCard = false;
+  int _currentStep = 1; // 1: Details, 2: Success
   bool _processing = false;
   bool _complete = false;
 
-  // Address form fields
-  final _addrFormKey = GlobalKey<FormState>();
-  final _addrNameController = TextEditingController();
-  final _addrStreetController = TextEditingController();
-  final _addrCityController = TextEditingController();
-  final _addrPostalController = TextEditingController();
-  final _addrPhoneController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _addressController;
+  DateTime _visitDate = DateTime.now().add(const Duration(days: 1));
+  TimeOfDay _visitTime = const TimeOfDay(hour: 10, minute: 0);
+  bool _initialized = false;
 
-  // Card form fields
-  final _cardFormKey = GlobalKey<FormState>();
-  final _cardNameController = TextEditingController();
-  final _cardNumberController = TextEditingController();
-  final _cardExpiryController = TextEditingController();
-  final _cardCvvController = TextEditingController();
-  String _cardBrand = 'Visa';
-  Color _cardColor = const Color(0xFF0071E3);
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _phoneController = TextEditingController();
+    _addressController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final store = AppScope.of(context);
+      final existingVisit = store.orders.cast<OrderRecord?>().firstWhere(
+            (o) => o?.status == 'Visit Scheduled',
+            orElse: () => null,
+          );
+
+      if (existingVisit != null) {
+        _nameController.text = existingVisit.customerName ?? '';
+        _phoneController.text = existingVisit.customerPhone ?? '';
+        _addressController.text = existingVisit.customerAddress ?? '';
+
+        if (existingVisit.visitTime != null) {
+          _visitDate = existingVisit.visitTime!;
+          _visitTime = TimeOfDay.fromDateTime(existingVisit.visitTime!);
+        }
+      }
+      _initialized = true;
+    }
+  }
 
   @override
   void dispose() {
-    _addrNameController.dispose();
-    _addrStreetController.dispose();
-    _addrCityController.dispose();
-    _addrPostalController.dispose();
-    _addrPhoneController.dispose();
-    _cardNameController.dispose();
-    _cardNumberController.dispose();
-    _cardExpiryController.dispose();
-    _cardCvvController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _visitDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: AppColors.white,
+              onSurface: AppColors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _visitDate) {
+      setState(() => _visitDate = picked);
+    }
+  }
+
+  Future<void> _selectTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _visitTime,
+    );
+    if (picked != null && picked != _visitTime) {
+      setState(() => _visitTime = picked);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final store = AppScope.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // Auto-select defaults
-    if (_selectedAddress == null && store.addresses.isNotEmpty) {
-      _selectedAddress = store.addresses.firstWhere((a) => a.isDefault, orElse: () => store.addresses.first);
-    }
-    if (_selectedCard == null && store.cards.isNotEmpty) {
-      _selectedCard = store.cards.first;
-    }
 
     return Container(
       decoration: BoxDecoration(
@@ -649,7 +726,6 @@ class _MultiStepCheckoutSheetState extends State<MultiStepCheckoutSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top drag pill
               Center(
                 child: Container(
                   width: 40,
@@ -662,42 +738,8 @@ class _MultiStepCheckoutSheetState extends State<MultiStepCheckoutSheet> {
               ),
               const SizedBox(height: AppSpacing.xl),
 
-              // Title and Header
-              if (_currentStep < 4) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _stepTitle(),
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    Text(
-                      'Step $_currentStep of 3',
-                      style: TextStyle(
-                        color: AppColors.mediumGray,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-              ],
-
-              // STEP 1: SHIPPING ADDRESS
-              if (_currentStep == 1) _buildShippingStep(store, isDark),
-
-              // STEP 2: PAYMENT METHOD
-              if (_currentStep == 2) _buildPaymentStep(store, isDark),
-
-              // STEP 3: FACE ID BIOMETRIC CONFIRMATION
-              if (_currentStep == 3) _buildFaceIdStep(store, isDark),
-
-              // STEP 4: ORDER SUCCESS RECEIPT
-              if (_currentStep == 4) _buildSuccessStep(store, isDark),
+              if (_currentStep == 1) _buildDetailsStep(store, isDark),
+              if (_currentStep == 2) _buildSuccessStep(store, isDark),
             ],
           ),
         ),
@@ -705,640 +747,201 @@ class _MultiStepCheckoutSheetState extends State<MultiStepCheckoutSheet> {
     );
   }
 
-  String _stepTitle() {
-    switch (_currentStep) {
-      case 1:
-        return 'Shipping Address';
-      case 2:
-        return 'Payment Method';
-      case 3:
-        return 'Express Checkout';
-      default:
-        return 'Success';
-    }
-  }
-
-  Widget _buildShippingStep(AppStore store, bool isDark) {
-    if (_isAddingAddress) {
-      return Form(
-        key: _addrFormKey,
-        child: Column(
-          children: [
-            ProfessionalTextField(
-              controller: _addrNameController,
-              hintText: 'e.g. Kry Saravuth',
-              label: 'Full Name',
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            ProfessionalTextField(
-              controller: _addrStreetController,
-              hintText: 'Street address, Suite, Apt...',
-              label: 'Street Address',
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: ProfessionalTextField(
-                    controller: _addrCityController,
-                    hintText: 'e.g. Cupertino, CA',
-                    label: 'City & State',
-                    validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: ProfessionalTextField(
-                    controller: _addrPostalController,
-                    hintText: 'e.g. 95014',
-                    label: 'Postal Code',
-                    validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            ProfessionalTextField(
-              controller: _addrPhoneController,
-              hintText: '+1 (555) 000-0000',
-              label: 'Phone Number',
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => setState(() => _isAddingAddress = false),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-                    ),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () {
-                      if (_addrFormKey.currentState!.validate()) {
-                        final newAddr = ShippingAddress(
-                          id: 'addr-${DateTime.now().millisecondsSinceEpoch}',
-                          fullName: _addrNameController.text.trim(),
-                          street: _addrStreetController.text.trim(),
-                          city: _addrCityController.text.trim(),
-                          postalCode: _addrPostalController.text.trim(),
-                          phone: _addrPhoneController.text.trim(),
-                          isDefault: store.addresses.isEmpty,
-                        );
-                        store.addAddress(newAddr);
-                        setState(() {
-                          _selectedAddress = newAddr;
-                          _isAddingAddress = false;
-                        });
-                      }
-                    },
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      backgroundColor: AppColors.black,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-                    ),
-                    child: const Text('Save Address'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        ...store.addresses.map((addr) {
-          final isSelected = _selectedAddress?.id == addr.id;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: InkWell(
-              onTap: () => setState(() => _selectedAddress = addr),
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkGray.withAlpha(120) : AppColors.lightGray.withAlpha(100),
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
-                  border: Border.all(
-                    color: isSelected ? AppColors.primary : Colors.transparent,
-                    width: 2,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      isSelected ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
-                      color: isSelected ? AppColors.primary : AppColors.mediumGray,
-                    ),
-                    const SizedBox(width: AppSpacing.lg),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            addr.fullName,
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${addr.street}, ${addr.city} ${addr.postalCode}',
-                            style: TextStyle(color: AppColors.mediumGray, fontSize: 13, fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            addr.phone,
-                            style: TextStyle(color: AppColors.mediumGray, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }),
-        const SizedBox(height: AppSpacing.md),
-        TextButton.icon(
-          onPressed: () => setState(() {
-            _addrNameController.clear();
-            _addrStreetController.clear();
-            _addrCityController.clear();
-            _addrPostalController.clear();
-            _addrPhoneController.clear();
-            _isAddingAddress = true;
-          }),
-          icon: const Icon(CupertinoIcons.add),
-          label: const Text('Add New Shipping Address'),
-        ),
-        const SizedBox(height: AppSpacing.xxl),
-        FilledButton(
-          onPressed: _selectedAddress == null
-              ? null
-              : () => setState(() => _currentStep = 2),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(56),
-            backgroundColor: AppColors.black,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-          ),
-          child: const Text('Continue to Payment', style: TextStyle(fontWeight: FontWeight.w800)),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentStep(AppStore store, bool isDark) {
-    if (_isAddingCard) {
-      return Form(
-        key: _cardFormKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Live Glassmorphic card preview!
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-              child: GlassmorphicCreditCard(
-                cardholderName: _cardNameController.text.isEmpty ? 'YOUR NAME' : _cardNameController.text,
-                cardNumber: _cardNumberController.text.isEmpty ? '•••• •••• •••• ••••' : _cardNumberController.text,
-                expiryDate: _cardExpiryController.text.isEmpty ? 'MM/YY' : _cardExpiryController.text,
-                brand: _cardBrand,
-                themeColor: _cardColor,
-              ),
-            ),
-            
-            ProfessionalTextField(
-              controller: _cardNameController,
-              hintText: 'e.g. Kry Saravuth',
-              label: 'Cardholder Name',
-              onChanged: (_) => setState(() {}),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            ProfessionalTextField(
-              controller: _cardNumberController,
-              hintText: '4242 4242 4242 4242',
-              label: 'Card Number',
-              keyboardType: TextInputType.number,
-              onChanged: (_) => setState(() {}),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: ProfessionalTextField(
-                    controller: _cardExpiryController,
-                    hintText: 'MM/YY',
-                    label: 'Expiry Date',
-                    onChanged: (_) => setState(() {}),
-                    validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: ProfessionalTextField(
-                    controller: _cardCvvController,
-                    hintText: '123',
-                    label: 'CVV',
-                    keyboardType: TextInputType.number,
-                    validator: (v) => v == null || v.trim().length != 3 ? 'Invalid' : null,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            
-            // Choose card color/theme!
-            Text('Card Color Theme', style: Theme.of(context).textTheme.labelLarge),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                _colorOption(const Color(0xFF0071E3)), // Apple Blue
-                _colorOption(const Color(0xFF1F1F1F)), // Space Black
-                _colorOption(const Color(0xFFE55A5A)), // Red Rose
-                _colorOption(const Color(0xFF27AE60)), // Forest Green
-                _colorOption(const Color(0xFF8E44AD)), // Premium Purple
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-            
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => setState(() => _isAddingCard = false),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-                    ),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () {
-                      if (_cardFormKey.currentState!.validate()) {
-                        final newCard = PaymentCard(
-                          id: 'card-${DateTime.now().millisecondsSinceEpoch}',
-                          cardholderName: _cardNameController.text.trim(),
-                          cardNumber: '•••• •••• •••• ${_cardNumberController.text.trim().substring(math.max(0, _cardNumberController.text.trim().length - 4))}',
-                          expiryDate: _cardExpiryController.text.trim(),
-                          cvv: _cardCvvController.text.trim(),
-                          brand: _cardBrand,
-                          themeColor: _cardColor,
-                        );
-                        store.addCard(newCard);
-                        setState(() {
-                          _selectedCard = newCard;
-                          _isAddingCard = false;
-                        });
-                      }
-                    },
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      backgroundColor: AppColors.black,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-                    ),
-                    child: const Text('Save Card'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Method toggler
-        Row(
-          children: [
-            Expanded(
-              child: ChoiceChip(
-                avatar: const Icon(CupertinoIcons.device_phone_portrait, size: 16),
-                label: const Text('Apple Pay'),
-                selected: _paymentMethod == 'Apple Pay',
-                onSelected: (val) {
-                  if (val) setState(() => _paymentMethod = 'Apple Pay');
-                },
-                showCheckmark: false,
-                labelStyle: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: _paymentMethod == 'Apple Pay' ? AppColors.white : AppColors.black,
-                ),
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: ChoiceChip(
-                avatar: const Icon(CupertinoIcons.creditcard, size: 16),
-                label: const Text('Credit Card'),
-                selected: _paymentMethod == 'Credit Card',
-                onSelected: (val) {
-                  if (val) setState(() => _paymentMethod = 'Credit Card');
-                },
-                showCheckmark: false,
-                labelStyle: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: _paymentMethod == 'Credit Card' ? AppColors.white : AppColors.black,
-                ),
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xxl),
-
-        if (_paymentMethod == 'Apple Pay') ...[
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkGray.withAlpha(120) : AppColors.lightGray.withAlpha(100),
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-            ),
-            child: Row(
-              children: [
-                const Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.success, size: 24),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Apple Pay Active',
-                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Confirm using your biometric security on step 3.',
-                        style: TextStyle(color: AppColors.mediumGray, fontSize: 13, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+  Widget _buildDetailsStep(AppStore store, bool isDark) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Plan Your Store Visit',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
           ),
-        ] else ...[
-          // Saved cards horizontal list!
-          SizedBox(
-            height: 180,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: store.cards.length,
-              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
-              itemBuilder: (context, index) {
-                final card = store.cards[index];
-                final isSelected = _selectedCard?.id == card.id;
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedCard = card),
-                  child: Stack(
-                    children: [
-                      SizedBox(
-                        width: 280,
-                        child: GlassmorphicCreditCard(
-                          cardholderName: card.cardholderName,
-                          cardNumber: card.cardNumber,
-                          expiryDate: card.expiryDate,
-                          brand: card.brand,
-                          themeColor: card.themeColor,
-                        ),
-                      ),
-                      if (isSelected)
-                        Positioned(
-                          right: 12,
-                          top: 12,
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: AppColors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            padding: const EdgeInsets.all(2),
-                            child: const Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.primary, size: 22),
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              },
-            ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Tell us when you are coming and we will have your items ready for testing.',
+            style: TextStyle(color: AppColors.mediumGray, fontSize: 14),
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+          
+          ProfessionalTextField(
+            controller: _nameController,
+            hintText: 'e.g. Kry Saravuth',
+            label: 'Full Name',
+            validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
           ),
           const SizedBox(height: AppSpacing.lg),
-          Center(
-            child: TextButton.icon(
-              onPressed: () => setState(() {
-                _cardNameController.clear();
-                _cardNumberController.clear();
-                _cardExpiryController.clear();
-                _cardCvvController.clear();
-                _cardBrand = 'Visa';
-                _cardColor = const Color(0xFF0071E3);
-                _isAddingCard = true;
-              }),
-              icon: const Icon(CupertinoIcons.add),
-              label: const Text('Add New Payment Card'),
+          ProfessionalTextField(
+            controller: _phoneController,
+            hintText: '012 345 678',
+            label: 'Phone Number',
+            keyboardType: TextInputType.phone,
+            validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ProfessionalTextField(
+            controller: _addressController,
+            hintText: 'Street, House No, City',
+            label: 'Address (Optional)',
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+
+          Text('Expected Visit Time', style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: _selectDate,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.white.withAlpha(20) : AppColors.lightGray.withAlpha(100),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(CupertinoIcons.calendar, size: 20),
+                        const SizedBox(width: AppSpacing.md),
+                        Text(DateFormat('MMM dd, yyyy').format(_visitDate)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(
+                child: InkWell(
+                  onTap: _selectTime,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.white.withAlpha(20) : AppColors.lightGray.withAlpha(100),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(CupertinoIcons.clock, size: 20),
+                        const SizedBox(width: AppSpacing.md),
+                        Text(_visitTime.format(context)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: AppSpacing.xxxl),
+
+          // Confirm interaction
+          GestureDetector(
+            onLongPressStart: (_) async {
+              if (_formKey.currentState!.validate()) {
+                setState(() => _processing = true);
+                await Future<void>.delayed(const Duration(milliseconds: 1400));
+                if (!mounted) return;
+                
+                setState(() {
+                  _processing = false;
+                  _complete = true;
+                });
+                
+                await Future<void>.delayed(const Duration(milliseconds: 800));
+                if (!mounted) return;
+
+                final visitDateTime = DateTime(
+                  _visitDate.year,
+                  _visitDate.month,
+                  _visitDate.day,
+                  _visitTime.hour,
+                  _visitTime.minute,
+                );
+
+                try {
+                  store.completeCheckout(
+                    customerName: _nameController.text.trim(),
+                    customerPhone: _phoneController.text.trim(),
+                    customerAddress: _addressController.text.trim(),
+                    visitTime: visitDateTime,
+                  );
+                } catch (e) {
+                  // Fallback: Proceed even if backend fails (Offline/Guest mode)
+                  debugPrint('Visit saved locally: $e');
+                }
+
+                setState(() {
+                  _currentStep = 2;
+                });
+              } else {
+                // Haptic feedback or snackbar to show validation failed
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Please fill out your name and phone number.'),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: Colors.orange.shade800,
+                  ),
+                );
+              }
+            },
+            onLongPressEnd: (_) {
+              if (!_complete) setState(() => _processing = false);
+            },
+            child: AnimatedContainer(
+              duration: AppAnimations.fast,
+              width: double.infinity,
+              height: 64,
+              decoration: BoxDecoration(
+                color: _complete 
+                    ? AppColors.success 
+                    : (_processing ? AppColors.success : (isDark ? AppColors.white : AppColors.black)),
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                boxShadow: _processing ? appShadowLg : appShadowMd,
+              ),
+              child: Center(
+                child: AnimatedSwitcher(
+                  duration: AppAnimations.fast,
+                  child: Text(
+                    _processing 
+                        ? (store.orders.any((o) => o.status == 'Visit Scheduled') ? 'Updating...' : 'Confirming...') 
+                        : (_complete ? (store.orders.any((o) => o.status == 'Visit Scheduled') ? 'Updated' : 'Confirmed') 
+                        : (store.orders.any((o) => o.status == 'Visit Scheduled') ? 'Hold to Update Visit' : 'Hold to Confirm Visit')),
+                    key: ValueKey(_processing || _complete),
+                    style: TextStyle(
+                      color: isDark && !_processing && !_complete ? AppColors.black : Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 17,
+                    ),
+                  ),
+                ),              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const Center(
+            child: Text(
+              'No payment required. Pay at the store after testing.',
+              style: TextStyle(color: AppColors.mediumGray, fontSize: 12),
             ),
           ),
         ],
-
-        const SizedBox(height: AppSpacing.xxl),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => setState(() => _currentStep = 1),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                ),
-                child: const Text('Back', style: TextStyle(fontWeight: FontWeight.w700)),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: FilledButton(
-                onPressed: (_paymentMethod == 'Credit Card' && _selectedCard == null)
-                    ? null
-                    : () => setState(() => _currentStep = 3),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                  backgroundColor: AppColors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                ),
-                child: const Text('Confirm Details', style: TextStyle(fontWeight: FontWeight.w800)),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _colorOption(Color color) {
-    final isSelected = _cardColor == color;
-    return GestureDetector(
-      onTap: () => setState(() => _cardColor = color),
-      child: Container(
-        margin: const EdgeInsets.only(right: AppSpacing.md),
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-            width: 3,
-          ),
-          boxShadow: appShadowSm,
-        ),
       ),
     );
   }
 
-  Widget _buildFaceIdStep(AppStore store, bool isDark) {
-    return Column(
-      children: [
-        const SizedBox(height: AppSpacing.md),
-        Container(
-          width: 90,
-          height: 90,
-          decoration: BoxDecoration(
-            color: (_complete ? AppColors.success : AppColors.primary).withAlpha(20),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: AnimatedSwitcher(
-              duration: AppAnimations.normal,
-              child: Icon(
-                _complete
-                    ? CupertinoIcons.check_mark_circled_solid
-                    : Icons.face_retouching_natural,
-                key: ValueKey(_complete),
-                color: _complete ? AppColors.success : AppColors.primary,
-                size: 46,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xxl),
-        Text(
-          _complete ? 'Order Success!' : 'Confirm Order',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          _complete
-              ? 'Biometric authorization successful.'
-              : 'Press & hold the Apple Pay bar to authenticate \$${store.total}',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: AppColors.mediumGray,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xxxl),
-        
-        // Dynamic press and hold authentication bar!
-        GestureDetector(
-          onLongPressStart: (_) async {
-            if (_complete) return;
-            setState(() => _processing = true);
-            
-            // Apple-style biometric processing simulation
-            await Future<void>.delayed(const Duration(milliseconds: 1400));
-            if (!mounted) return;
-            
-            setState(() {
-              _processing = false;
-              _complete = true;
-            });
-            
-            await Future<void>.delayed(const Duration(milliseconds: 800));
-            if (!mounted) return;
-            setState(() {
-              _currentStep = 4;
-            });
-            // Complete checkout in the store which generates OrderRecord and empties the bag!
-            store.completeCheckout();
-          },
-          onLongPressEnd: (_) {
-            if (!_complete) setState(() => _processing = false);
-          },
-          child: AnimatedContainer(
-            duration: AppAnimations.fast,
-            width: double.infinity,
-            height: 64,
-            decoration: BoxDecoration(
-              color: _complete 
-                  ? AppColors.success 
-                  : (_processing ? AppColors.success : (isDark ? AppColors.white : AppColors.black)),
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-              boxShadow: _processing ? appShadowLg : appShadowMd,
-            ),
-            child: Center(
-              child: AnimatedSwitcher(
-                duration: AppAnimations.fast,
-                child: Text(
-                  _processing 
-                      ? 'Authorizing...' 
-                      : (_complete ? 'Success' : 'Hold to Authorize'),
-                  key: ValueKey(_processing || _complete),
-                  style: TextStyle(
-                    color: isDark && !_processing && !_complete ? AppColors.black : Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 17,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xxl),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => setState(() => _currentStep = 2),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                ),
-                child: const Text('Back', style: TextStyle(fontWeight: FontWeight.w700)),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _buildSuccessStep(AppStore store, bool isDark) {
-    // Generate order receipt details before popping
     final orderId = store.orders.isNotEmpty ? store.orders.first.id : 'AT-1001';
-    final shippingTo = _selectedAddress != null 
-        ? '${_selectedAddress!.fullName}\n${_selectedAddress!.street}, ${_selectedAddress!.city}'
-        : 'Store Pickup';
-    
-    final paidWith = _paymentMethod == 'Apple Pay' 
-        ? 'Apple Pay (Biometric)' 
-        : (_selectedCard != null ? '${_selectedCard!.brand} ending in ${_selectedCard!.cardNumber.substring(_selectedCard!.cardNumber.length - 4)}' : 'Credit Card');
+    final visitDateTime = DateTime(
+      _visitDate.year,
+      _visitDate.month,
+      _visitDate.day,
+      _visitTime.hour,
+      _visitTime.minute,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1349,12 +952,12 @@ class _MultiStepCheckoutSheetState extends State<MultiStepCheckoutSheet> {
               const Icon(CupertinoIcons.checkmark_seal_fill, color: AppColors.success, size: 64),
               const SizedBox(height: AppSpacing.lg),
               const Text(
-                'Order Confirmed!',
+                'Visit Scheduled!',
                 style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, letterSpacing: -0.5),
               ),
               const SizedBox(height: 4),
               Text(
-                'Order ID: $orderId',
+                'Reservation ID: $orderId',
                 style: const TextStyle(color: AppColors.mediumGray, fontWeight: FontWeight.w700, fontSize: 14),
               ),
               const SizedBox(height: AppSpacing.xxl),
@@ -1362,7 +965,6 @@ class _MultiStepCheckoutSheetState extends State<MultiStepCheckoutSheet> {
           ),
         ),
 
-        // Receipt Summary Box
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -1374,22 +976,22 @@ class _MultiStepCheckoutSheetState extends State<MultiStepCheckoutSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Delivery Information',
+                'Visit Details',
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                shippingTo,
-                style: const TextStyle(color: AppColors.mediumGray, fontSize: 13, height: 1.4),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              const Text(
-                'Payment Method',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                'Time: ${DateFormat('MMM dd, yyyy').format(visitDateTime)} at ${visitDateTime.hour.toString().padLeft(2, '0')}:${visitDateTime.minute.toString().padLeft(2, '0')}',
+                style: const TextStyle(color: AppColors.mediumGray, fontSize: 13),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                paidWith,
+                'Name: ${_nameController.text}',
+                style: const TextStyle(color: AppColors.mediumGray, fontSize: 13),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Phone: ${_phoneController.text}',
                 style: const TextStyle(color: AppColors.mediumGray, fontSize: 13),
               ),
             ],
@@ -1400,147 +1002,15 @@ class _MultiStepCheckoutSheetState extends State<MultiStepCheckoutSheet> {
         FilledButton(
           onPressed: () {
             Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                behavior: SnackBarBehavior.floating,
-                backgroundColor: AppColors.success,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                ),
-                content: const Row(
-                  children: [
-                    Icon(CupertinoIcons.cube_box_fill, color: AppColors.white),
-                    SizedBox(width: AppSpacing.md),
-                    Text('Order placed successfully! Track status in Profile.'),
-                  ],
-                ),
-              ),
-            );
           },
           style: FilledButton.styleFrom(
             minimumSize: const Size.fromHeight(60),
             backgroundColor: AppColors.black,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
           ),
-          child: const Text('Track Order Status', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+          child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
         ),
       ],
-    );
-  }
-}
-
-class GlassmorphicCreditCard extends StatelessWidget {
-  const GlassmorphicCreditCard({
-    required this.cardholderName,
-    required this.cardNumber,
-    required this.expiryDate,
-    required this.brand,
-    required this.themeColor,
-    super.key,
-  });
-
-  final String cardholderName;
-  final String cardNumber;
-  final String expiryDate;
-  final String brand;
-  final Color themeColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 170,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [themeColor.withAlpha(230), themeColor.withAlpha(120)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
-        border: Border.all(color: AppColors.white.withAlpha(60)),
-        boxShadow: appShadowSm,
-      ),
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Icon(CupertinoIcons.creditcard, color: AppColors.white, size: 28),
-              Text(
-                brand,
-                style: const TextStyle(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                  letterSpacing: -0.5,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            cardNumber,
-            style: const TextStyle(
-              color: AppColors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 22,
-              letterSpacing: 2,
-            ),
-          ),
-          const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'CARDHOLDER',
-                    style: TextStyle(
-                      color: AppColors.white.withAlpha(150),
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    cardholderName.toUpperCase(),
-                    style: const TextStyle(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'EXPIRES',
-                    style: TextStyle(
-                      color: AppColors.white.withAlpha(150),
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    expiryDate,
-                    style: const TextStyle(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

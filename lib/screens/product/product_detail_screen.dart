@@ -159,12 +159,41 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: Text(
-                            widget.product.name,
-                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -1,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.product.name,
+                                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -1,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withAlpha(20),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: AppColors.primary.withAlpha(50)),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(CupertinoIcons.location_solid, size: 12, color: AppColors.primary),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'Pay at Store • Test in-person',
+                                      style: TextStyle(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
@@ -253,43 +282,66 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
           AppSpacing.xxl,
           MediaQuery.of(context).padding.bottom + AppSpacing.lg,
         ),
-        child: FilledButton(
-          onPressed: selected.stock == 0
-              ? null
-              : () {
-                  store.addToBag(widget.product, selected);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      behavior: SnackBarBehavior.floating,
-                      backgroundColor: AppColors.success,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                      ),
-                      content: Row(
-                        children: [
-                          const Icon(CupertinoIcons.checkmark_alt, color: AppColors.white),
-                          const SizedBox(width: AppSpacing.md),
-                          Text('${widget.product.name} added to Bag'),
-                        ],
-                      ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(CupertinoIcons.info_circle, size: 14, color: AppColors.mediumGray),
+                  const SizedBox(width: 6),
+                  Text(
+                    'No online payment. Pay at store after testing.',
+                    style: TextStyle(
+                      color: AppColors.mediumGray,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
-                  );
-                },
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(60),
-            backgroundColor: AppColors.black,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.xl),
+                  ),
+                ],
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(CupertinoIcons.bag_badge_plus, size: 20),
-              const SizedBox(width: AppSpacing.md),
-              Text('Add to Bag - \$${selected.price}'),
-            ],
-          ),
+            FilledButton(
+              onPressed: selected.stock == 0
+                  ? null
+                  : () {
+                      store.addToBag(widget.product, selected);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: AppColors.success,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                          ),
+                          content: Row(
+                            children: [
+                              const Icon(CupertinoIcons.checkmark_alt, color: AppColors.white),
+                              const SizedBox(width: AppSpacing.md),
+                              Text('${widget.product.name} added to Store Selection'),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(60),
+                backgroundColor: AppColors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(CupertinoIcons.add_circled, size: 20),
+                  const SizedBox(width: AppSpacing.md),
+                  Text('Add to Store Selection - \$${selected.price}'),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

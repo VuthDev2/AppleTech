@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>AppleTech needs photo library access so you can choose a profile picture.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>AppleTech needs photo library access so you can choose a profile picture.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>AppleTech needs camera access so you can take a profile picture.</string>
 </dict>
 </plist>

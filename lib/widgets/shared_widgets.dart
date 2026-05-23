@@ -737,6 +737,7 @@ class ProfessionalTextField extends StatefulWidget {
     this.label,
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
+    this.readOnly = false,
     this.prefixIcon,
     this.suffixIcon,
     this.validator,
@@ -750,6 +751,7 @@ class ProfessionalTextField extends StatefulWidget {
   final String hintText;
   final TextInputType keyboardType;
   final bool obscureText;
+  final bool readOnly;
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
@@ -796,6 +798,7 @@ class _ProfessionalTextFieldState extends State<ProfessionalTextField> {
           focusNode: _focusNode,
           keyboardType: widget.keyboardType,
           obscureText: widget.obscureText,
+          readOnly: widget.readOnly,
           validator: widget.validator,
           onChanged: widget.onChanged,
           onFieldSubmitted: widget.onFieldSubmitted,

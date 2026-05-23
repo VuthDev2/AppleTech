@@ -8,25 +8,16 @@ class WishlistScreen extends StatefulWidget {
 }
 
 class _WishlistScreenState extends State<WishlistScreen> {
-  bool _isGridView = false;
-
   @override
   Widget build(BuildContext context) {
+    // AppScope.of(context) ensures this widget rebuilds whenever the wishlist changes
     final store = AppScope.of(context);
     final saved = store.wishlist.map(store.productById).toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)?.wishlist ?? 'Wishlist'),
+        title: Text(AppLocalizations.of(context)?.wishlist ?? 'Favorites'),
         actions: [
-          IconButton(
-            icon: Icon(
-              _isGridView
-                  ? CupertinoIcons.list_bullet
-                  : CupertinoIcons.square_grid_2x2,
-            ),
-            onPressed: () => setState(() => _isGridView = !_isGridView),
-          ),
           if (saved.isNotEmpty)
             TextButton.icon(
               style: TextButton.styleFrom(
@@ -36,200 +27,78 @@ class _WishlistScreenState extends State<WishlistScreen> {
               onPressed: () {
                 for (final prod in saved) {
                   store.addToBag(prod, prod.variants.first);
-                  store.toggleWishlist(prod.id);
                 }
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Moved all ${saved.length} items to Bag'),
+                    content: Text('Added all ${saved.length} items to Store Selection'),
                     behavior: SnackBarBehavior.floating,
                     action: SnackBarAction(
-                      label: 'View Bag',
+                      label: 'View Selection',
                       textColor: AppColors.primary,
                       onPressed: () => store.setTab(3),
                     ),
                   ),
                 );
               },
-              icon: const Icon(CupertinoIcons.bag_fill, size: 16),
+              icon: const Icon(CupertinoIcons.add_circled_solid, size: 16),
               label: const Text(
-                'Move All',
+                'Add All to Selection',
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
               ),
             ),
         ],
       ),
-      body: saved.isEmpty
-          ? EmptyState(
-              icon: CupertinoIcons.heart,
-              title:
-                  AppLocalizations.of(context)?.emptyWishlist ??
-                  'Nothing Saved Yet',
-              subtitle:
-                  AppLocalizations.of(context)?.wishlistEmptyDesc ??
-                  'Tap the heart on any product to save it here for later.',
-              customArt: const WishlistEmptyArt(),
-            )
-          : _isGridView
-          ? GridView.builder(
-              padding: const EdgeInsets.all(AppSpacing.xxl),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: AppSpacing.lg,
-                mainAxisSpacing: AppSpacing.lg,
-              ),
-              itemCount: saved.length,
-              itemBuilder: (context, index) =>
-                  WishlistGridTile(product: saved[index]),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(AppSpacing.xxl),
-              itemCount: saved.length,
-              itemBuilder: (context, index) {
-                final product = saved[index];
-                return Dismissible(
-                  key: ValueKey(product.id),
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (_) {
-                    store.toggleWishlist(product.id);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Removed ${product.name} from Wishlist'),
-                        behavior: SnackBarBehavior.floating,
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: saved.isEmpty
+            ? Center(
+                key: const ValueKey('empty'),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const EmptyState(
+                      icon: CupertinoIcons.heart_fill,
+                      title: 'Your Heart is Empty',
+                      subtitle: 'Tap the heart on any product to see it listed here.',
+                      customArt: WishlistEmptyArt(),
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton.tonal(
+                      onPressed: () => store.setTab(1),
+                      child: const Text('Explore Products'),
+                    ),
+                  ],
+                ),
+              )
+            : ListView.builder(
+                key: const ValueKey('list'),
+                padding: const EdgeInsets.all(AppSpacing.xxl),
+                itemCount: saved.length,
+                itemBuilder: (context, index) {
+                  final product = saved[index];
+                  return Dismissible(
+                    key: ValueKey('wish-${product.id}'),
+                    direction: DismissDirection.endToStart,
+                    onDismissed: (_) {
+                      store.toggleWishlist(product.id);
+                    },
+                    background: Container(
+                      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                      alignment: Alignment.centerRight,
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent.shade700,
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
                       ),
-                    );
-                  },
-                  background: Container(
-                    margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xxl,
+                      child: const Icon(CupertinoIcons.trash, color: Colors.white),
                     ),
-                    alignment: Alignment.centerRight,
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent.shade700,
-                      borderRadius: BorderRadius.circular(AppRadius.xl),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Icon(
-                          CupertinoIcons.trash,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'Remove',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  child: WishlistItemTile(product: product),
-                );
-              },
-            ),
+                    child: WishlistItemTile(product: product),
+                  );
+                },
+              ),
+      ),
     );
   }
-}
-
-void _showVariantSelector(BuildContext context, Product product) {
-  final store = AppScope.of(context);
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (sheetContext) {
-      final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
-      return Container(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.xxl,
-          AppSpacing.xl,
-          AppSpacing.xxl,
-          MediaQuery.of(sheetContext).padding.bottom + AppSpacing.xxl,
-        ),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkGray : AppColors.white,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppRadius.xxl),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: AppColors.mediumGray.withAlpha(100),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              Text(
-                'Select Variant',
-                style: Theme.of(
-                  sheetContext,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              ...product.variants.map(
-                (v) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    '${v.colorName} • ${v.storage}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Text(
-                    '\$${v.price}',
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  trailing: FilledButton.icon(
-                    onPressed: () {
-                      store.addToBag(product, v);
-                      store.toggleWishlist(product.id);
-                      Navigator.pop(sheetContext);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Moved ${product.name} to Bag'),
-                          behavior: SnackBarBehavior.floating,
-                          action: SnackBarAction(
-                            label: 'View Bag',
-                            textColor: AppColors.primary,
-                            onPressed: () => store.setTab(3),
-                          ),
-                        ),
-                      );
-                    },
-                    icon: const Icon(CupertinoIcons.bag_badge_plus, size: 16),
-                    label: const Text('Add'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
 }
 
 class WishlistItemTile extends StatelessWidget {
@@ -248,9 +117,7 @@ class WishlistItemTile extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: isDark
-              ? AppColors.darkGray.withAlpha(80)
-              : AppColors.lightGray,
+          color: isDark ? AppColors.darkGray.withAlpha(80) : AppColors.lightGray,
         ),
         boxShadow: appShadowSm,
       ),
@@ -260,50 +127,52 @@ class WishlistItemTile extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Product Image
-              SizedBox(
-                width: 110,
-                child: Hero(
-                  tag: 'product-image-wishlist-${product.id}',
-                  child: ProductImageBox(
-                    imagePath: product.imagePath,
-                    category: product.category,
-                    fit: BoxFit.contain,
-                    animate: false,
-                  ),
+              // 1. PRODUCT IMAGE
+              Container(
+                width: 120,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withAlpha(10) : Colors.black.withAlpha(5),
+                ),
+                child: ProductImageBox(
+                  imagePath: product.imagePath,
+                  category: product.category,
+                  fit: BoxFit.contain,
+                  animate: false,
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
-              // Product details
+              
+              // 2. DESCRIPTIVE TEXT
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         product.name,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 17,
                           letterSpacing: -0.5,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         product.tagline,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.mediumGray,
-                          fontWeight: FontWeight.w500,
+                        style: TextStyle(
+                          color: isDark ? Colors.white70 : AppColors.mediumGray,
+                          fontSize: 13,
+                          height: 1.3,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '\$${variant.price}',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
@@ -313,147 +182,33 @@ class WishlistItemTile extends StatelessWidget {
                   ),
                 ),
               ),
-              // Add to Bag Button
+
+              // 3. ACTION BUTTON
               Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton.filledTonal(
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppColors.primary.withAlpha(20),
-                          foregroundColor: AppColors.primary,
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppRadius.lg),
-                          ),
+                  child: IconButton.filledTonal(
+                    onPressed: () {
+                      final store = AppScope.of(context);
+                      store.addToBag(product, variant);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Added ${product.name} to Visit'),
+                          behavior: SnackBarBehavior.floating,
                         ),
-                        onPressed: () => _showVariantSelector(context, product),
-                        icon: const Icon(
-                          CupertinoIcons.bag_badge_plus,
-                          size: 20,
-                        ),
-                      ),
-                    ],
+                      );
+                    },
+                    icon: const Icon(CupertinoIcons.plus_circle, size: 22),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.primary.withAlpha(20),
+                      foregroundColor: AppColors.primary,
+                    ),
                   ),
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class WishlistGridTile extends StatelessWidget {
-  const WishlistGridTile({required this.product, super.key});
-
-  final Product product;
-
-  @override
-  Widget build(BuildContext context) {
-    final store = AppScope.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final variant = product.variants.first;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(
-          color: isDark
-              ? AppColors.darkGray.withAlpha(80)
-              : AppColors.lightGray,
-        ),
-        boxShadow: appShadowSm,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(AppRadius.xl),
-              ),
-              child: Stack(
-                children: [
-                  Hero(
-                    tag: 'product-image-wishlist-grid-${product.id}',
-                    child: ProductImageBox(
-                      imagePath: product.imagePath,
-                      category: product.category,
-                      fit: BoxFit.contain,
-                      animate: false,
-                    ),
-                  ),
-                  Positioned(
-                    top: AppSpacing.sm,
-                    right: AppSpacing.sm,
-                    child: IconButton.filledTonal(
-                      onPressed: () {
-                        store.toggleWishlist(product.id);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Removed ${product.name} from Wishlist',
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
-                      icon: const Icon(CupertinoIcons.trash, size: 16),
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppColors.lightGray.withAlpha(200),
-                        foregroundColor: AppColors.error,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '\$${variant.price}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    IconButton.filledTonal(
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppColors.primary.withAlpha(20),
-                        foregroundColor: AppColors.primary,
-                        padding: const EdgeInsets.all(8),
-                        minimumSize: Size.zero,
-                      ),
-                      onPressed: () => _showVariantSelector(context, product),
-                      icon: const Icon(CupertinoIcons.bag_badge_plus, size: 16),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

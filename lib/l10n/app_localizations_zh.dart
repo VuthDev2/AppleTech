@@ -18,10 +18,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get explore => '探索';
 
   @override
-  String get wishlist => '愿望清单';
+  String get wishlist => '我的收藏';
 
   @override
-  String get bag => '购物袋';
+  String get bag => '到店清单';
 
   @override
   String get profile => '个人资料';
@@ -175,16 +175,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pickFinishes => '挑选表面处理、存储和表带。';
 
   @override
-  String get easyDelivery => '轻松交付';
+  String get easyDelivery => '预约到店';
 
   @override
-  String get trackEveryOrder => '从结账开始跟踪每个订单。';
+  String get trackEveryOrder => '查看您的预约到店计划。';
 
   @override
-  String get shopMacBook => '购买 MacBook';
+  String get shopMacBook => '选购 MacBook';
 
   @override
-  String get learnMore => '了解更多';
+  String get learnMore => '进一步了解';
 
   @override
   String get exploreUltra => '探索 Ultra';
@@ -196,52 +196,52 @@ class AppLocalizationsZh extends AppLocalizations {
   String get personalInformation => '个人信息';
 
   @override
-  String get nameEmailProfile => '姓名、电子邮件和客户资料';
+  String get nameEmailProfile => '姓名、电子邮件和客户个人资料';
 
   @override
-  String get deliveryAddresses => '收货地址';
+  String get deliveryAddresses => '到店预约';
 
   @override
-  String get defaultShipping => '默认发货地址和联系电话';
+  String get defaultShipping => '预约时间及联系方式';
 
   @override
   String get saved => '已保存';
 
   @override
-  String get secureCheckout => '安全结账';
+  String get secureCheckout => '预约到店';
 
   @override
-  String get requireFaceId => '付款前需要面容 ID 或密码';
+  String get requireFaceId => '安全预约您的到店计划';
 
   @override
-  String get preferences => '首选项';
+  String get preferences => '偏好设置';
 
   @override
   String get appearance => '外观';
 
   @override
-  String get darkModeEnabled => '已启用深色模式';
+  String get darkModeEnabled => '深色模式已启用';
 
   @override
-  String get lightModeEnabled => '已启用浅色模式';
+  String get lightModeEnabled => '浅色模式已启用';
 
   @override
-  String get orderUpdates => '订单更新';
+  String get orderUpdates => '预约更新';
 
   @override
-  String get deliveryAlerts => '送货提醒、收据和提货状态';
+  String get deliveryAlerts => '预约提醒与确认';
 
   @override
   String get offersAndNews => '优惠和产品新闻';
 
   @override
-  String get personalizedDeals => '个性化交易、发布和可用性';
+  String get personalizedDeals => '个性化优惠、发布和供货情况';
 
   @override
   String get appleTechCareReminders => 'AppleTech Care 提醒';
 
   @override
-  String get coverageRenewal => '承保续订和保修通知';
+  String get coverageRenewal => '保修续期和保修通知';
 
   @override
   String get support => '支持';
@@ -250,22 +250,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get contactSupport => '联系支持';
 
   @override
-  String get getHelpWithOrders => '获得有关订单、退货和设置的帮助';
+  String get getHelpWithOrders => '获取预约及设置方面的帮助';
 
   @override
-  String get privacyAndTerms => '隐私和条款';
+  String get privacyAndTerms => '隐私与条款';
 
   @override
-  String get dataUse => '数据使用、购买条款和退货政策';
+  String get dataUse => '数据使用及到店政策';
 
   @override
-  String get orderHistory => '订单历史';
+  String get orderHistory => '预约记录';
 
   @override
-  String get noOrdersYet => '暂无订单';
+  String get noOrdersYet => '尚无预约';
 
   @override
-  String get orderHistoryAppearHere => '您购买后，您的订单历史将显示在此处。';
+  String get orderHistoryAppearHere => '预约成功后，您的预约记录将显示在这里。';
 
   @override
   String get frequentlyAskedQuestions => '常见问题';
@@ -280,25 +280,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get save => '保存';
 
   @override
-  String get account => '帐户';
+  String get account => '账户';
 
   @override
-  String get signOut => '退出';
+  String get signOut => '退出登录';
 
   @override
   String get notifications => '通知';
 
   @override
-  String get markAllRead => '全部标为已读';
+  String get markAllRead => '标记全部已读';
 
   @override
-  String get allCaughtUp => '全都在这里了';
+  String get allCaughtUp => '已全部读完';
 
   @override
   String get noNotifications => '您目前没有通知。';
 
   @override
-  String get searchHint => '搜索 MacBook M5、iPad、iMac、RAM、SSD...';
+  String get searchHint => '搜索 MacBook M5, iPad, iMac, RAM, SSD…';
 
   @override
   String get discover => '发现';
@@ -307,35 +307,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get searchPlaceholder => '搜索产品...';
 
   @override
-  String get emptyWishlist => '空愿望清单';
+  String get emptyWishlist => '暂无收藏';
 
   @override
-  String get wishlistEmptyDesc => '添加到您的愿望清单的物品将显示在这里。';
+  String get wishlistEmptyDesc => '您喜爱或想要关注的产品将显示在这里。';
 
   @override
-  String get yourBag => '你的包包';
+  String get yourBag => '准备在到店购买的产品';
 
   @override
-  String get emptyBag => '你的包是空的';
+  String get emptyBag => '您的清单是空的';
 
   @override
-  String get bagEmptyDesc => '添加项目以开始构建您的 AppleTech 设置。';
+  String get bagEmptyDesc => '添加您打算在店内测试并购买的产品。';
 
   @override
   String get subtotal => '小计';
 
   @override
-  String get shipping => '运输';
+  String get shipping => '到店测试';
 
   @override
-  String get free => '自由';
+  String get free => '免费';
 
   @override
-  String get tax => '估计税';
+  String get tax => '预估税费';
 
   @override
-  String get total => '全部';
+  String get total => '总计';
 
   @override
-  String get checkout => '继续结账';
+  String get checkout => '确认到店清单';
 }
