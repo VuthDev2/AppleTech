@@ -1,111 +1,265 @@
-# Auth Backend (Firebase + Express)
+# 🍎 AppleTech
 
-## Overview
-A lightweight backend built with **Node.js**, **Express**, **TypeScript**, and **Firebase Admin SDK**. It provides:
-- User registration and login via Firebase Auth REST API
-- Firebase ID token verification for protected routes
-- User profile, bag, wishlist, orders, addresses, cards, and notifications APIs
-- Refresh-token revocation and logout
-- Secure middleware: Helmet, CORS, and rate limiting
+A modern Flutter e-commerce application inspired by Apple’s ecosystem design.  
+AppleTech provides a smooth shopping experience with Firebase authentication, Cloud Firestore integration, wishlist management, cart persistence, profile management, and optional Express backend support.
 
-## Prerequisites
-- Node.js (v20+) and npm
-- A Firebase project with **Email/Password** enabled
-- Service-account JSON file from Firebase Console
+---
 
-## Setup
-1. Open the project at `/Users/macos/Desktop/appletech/auth-backend`.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Copy `.env.example` to `.env` and fill in Firebase + **Cloudflare R2** (profile photos; avoids Firebase Storage Blaze upgrade):
-   ```text
-   PORT=4000
-   FIREBASE_API_KEY=your_firebase_web_api_key
-   FIREBASE_SERVICE_ACCOUNT_PATH=./google-service.json
-   R2_ACCOUNT_ID=...
-   R2_ACCESS_KEY_ID=...
-   R2_SECRET_ACCESS_KEY=...
-   R2_BUCKET_NAME=appletech-profiles
-   R2_PUBLIC_BASE_URL=https://pub-xxxx.r2.dev
-   ```
-4. Place a valid Firebase Admin `google-service.json` in this folder.
+## ✨ Features
 
-## Development
-Run the development server with hot reloading:
+- 🔐 Firebase Authentication
+  - Email & Password
+  - Google Sign-In
+
+- 🛍️ E-Commerce Functionality
+  - Product catalog
+  - Shopping cart
+  - Wishlist
+  - Order management
+
+- 👤 User Profile System
+  - Address management
+  - Payment cards
+  - Notifications
+  - Profile photo upload
+
+- ☁️ Cloud Firestore Integration
+  - Real-time data persistence
+  - Secure user data storage
+
+- ⚡ Optional Express Backend
+  - Firebase Admin SDK
+  - REST APIs
+  - Product seeding support
+
+- 📱 Cross Platform Support
+  - Android
+  - iOS
+  - Web
+  - macOS
+  - Windows
+  - Linux
+
+---
+
+# 📸 Screenshots
+
+## Home Screen
+![Home Screen](Screenshot%202026-05-23%20at%204.03.33%20PM.png)
+
+## Product View
+![Product View](Screenshot%202026-05-23%20at%204.09.20%20PM.png)
+
+---
+
+# 🛠️ Tech Stack
+
+## Frontend
+- Flutter
+- Dart
+
+## Backend
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Storage (optional)
+- Express.js (optional backend)
+
+## Tools & Services
+- Firebase
+- Node.js
+- Cloudflare R2 (optional)
+
+---
+
+# 📂 Project Structure
+
 ```bash
+AppleTech/
+│
+├── lib/                 # Flutter source code
+├── assets/              # Images and assets
+├── auth-backend/        # Optional Express backend
+├── android/             # Android configuration
+├── ios/                 # iOS configuration
+├── web/                 # Web support
+├── windows/             # Windows support
+├── macos/               # macOS support
+├── linux/               # Linux support
+└── test/                # Test files
+```
+
+---
+
+# 🔥 Firebase Setup
+
+## 1. Create Firebase Project
+
+Create or use the Firebase project:
+
+```bash
+appletech-6b722
+```
+
+---
+
+## 2. Enable Authentication
+
+Enable:
+- Email/Password Authentication
+- Google Sign-In
+
+---
+
+## 3. Create Firestore Database
+
+Create a Cloud Firestore database in Firebase Console.
+
+---
+
+## 4. Deploy Firebase Rules
+
+```bash
+npm run firebase:rules:deploy
+```
+
+---
+
+# 🚀 Run The Application
+
+## Default Mode (Direct Firestore)
+
+```bash
+flutter pub get
+flutter run
+```
+
+The app will connect directly to Firebase using Firestore + Firebase Authentication.
+
+---
+
+# 🧠 Optional Express Backend
+
+The `auth-backend` folder provides REST APIs using Express.js and Firebase Admin SDK.
+
+## Setup Backend
+
+### 1. Generate Firebase Admin SDK Key
+
+Go to:
+
+Firebase Console → Project Settings → Service Accounts → Generate New Private Key
+
+Save the key as:
+
+```bash
+auth-backend/google-service.json
+```
+
+---
+
+### 2. Start Backend Server
+
+```bash
+cd auth-backend
+npm install
 npm run dev
 ```
-The API will be available at `http://localhost:4000`.
 
-## Seed Firestore
-If the Firestore Database page is empty, seed it with demo data:
+---
+
+### 3. Seed Demo Products
 
 ```bash
 npm run seed
 ```
 
-This creates:
-- `users/{demoUid}` with bag, wishlist, address, and notification subcollections
-- `products/iphone-16-pro`
-- `products/mbp-14-m4p-2024`
+---
 
-If seeding fails with `invalid_grant` or `Invalid JWT Signature`, generate a
-new Firebase Admin SDK private key from Firebase Console:
-Project settings -> Service accounts -> Generate new private key.
-Save it as `auth-backend/google-service.json`, then run `npm run seed` again.
+### 4. Run Flutter With Backend
 
-## API Endpoints
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/auth/register` | Register a new user with email and password. |
-| `POST` | `/auth/login` | Log in and receive Firebase ID and refresh tokens. |
-| `POST` | `/auth/refresh` | Refresh an ID token. |
-| `POST` | `/auth/logout` | Revoke refresh tokens. |
-| `GET` | `/protected` | Example protected route. |
-| `GET` | `/users/me` | Fetch the authenticated user's profile. |
-| `PATCH` | `/users/me` | Update display name and locale. |
-| `POST` | `/users/me/profile-photo` | Upload profile photo to Cloudflare R2 (`multipart` field `photo`). |
-| `GET` | `/users/me/orders` | Fetch order history. |
-| `POST` | `/users/me/orders` | Create an order. |
-| `GET` | `/users/me/wishlist` | Fetch wishlist product IDs. |
-| `POST` | `/users/me/wishlist` | Add a wishlist product. |
-| `DELETE` | `/users/me/wishlist/:productId` | Remove a wishlist product. |
-| `GET` | `/users/me/bag` | Fetch shopping bag items. |
-| `PUT` | `/users/me/bag/:itemId` | Create or update a bag item. |
-| `DELETE` | `/users/me/bag/:itemId` | Remove a bag item. |
-| `DELETE` | `/users/me/bag` | Clear the shopping bag. |
-| `GET` | `/users/me/addresses` | Fetch saved addresses. |
-| `PUT` | `/users/me/addresses/:addressId` | Create or update an address. |
-| `DELETE` | `/users/me/addresses/:addressId` | Remove an address. |
-| `GET` | `/users/me/cards` | Fetch saved payment cards. |
-| `PUT` | `/users/me/cards/:cardId` | Create or update a card. |
-| `DELETE` | `/users/me/cards/:cardId` | Remove a card. |
-| `GET` | `/users/me/notifications` | Fetch notifications. |
-| `POST` | `/users/me/notifications` | Create a notification. |
-| `PATCH` | `/users/me/notifications/:notificationId` | Update notification read state. |
-| `POST` | `/users/me/notifications/mark-all-read` | Mark all notifications as read. |
-| `DELETE` | `/users/me/notifications/:notificationId` | Remove a notification. |
-
-All `/users/*` routes require:
-```text
-Authorization: Bearer <firebase_id_token>
-```
-
-## Testing
-You can test quickly with `curl` or Postman:
 ```bash
-curl -X POST http://localhost:4000/auth/register \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"test@example.com","password":"Secret123!"}'
+flutter run --dart-define=USE_BACKEND_API=true --dart-define=API_BASE_URL=http://localhost:4000
 ```
-Replace with your credentials and follow the flow.
 
-## Security Notes
-- Helmet, CORS, and rate limiting are enabled by default.
-- Keep Firebase service-account JSON and API keys out of source control.
-- Use HTTPS in production.
+For Android Emulator:
 
-## License
-MIT
+```bash
+http://10.0.2.2:4000
+```
+
+---
+
+# 🖼️ Profile Photo Storage
+
+By default, profile photos are compressed and stored directly in Firestore.
+
+No Firebase Storage or billing required.
+
+```bash
+flutter run
+```
+
+---
+
+## Optional Storage Providers
+
+| Storage Provider | Configuration |
+|------------------|---------------|
+| Cloudflare R2 | `--dart-define=PROFILE_STORAGE=r2` |
+| Firebase Storage | `--dart-define=PROFILE_STORAGE=firebase` |
+
+---
+
+# 🔐 Security
+
+- Firestore security rules included
+- Firebase Authentication secured
+- Optional backend verification using Firebase Admin SDK
+
+---
+
+# 📦 Dependencies
+
+Main dependencies used in this project:
+
+- firebase_auth
+- cloud_firestore
+- google_sign_in
+- flutter_bloc
+- provider
+- cached_network_image
+
+---
+
+# 🎯 Future Improvements
+
+- ✅ Payment gateway integration
+- ✅ Admin dashboard
+- ✅ Push notifications
+- ✅ AI product recommendations
+- ✅ Dark mode support
+- ✅ Product reviews & ratings
+
+---
+
+# 👨‍💻 Author
+
+Developed by :contentReference[oaicite:1]{index=1}
+
+GitHub: :contentReference[oaicite:2]{index=2}
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+# ⭐ Support
+
+If you like this project:
+
+- Give it a ⭐ on GitHub
+- Fork the repository
+- Share feedback and suggestions
