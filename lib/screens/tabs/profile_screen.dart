@@ -53,7 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Row(
               children: [
-                _ProfileAvatar(
+                StoreUserAvatar(
                   name: user?.name ?? 'AppleTech Customer',
                   photoUrl: user?.photoUrl,
                   size: 72,

@@ -6,6 +6,7 @@ class UserProfile {
     required this.name,
     required this.email,
     required this.createdAt,
+    this.isAdmin = false,
     this.photoUrl,
   });
 
@@ -13,6 +14,7 @@ class UserProfile {
   final String name;
   final String email;
   final DateTime createdAt;
+  final bool isAdmin;
   final String? photoUrl;
 }
 

@@ -18,6 +18,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:appletech/screens/admin/admin_shell.dart'; // Import AdminShell
 import 'package:device_preview/device_preview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
@@ -149,11 +150,50 @@ class _AppleTechAppState extends State<AppleTechApp> {
             darkTheme: AppTheme.darkTheme(),
             themeMode: store.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             home: store.isAuthenticated
-                ? const StoreShell()
+                ? const _AuthGate() // Use AuthGate to determine view based on role
                 : const WelcomeAuthScreen(),
           );
         },
       ),
+    );
+  }
+}
+
+/// A widget that acts as an authentication gate, redirecting users
+/// based on their role (admin or regular user) after successful login.
+class _AuthGate extends StatelessWidget {
+  const _AuthGate({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final user = firebase_auth.FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      // This case should ideally not be reached if store.isAuthenticated is true,
+      // but as a fallback, redirect to login.
+      return const WelcomeAuthScreen();
+    }
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+
+        if (snapshot.hasError) {
+          // Handle error, e.g., show an error message or log out
+          return const Scaffold(body: Center(child: Text('Error fetching user data.')));
+        }
+
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          if (data['role'] == 'admin') {
+            return const AdminShell(); // Admin view
+          }
+        }
+        return const StoreShell(); // Regular user view or if role is not 'admin'
+      },
     );
   }
 }

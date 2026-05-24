@@ -100,7 +100,10 @@ class HomeScreen extends StatelessWidget {
                       'Vision',
                     ];
                     final category = recentCategories[index];
-                    return StoreCategoryBubble(category: category);
+                    return StaggeredFadeSlide(
+                      index: index,
+                      child: StoreCategoryBubble(category: category),
+                    );
                   },
                 ),
               ),
@@ -131,20 +134,8 @@ class HomeScreen extends StatelessWidget {
                   separatorBuilder: (_, _) =>
                       const SizedBox(width: AppSpacing.lg),
                   itemBuilder: (context, index) {
-                    return TweenAnimationBuilder<double>(
-                      key: ValueKey(featured[index].id),
-                      tween: Tween(begin: 0, end: 1),
-                      duration: Duration(milliseconds: 420 + (index * 90)),
-                      curve: AppAnimations.easeOut,
-                      builder: (context, value, child) {
-                        return Opacity(
-                          opacity: value,
-                          child: Transform.translate(
-                            offset: Offset(0, 18 * (1 - value)),
-                            child: child,
-                          ),
-                        );
-                      },
+                    return StaggeredFadeSlide(
+                      index: index,
                       child: HeroProductCard(product: featured[index]),
                     );
                   },
@@ -236,6 +227,69 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+class AutomatedTextLoop extends StatefulWidget {
+  const AutomatedTextLoop({
+    required this.texts,
+    this.style,
+    this.duration = const Duration(seconds: 3),
+    super.key,
+  });
+
+  final List<String> texts;
+  final TextStyle? style;
+  final Duration duration;
+
+  @override
+  State<AutomatedTextLoop> createState() => _AutomatedTextLoopState();
+}
+
+class _AutomatedTextLoopState extends State<AutomatedTextLoop> {
+  int _currentIndex = 0;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(widget.duration, (timer) {
+      if (mounted) {
+        setState(() {
+          _currentIndex = (_currentIndex + 1) % widget.texts.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 800),
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.3),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+            child: child,
+          ),
+        );
+      },
+      child: Text(
+        widget.texts[_currentIndex],
+        key: ValueKey(widget.texts[_currentIndex]),
+        style: widget.style,
+      ),
+    );
+  }
+}
+
 class StoreHeader extends StatelessWidget {
   const StoreHeader({required this.onToggleTheme, super.key});
 
@@ -250,6 +304,12 @@ class StoreHeader extends StatelessWidget {
     final chipBg = isDark
         ? Colors.white.withValues(alpha: 0.12)
         : AppColors.lightGray.withAlpha(100);
+
+    final l10n = AppLocalizations.of(context);
+    final greetings = [
+      l10n?.welcome ?? 'Welcome',
+      
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,12 +400,8 @@ class StoreHeader extends StatelessWidget {
         ),
 
         const SizedBox(height: AppSpacing.md),
-        Text(
-          store.user?.name != null
-              ? (AppLocalizations.of(context)?.welcome != null
-                    ? '${AppLocalizations.of(context)!.welcome}, ${store.user!.name.split(' ').first}'
-                    : 'Welcome, ${store.user!.name.split(' ').first}')
-              : (AppLocalizations.of(context)?.welcome ?? 'Welcome'),
+        AutomatedTextLoop(
+          texts: greetings.map((g) => store.user?.name != null ? '$g, ${store.user!.name.split(' ').first}' : g).toList(),
           style: theme.textTheme.headlineLarge?.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 24,
@@ -523,6 +579,169 @@ class StoreDifferenceCard extends StatelessWidget {
   }
 }
 
+class AnimatedHintTextField extends StatefulWidget {
+  const AnimatedHintTextField({
+    required this.controller,
+    required this.hints,
+    this.onFieldSubmitted,
+    this.prefixIcon,
+    super.key,
+  });
+
+  final TextEditingController controller;
+  final List<String> hints;
+  final ValueChanged<String>? onFieldSubmitted;
+  final IconData? prefixIcon;
+
+  @override
+  State<AnimatedHintTextField> createState() => _AnimatedHintTextFieldState();
+}
+
+class _AnimatedHintTextFieldState extends State<AnimatedHintTextField> {
+  int _currentHintIndex = 0;
+  String _displayedHint = '';
+  Timer? _typingTimer;
+  Timer? _cycleTimer;
+  bool _showHint = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTyping();
+
+    widget.controller.addListener(() {
+      final shouldShow = widget.controller.text.isEmpty;
+      if (shouldShow != _showHint) {
+        setState(() {
+          _showHint = shouldShow;
+          if (_showHint) {
+            _startTyping();
+          } else {
+            _stopTyping();
+          }
+        });
+      }
+    });
+  }
+
+  void _startTyping() {
+    _stopTyping();
+    _displayedHint = '';
+    int charIndex = 0;
+    final currentFullHint = widget.hints[_currentHintIndex];
+
+    _typingTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (charIndex < currentFullHint.length) {
+        if (mounted) {
+          setState(() {
+            _displayedHint = currentFullHint.substring(0, charIndex + 1);
+          });
+        }
+        charIndex++;
+      } else {
+        timer.cancel();
+        // Wait 2 seconds before starting the next hint
+        _cycleTimer = Timer(const Duration(seconds: 2), () {
+          if (mounted && _showHint) {
+            setState(() {
+              _currentHintIndex = (_currentHintIndex + 1) % widget.hints.length;
+              _startTyping();
+            });
+          }
+        });
+      }
+    });
+  }
+
+  void _stopTyping() {
+    _typingTimer?.cancel();
+    _cycleTimer?.cancel();
+  }
+
+  @override
+  void dispose() {
+    _stopTyping();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Stack(
+      alignment: Alignment.centerLeft,
+      children: [
+        ProfessionalTextField(
+          controller: widget.controller,
+          hintText: '', 
+          prefixIcon: widget.prefixIcon,
+          onFieldSubmitted: widget.onFieldSubmitted,
+        ),
+        if (_showHint)
+          Positioned(
+            left: 48,
+            child: IgnorePointer(
+              child: Row(
+                children: [
+                  Text(
+                    _displayedHint,
+                    style: TextStyle(
+                      color: isDark ? Colors.white38 : Colors.black38,
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  // Blinking cursor
+                  _BlinkingCursor(isDark: isDark),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _BlinkingCursor extends StatefulWidget {
+  const _BlinkingCursor({required this.isDark});
+  final bool isDark;
+
+  @override
+  State<_BlinkingCursor> createState() => _BlinkingCursorState();
+}
+
+class _BlinkingCursorState extends State<_BlinkingCursor> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: Container(
+        width: 2,
+        height: 18,
+        color: widget.isDark ? Colors.white38 : Colors.black38,
+      ),
+    );
+  }
+}
+
 class HomeSearchField extends StatefulWidget {
   const HomeSearchField({super.key});
 
@@ -541,9 +760,18 @@ class _HomeSearchFieldState extends State<HomeSearchField> {
 
   @override
   Widget build(BuildContext context) {
-    return ProfessionalTextField(
+    final l10n = AppLocalizations.of(context);
+    final hints = [
+      l10n?.searchHint ?? 'Search products…',
+      'Search MacBook Pro…',
+      'Search iPhone 16…',
+      'Search Apple Watch…',
+      'Search AirPods…',
+    ];
+
+    return AnimatedHintTextField(
       controller: _controller,
-      hintText: AppLocalizations.of(context)?.searchHint ?? 'Search products…',
+      hints: hints,
       prefixIcon: CupertinoIcons.search,
       onFieldSubmitted: (value) {
         if (value.trim().isNotEmpty) {
@@ -629,7 +857,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
               0.0,
               constraints.maxWidth - horizontalPadding,
             );
-            final carouselHeight = (cardWidth * 0.42).clamp(218.0, 292.0);
+            final carouselHeight = (cardWidth * 0.35).clamp(180.0, 240.0);
 
             return SizedBox(
               height: carouselHeight,
@@ -699,56 +927,49 @@ class _PromoBannerCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
-        boxShadow: appShadowMd,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
+          // Background accents
           Positioned(
-            right: -42,
-            top: -54,
+            right: -20,
+            top: -30,
             child: Container(
-              width: 190,
-              height: 190,
+              width: 180,
+              height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.white.withAlpha(22),
+                color: Colors.white.withValues(alpha: 0.08),
               ),
             ),
           ),
-          Positioned(
-            right: 36,
-            bottom: -70,
-            child: Container(
-              width: 170,
-              height: 170,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.white.withAlpha(14),
-              ),
-            ),
-          ),
+          
           Positioned.fill(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 10, 20),
+              padding: const EdgeInsets.fromLTRB(28, 20, 24, 20), // Increased right padding to 24
               child: Row(
                 children: [
-                  Expanded(flex: 11, child: _PromoBannerCopy(banner: banner)),
-                  const SizedBox(width: 8),
+                  Expanded(flex: 12, child: _PromoBannerCopy(banner: banner)),
+                  const SizedBox(width: 12),
                   Expanded(
                     flex: 10,
-                    child: Align(
-                      alignment: Alignment.centerRight,
+                    child: Center(
                       child: FractionallySizedBox(
-                        widthFactor: 1,
+                        widthFactor: 1.0,
                         heightFactor: banner.imageHeightFactor,
-                        child: Image.asset(
-                          banner.imagePath,
+                        child: ProductImageBox(
+                          imagePath: banner.imagePath,
                           fit: BoxFit.contain,
-                          alignment: Alignment.centerRight,
-                          filterQuality: FilterQuality.high,
-                          gaplessPlayback: true,
+                          animate: true,
                         ),
                       ),
                     ),
@@ -773,45 +994,44 @@ class _PromoBannerCopy extends StatelessWidget {
     final theme = Theme.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 230;
+        final compact = constraints.maxWidth < 200;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Professional Tag
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: 3,
+                horizontal: 10,
+                vertical: 4,
               ),
-              constraints: const BoxConstraints(maxWidth: 170),
               decoration: BoxDecoration(
-                color: AppColors.white.withAlpha(54),
-                borderRadius: BorderRadius.circular(AppRadius.sm),
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 AppLocalizations.of(context)?.latestRelease ?? 'LATEST RELEASE',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: AppColors.white,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
                   fontWeight: FontWeight.w800,
-                  height: 1.15,
+                  letterSpacing: 0.8,
                 ),
               ),
             ),
-            SizedBox(height: compact ? 8 : 10),
+            const SizedBox(height: 12),
             Text(
               banner.title,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: AppColors.white,
-                fontSize: compact ? 22 : 28,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0,
-                height: 1.04,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: compact ? 22 : 30,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.8,
+                height: 1.1,
               ),
             ),
             const SizedBox(height: 6),
@@ -819,37 +1039,44 @@ class _PromoBannerCopy extends StatelessWidget {
               banner.subtitle,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.white.withAlpha(210),
-                fontWeight: FontWeight.w600,
-                height: 1.25,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: compact ? 13 : 15,
+                fontWeight: FontWeight.w500,
+                height: 1.3,
+                letterSpacing: -0.2,
               ),
             ),
-            SizedBox(height: compact ? 12 : 18),
+            const SizedBox(height: 18),
+            // Action Button
             InkWell(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
+              borderRadius: BorderRadius.circular(20),
               onTap: () {
                 final store = AppScope.of(context);
                 store.setTab(1, searchQuery: banner.title);
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: 8,
+                  horizontal: 20,
+                  vertical: 10,
                 ),
-                constraints: const BoxConstraints(maxWidth: 150),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Text(
                   _localizedActionText(context, banner.actionText),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(
+                  style: TextStyle(
                     color: banner.colors.first,
+                    fontSize: 12,
                     fontWeight: FontWeight.w800,
-                    height: 1.1,
                   ),
                 ),
               ),

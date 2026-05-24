@@ -1,5 +1,79 @@
 part of '../main.dart';
 
+class StoreUserAvatar extends StatelessWidget {
+  const StoreUserAvatar({
+    required this.name,
+    this.photoUrl,
+    this.size = 36,
+    this.onTap,
+    super.key,
+  });
+
+  final String name;
+  final String? photoUrl;
+  final double size;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : 'A';
+    final inlineBytes = FirestoreInlineProfileStorage.bytesFromPhotoUrl(photoUrl);
+    Widget avatar;
+    if (inlineBytes != null) {
+      avatar = ClipOval(
+        child: Image.memory(
+          inlineBytes,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        ),
+      );
+    } else if (photoUrl != null &&
+        photoUrl!.isNotEmpty &&
+        photoUrl!.startsWith('http')) {
+      avatar = ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: photoUrl!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => _initials(initial, size),
+          errorWidget: (_, __, ___) => _initials(initial, size),
+        ),
+      );
+    } else {
+      avatar = _initials(initial, size);
+    }
+
+    if (onTap == null) return avatar;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: avatar,
+    );
+  }
+
+  Widget _initials(String initial, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(
+        gradient: AppColors.appleGradient,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: size * 0.4,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
 class EmptyState extends StatelessWidget {
   const EmptyState({
     required this.icon,
@@ -439,6 +513,39 @@ String ensureTransparentImageUrl(String path) {
   return '$path${path.contains('?') ? '&' : '?'}fmt=png-alpha';
 }
 
+/// A staggered entrance animation for a list of items.
+class StaggeredFadeSlide extends StatelessWidget {
+  const StaggeredFadeSlide({
+    required this.child,
+    required this.index,
+    this.delay = const Duration(milliseconds: 50),
+    super.key,
+  });
+
+  final Widget child;
+  final int index;
+  final Duration delay;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutQuart,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 30 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+}
+
 /// Local hero asset when CDN images fail or are still loading offline.
 String categoryImageAsset(String category) {
   return switch (category) {
@@ -447,8 +554,8 @@ String categoryImageAsset(String category) {
     'iPad' => 'assets/images/ipad_pro.png',
     'Watch' => 'assets/images/watch_ultra.png',
     'AirPods' => 'assets/images/airpods_pro.png',
-    'iMac' => 'assets/images/ipad_pro.png',
-    'Home' => 'assets/images/airpods_pro.png',
+    'iMac' => 'assets/images/imac_blue.png',
+    'Home' => 'assets/images/apple_tv_4k.png',
     'Vision' => 'assets/images/iphone_16_pro.png',
     'Display' => 'assets/images/ipad_pro.png',
     'Accessories' => 'assets/images/airpods_pro.png',
@@ -483,20 +590,14 @@ class ProductImageBox extends StatelessWidget {
       builder: (context, constraints) {
         final w = constraints.hasBoundedWidth ? constraints.maxWidth : null;
         final h = constraints.hasBoundedHeight ? constraints.maxHeight : null;
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          child: ColoredBox(
-            color: Colors.transparent,
-            child: Center(
-              child: ProductImage(
-                imagePath: imagePath,
-                fallbackAsset: _resolvedFallback,
-                width: w,
-                height: h,
-                fit: fit,
-                animate: animate,
-              ),
-            ),
+        return Center(
+          child: ProductImage(
+            imagePath: imagePath,
+            fallbackAsset: _resolvedFallback,
+            width: w,
+            height: h,
+            fit: fit,
+            animate: animate,
           ),
         );
       },
@@ -542,7 +643,7 @@ class _ProductImageState extends State<ProductImage>
     super.initState();
     _floatController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2800),
+      duration: const Duration(milliseconds: 3000),
     );
     if (widget.animate) {
       _floatController.repeat(reverse: true);
@@ -570,8 +671,8 @@ class _ProductImageState extends State<ProductImage>
             width: _width,
             height: _height,
             fit: widget.fit,
-            fadeInDuration: AppAnimations.normal,
-            fadeOutDuration: AppAnimations.fast,
+            fadeInDuration: const Duration(milliseconds: 500),
+            fadeOutDuration: const Duration(milliseconds: 300),
             filterQuality: FilterQuality.high,
             placeholder: (context, _) => _loadingPlaceholder(),
             errorWidget: (context, _, _) => _fallbackOrError(),
@@ -590,14 +691,14 @@ class _ProductImageState extends State<ProductImage>
       image = AnimatedBuilder(
         animation: _floatController,
         builder: (context, child) {
-          final dy = (_floatController.value - 0.5) * 10;
+          final dy = (math.sin(_floatController.value * 2 * math.pi)) * 6;
           return Transform.translate(offset: Offset(0, dy), child: child);
         },
         child: image,
       );
     }
 
-    return ColoredBox(color: Colors.transparent, child: image);
+    return image;
   }
 
   Widget _loadingPlaceholder() {
