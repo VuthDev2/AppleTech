@@ -19,6 +19,8 @@ class _OrdersViewState extends State<OrdersView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: CustomScrollView(
@@ -27,70 +29,95 @@ class _OrdersViewState extends State<OrdersView> {
         slivers: [
           const AdminSliverHeader(
             title: 'Orders',
-            subtitle: 'View and manage customer orders.',
+            subtitle: 'Real-time order management.',
           ),
-          // Filter chips
+          
+          // ── Order Stats / Quick Filter ──────────────────────────────────
           SliverToBoxAdapter(
-            child: SizedBox(
-              height: 44,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xxl),
-                scrollDirection: Axis.horizontal,
-                itemCount: _filters.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(width: AppSpacing.sm),
-                itemBuilder: (context, i) {
-                  final f = _filters[i];
-                  final selected = _filter == f;
-                  return GestureDetector(
-                    onTap: () => setState(() => _filter = f),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? AppColors.primary
-                            : Theme.of(context)
-                                .cardColor
-                                .withOpacity(0.6),
-                        borderRadius:
-                            BorderRadius.circular(AppRadius.full),
-                        border: Border.all(
-                          color: selected
-                              ? AppColors.primary
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .outline
-                                  .withOpacity(0.2),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collectionGroup('orders').snapshots(),
+              builder: (context, snapshot) {
+                final counts = {
+                  'All': 0, 'Pending': 0, 'Processing': 0, 'Delivered': 0, 'Cancelled': 0
+                };
+                if (snapshot.hasData) {
+                  counts['All'] = snapshot.data!.docs.length;
+                  for (final doc in snapshot.data!.docs) {
+                    final status = (doc.data() as Map)['status'] ?? 'Pending';
+                    if (counts.containsKey(status)) {
+                      counts[status] = counts[status]! + 1;
+                    }
+                  }
+                }
+
+                return SizedBox(
+                  height: 48,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _filters.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
+                    itemBuilder: (context, i) {
+                      final f = _filters[i];
+                      final selected = _filter == f;
+                      final count = counts[f] ?? 0;
+
+                      return GestureDetector(
+                        onTap: () => setState(() => _filter = f),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: selected 
+                              ? AppColors.primary 
+                              : (isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04)),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                f,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: selected ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
+                                ),
+                              ),
+                              if (count > 0) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: selected ? Colors.white.withOpacity(0.2) : AppColors.primary.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    '$count',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: selected ? Colors.white : AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        f,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: selected
-                              ? Colors.white
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withOpacity(0.6),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                );
+              }
             ),
           ),
-          const SliverToBoxAdapter(
-              child: SizedBox(height: AppSpacing.lg)),
-          // Orders list
+          
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+          
+          // ── Orders List ─────────────────────────────────────────────────
           _OrdersList(filter: _filter),
-          const SliverPadding(
-              padding: EdgeInsets.only(bottom: 120)),
+          const SliverPadding(padding: EdgeInsets.only(bottom: 120)),
         ],
       ),
     );

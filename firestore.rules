@@ -2,145 +2,59 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // ── Global Helper Functions ──────────────────────────────────────────────
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
     function isOwner(uid) {
-      return request.auth != null && request.auth.uid == uid;
+      return isAuthenticated() && request.auth.uid == uid;
     }
 
-    function profileKeysAreValid() {
-      return request.resource.data.keys().hasOnly([
-        'displayName',
-        'email',
-        'createdAt',
-        'locale',
-        'photoUrl'
-      ]);
+    // Checks if the user has the 'admin' role in their user document
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    function profileDataIsValid() {
-      return (!('displayName' in request.resource.data) || request.resource.data.displayName is string)
-        && (!('email' in request.resource.data) || request.resource.data.email is string)
-        && (!('createdAt' in request.resource.data) || request.resource.data.createdAt is timestamp)
-        && (!('locale' in request.resource.data) || request.resource.data.locale in ['en', 'km', 'zh'])
-        && (!('photoUrl' in request.resource.data) || request.resource.data.photoUrl is string);
-    }
+    // ── Collection Rules ─────────────────────────────────────────────────────
 
-    function cartItemIsValid(itemId) {
-      return request.resource.data.keys().hasOnly(['productId', 'variantId', 'quantity'])
-        && request.resource.data.productId is string
-        && request.resource.data.variantId is string
-        && request.resource.data.quantity is int
-        && request.resource.data.quantity > 0
-        && itemId == request.resource.data.productId + '__' + request.resource.data.variantId;
-    }
-
-    function wishlistItemIsValid(productId) {
-      return request.resource.data.keys().hasOnly(['productId'])
-        && request.resource.data.productId == productId;
-    }
-
-    function orderIsValid(orderId) {
-      return request.resource.data.keys().hasOnly(['id', 'placedAt', 'total', 'status', 'items'])
-        && request.resource.data.id == orderId
-        && request.resource.data.placedAt is timestamp
-        && request.resource.data.total is number
-        && request.resource.data.total >= 0
-        && request.resource.data.status is string
-        && request.resource.data.items is list;
-    }
-
-    function addressIsValid(addressId) {
-      return request.resource.data.keys().hasOnly([
-        'id',
-        'fullName',
-        'street',
-        'city',
-        'postalCode',
-        'phone',
-        'isDefault'
-      ])
-        && request.resource.data.id == addressId
-        && request.resource.data.fullName is string
-        && request.resource.data.street is string
-        && request.resource.data.city is string
-        && request.resource.data.postalCode is string
-        && request.resource.data.phone is string
-        && request.resource.data.isDefault is bool;
-    }
-
-    function cardIsValid(cardId) {
-      return request.resource.data.keys().hasOnly([
-        'id',
-        'cardholderName',
-        'cardNumber',
-        'expiryDate',
-        'brand',
-        'themeColor'
-      ])
-        && request.resource.data.id == cardId
-        && request.resource.data.cardholderName is string
-        && request.resource.data.cardNumber is string
-        && request.resource.data.expiryDate is string
-        && request.resource.data.brand is string
-        && request.resource.data.themeColor is int;
-    }
-
-    function notificationIsValid(notificationId) {
-      return request.resource.data.keys().hasOnly([
-        'id',
-        'title',
-        'body',
-        'createdAt',
-        'kind',
-        'isRead'
-      ])
-        && request.resource.data.id == notificationId
-        && request.resource.data.title is string
-        && request.resource.data.body is string
-        && request.resource.data.createdAt is timestamp
-        && request.resource.data.kind in ['order', 'promo', 'product', 'system']
-        && request.resource.data.isRead is bool;
-    }
-
+    // Users and their subcollections
     match /users/{uid} {
-      allow read, delete: if isOwner(uid);
-      allow create, update: if isOwner(uid) && profileKeysAreValid() && profileDataIsValid();
+      // Admins can read any user profile; owners can read their own
+      allow read: if isOwner(uid) || isAdmin();
+      
+      // Only owners can update their own basic profile data (excluding roles)
+      allow create, update: if isOwner(uid) && 
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
+      
+      // Admins have full control over user documents (e.g., to promote to admin)
+      allow write: if isAdmin();
 
-      match /bag/{itemId} {
-        allow read, delete: if isOwner(uid);
-        allow create, update: if isOwner(uid) && cartItemIsValid(itemId);
-      }
-
-      match /wishlist/{productId} {
-        allow read, delete: if isOwner(uid);
-        allow create, update: if isOwner(uid) && wishlistItemIsValid(productId);
-      }
-
-      match /orders/{orderId} {
-        allow read, delete: if isOwner(uid);
-        allow create, update: if isOwner(uid) && orderIsValid(orderId);
-      }
-
-      match /addresses/{addressId} {
-        allow read, delete: if isOwner(uid);
-        allow create, update: if isOwner(uid) && addressIsValid(addressId);
-      }
-
-      match /cards/{cardId} {
-        allow read, delete: if isOwner(uid);
-        allow create, update: if isOwner(uid) && cardIsValid(cardId);
-      }
-
-      match /notifications/{notificationId} {
-        allow read, delete: if isOwner(uid);
-        allow create, update: if isOwner(uid) && notificationIsValid(notificationId);
+      // Subcollections (Bag, Wishlist, Orders, etc.)
+      match /{allSubcollections=**} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow write: if isOwner(uid) || isAdmin();
       }
     }
 
+    // Products Catalog
     match /products/{productId} {
+      // Anyone (even guest) can view products
       allow read: if true;
-      allow write: if false;
+      // Only admins can add, edit, or delete products
+      allow write: if isAdmin();
     }
 
+    // Global Metadata / App Settings
+    match /metadata/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Default Deny
     match /{document=**} {
       allow read, write: if false;
     }

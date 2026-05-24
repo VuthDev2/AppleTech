@@ -1,16 +1,33 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iconly/iconly.dart';
 
 import '../../main.dart';
 import 'admin_widgets.dart';
 
-class ProductsView extends StatelessWidget {
+class ProductsView extends StatefulWidget {
   const ProductsView({super.key});
 
   @override
+  State<ProductsView> createState() => _ProductsViewState();
+}
+
+class _ProductsViewState extends State<ProductsView> {
+  String _searchQuery = '';
+  final TextEditingController _searchCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: CustomScrollView(
@@ -18,12 +35,46 @@ class ProductsView extends StatelessWidget {
             parent: AlwaysScrollableScrollPhysics()),
         slivers: [
           AdminSliverHeader(
-            title: 'Products',
-            subtitle: 'Manage catalog & inventory.',
+            title: 'Inventory',
+            subtitle: 'Manage and track your catalog.',
             trailingActions: [
               _AddProductButton(context: context),
             ],
           ),
+          
+          // ── Search Bar ──────────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl, AppSpacing.md),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: (v) => setState(() => _searchQuery = v.trim().toLowerCase()),
+                  style: const TextStyle(fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: 'Search products by name or category...',
+                    prefixIcon: Icon(CupertinoIcons.search, size: 18),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    suffixIcon: _searchQuery.isNotEmpty 
+                      ? IconButton(
+                          icon: Icon(CupertinoIcons.clear_circled_solid, size: 16),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                        ) 
+                      : null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           _buildProductList(context),
           const SliverPadding(padding: EdgeInsets.only(bottom: 120)),
         ],
@@ -43,23 +94,33 @@ class ProductsView extends StatelessWidget {
             child: Center(child: CircularProgressIndicator()),
           );
         }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        
+        var docs = snapshot.data?.docs ?? [];
+        
+        // Apply local filtering
+        if (_searchQuery.isNotEmpty) {
+          docs = docs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final name = (data['name'] as String?)?.toLowerCase() ?? '';
+            final cat = (data['category'] as String?)?.toLowerCase() ?? '';
+            return name.contains(_searchQuery) || cat.contains(_searchQuery);
+          }).toList();
+        }
+
+        if (docs.isEmpty) {
           return const SliverFillRemaining(
             child: _EmptyProducts(),
           );
         }
 
-        final docs = snapshot.data!.docs;
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
 
         return SliverPadding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xxl, vertical: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.md),
           sliver: SliverList.separated(
             itemCount: docs.length,
-            separatorBuilder: (_, __) =>
-                const SizedBox(height: AppSpacing.md),
+            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
             itemBuilder: (context, index) {
               final doc = docs[index];
               final data = doc.data() as Map<String, dynamic>;

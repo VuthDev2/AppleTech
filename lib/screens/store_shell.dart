@@ -8,255 +8,6 @@ class StoreShell extends StatefulWidget {
 }
 
 class _StoreShellState extends State<StoreShell> {
-  late Timer _clockTimer;
-  DateTime _now = DateTime.now();
-
-  @override
-  void initState() {
-    super.initState();
-    _clockTimer = Timer.periodic(const Duration(seconds: 15), (_) {
-      if (mounted) {
-        setState(() => _now = DateTime.now());
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _clockTimer.cancel();
-    super.dispose();
-  }
-
-  String _formatTime(DateTime time) {
-    final hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
-  }
-
-  Widget _buildStatusBar(BuildContext context, AppStore store) {
-    final platform = Theme.of(context).platform;
-    final isIOS = platform == TargetPlatform.iOS;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final barColor = isDark ? Colors.white : Colors.black87;
-    // Full status-bar inset once only — do not wrap this widget in SafeArea or it
-    // stacks below the notch/island and looks unrealistically low.
-    final safeTop = MediaQuery.paddingOf(context).top;
-
-    if (isIOS) {
-      // iOS: time + trailing indicators share one row, vertically centered in the top inset.
-      return SizedBox(
-        height: safeTop > 0 ? safeTop : 20.0,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22),
-          child: Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              // Left: Time
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  _formatTime(_now),
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w600,
-                    color: barColor,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-              ),
-              // Right: Status Icons
-              Align(
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Signal bars
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: List.generate(4, (index) {
-                        final active = index < 3; // 3 bars active
-                        return Container(
-                          width: 2.8,
-                          height: 3.5 + (index * 2.2),
-                          margin: const EdgeInsets.only(left: 1.8),
-                          decoration: BoxDecoration(
-                            color: active ? barColor : barColor.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(0.5),
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(width: 5),
-                    // WiFi
-                    Icon(
-                      store.demoWifiConnected ? CupertinoIcons.wifi : CupertinoIcons.wifi_slash,
-                      size: 14.0,
-                      color: barColor,
-                    ),
-                    const SizedBox(width: 5),
-                    // Battery
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 22,
-                          height: 11.0,
-                          padding: const EdgeInsets.all(1.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: barColor.withValues(alpha: 0.8), width: 1.0),
-                            borderRadius: BorderRadius.circular(3.0),
-                          ),
-                          child: Stack(
-                            children: [
-                              FractionallySizedBox(
-                                widthFactor: 0.88,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: barColor,
-                                    borderRadius: BorderRadius.circular(1.2),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 0.5),
-                        Container(
-                          width: 1.0,
-                          height: 3.5,
-                          decoration: BoxDecoration(
-                            color: barColor.withValues(alpha: 0.8),
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(0.8),
-                              bottomRight: Radius.circular(0.8),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    } else {
-      final top = safeTop > 0 ? safeTop : 24.0;
-      return SizedBox(
-        height: top,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              // Left: Time & notification dots
-              Text(
-                _formatTime(_now),
-                style: TextStyle(
-                  fontSize: 13.0,
-                  fontWeight: FontWeight.w600,
-                  color: barColor,
-                  fontFamily: 'Roboto',
-                ),
-              ),
-              const SizedBox(width: 6),
-              Icon(
-                Icons.mail_outline_rounded,
-                size: 13.0,
-                color: barColor.withValues(alpha: 0.65),
-              ),
-              const SizedBox(width: 4),
-              Container(
-                width: 4,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: barColor.withValues(alpha: 0.65),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const Spacer(),
-              // Right: Status Icons
-              Icon(
-                store.demoWifiConnected ? Icons.wifi : Icons.wifi_off_rounded,
-                size: 14,
-                color: barColor,
-              ),
-              const SizedBox(width: 6),
-              Icon(
-                Icons.signal_cellular_4_bar_rounded,
-                size: 14,
-                color: barColor,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                '88%',
-                style: TextStyle(
-                  fontSize: 11.0,
-                  fontWeight: FontWeight.w600,
-                  color: barColor,
-                  fontFamily: 'Roboto',
-                ),
-              ),
-              const SizedBox(width: 4),
-              // Android vertical battery icon
-              Container(
-                width: 9.0,
-                height: 13.5,
-                decoration: BoxDecoration(
-                  border: Border.all(color: barColor.withValues(alpha: 0.8), width: 1.0),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                padding: const EdgeInsets.all(0.8),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 1.5,
-                      color: Colors.transparent,
-                    ),
-                    Expanded(
-                      child: Container(
-                        color: barColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-  }
-
-  Widget _buildHomeIndicator(BuildContext context) {
-    final platform = Theme.of(context).platform;
-    final isIOS = platform == TargetPlatform.iOS;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final barColor = isDark
-        ? Colors.white.withValues(alpha: 0.82)
-        : Colors.black.withValues(alpha: 0.72);
-
-    // Tab bar floats above; home indicator sits in the system safe area below it.
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 10,
-        bottom: bottomInset > 0 ? math.max(bottomInset - 6, 4) : 12,
-      ),
-      child: Center(
-        child: Container(
-          width: isIOS ? 134 : 96,
-          height: isIOS ? 5 : 3.5,
-          decoration: BoxDecoration(
-            color: barColor,
-            borderRadius: BorderRadius.circular(100),
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -305,34 +56,28 @@ class _StoreShellState extends State<StoreShell> {
       Icons.person_rounded,
     ];
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Column(
-        children: [
-          // Mock OS status bar — height is exactly MediaQuery.padding.top (no extra SafeArea).
-          ColoredBox(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: _buildStatusBar(context, store),
-          ),
-          // Main screen view (removing top padding to prevent double SafeArea spacing)
-          Expanded(
-            child: MediaQuery.removePadding(
-              context: context,
-              removeTop: true,
-              child: IndexedStack(
-                index: tabIndex,
-                children: screens,
-              ),
-            ),
-          ),
-        ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-            child: LayoutBuilder(
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: IndexedStack(
+          index: tabIndex,
+          children: screens,
+        ),
+        bottomNavigationBar: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                child: LayoutBuilder(
               builder: (context, constraints) {
                 final tabWidth = constraints.maxWidth / 5;
                 final targetSelectedLeft = (tabWidth * tabIndex) + (tabWidth - 56) / 2;
@@ -514,9 +259,10 @@ class _StoreShellState extends State<StoreShell> {
               },
             ),
           ),
-          _buildHomeIndicator(context),
         ],
       ),
+    ),
+    ),
     );
   }
 }

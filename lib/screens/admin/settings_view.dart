@@ -23,84 +23,74 @@ class AdminSettingsView extends StatelessWidget {
         slivers: [
           const AdminSliverHeader(
             title: 'Settings',
-            subtitle: 'Manage admin preferences.',
+            subtitle: 'Configure your administration.',
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xxl,
-                  vertical: AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Admin profile card
-                  _buildProfileCard(context, store, isDark),
-                  const SizedBox(height: AppSpacing.xxxl),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.lg),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                // Admin profile card
+                _buildProfileCard(context, store, isDark),
+                const SizedBox(height: AppSpacing.xxxl),
 
-                  // Appearance section
-                  _SectionTitle(title: 'Appearance'),
-                  const SizedBox(height: AppSpacing.md),
-                  _SettingRow(
-                    icon: isDark
-                        ? CupertinoIcons.sun_max_fill
-                        : CupertinoIcons.moon_fill,
-                    iconColor: isDark
-                        ? AppColors.accent
-                        : AppColors.primary,
-                    title: 'Dark Mode',
-                    subtitle: isDark ? 'Enabled' : 'Disabled',
-                    trailing: Switch.adaptive(
-                      value: isDark,
-                      onChanged: (_) => store.toggleTheme(),
-                      activeColor: AppColors.primary,
-                    ),
+                // Appearance section
+                _SectionTitle(title: 'Appearance'),
+                const SizedBox(height: AppSpacing.md),
+                _SettingRow(
+                  icon: isDark ? CupertinoIcons.sun_max_fill : CupertinoIcons.moon_fill,
+                  iconColor: isDark ? const Color(0xFFFFB81C) : AppColors.primary,
+                  title: 'Dark Mode',
+                  subtitle: isDark ? 'Brighter interface' : 'Battery saving mode',
+                  trailing: Switch.adaptive(
+                    value: isDark,
+                    onChanged: (_) => store.toggleTheme(),
+                    activeColor: AppColors.primary,
                   ),
-                  const SizedBox(height: AppSpacing.xxxl),
+                ),
+                const SizedBox(height: AppSpacing.xxxl),
 
-                  // Store section
-                  _SectionTitle(title: 'Store'),
-                  const SizedBox(height: AppSpacing.md),
-                  _SettingRow(
-                    icon: IconlyLight.bag,
-                    iconColor: AppColors.primary,
-                    title: 'Products',
-                    subtitle: 'Manage your product catalog',
-                    trailing: Icon(
-                      Icons.chevron_right_rounded,
-                      color: theme.colorScheme.onSurface
-                          .withOpacity(0.3),
-                    ),
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  _SettingRow(
-                    icon: IconlyLight.buy,
-                    iconColor: AppColors.accent,
-                    title: 'Orders',
-                    subtitle: 'View and process orders',
-                    trailing: Icon(
-                      Icons.chevron_right_rounded,
-                      color: theme.colorScheme.onSurface
-                          .withOpacity(0.3),
-                    ),
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: AppSpacing.xxxl),
+                // Store Configuration
+                _SectionTitle(title: 'Store Configuration'),
+                const SizedBox(height: AppSpacing.md),
+                _SettingRow(
+                  icon: IconlyBold.shield_done,
+                  iconColor: AppColors.success,
+                  title: 'Store Status',
+                  subtitle: 'Online and accepting orders',
+                  trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppColors.mediumGray),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                _SettingRow(
+                  icon: IconlyBold.notification,
+                  iconColor: AppColors.primary,
+                  title: 'Push Notifications',
+                  subtitle: 'Alerts for new customer orders',
+                  trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppColors.mediumGray),
+                ),
+                const SizedBox(height: AppSpacing.xxxl),
 
-                  // Danger zone
-                  _SectionTitle(title: 'Account'),
-                  const SizedBox(height: AppSpacing.md),
-                  _SettingRow(
-                    icon: IconlyLight.logout,
-                    iconColor: AppColors.error,
-                    title: 'Sign Out',
-                    subtitle: 'Log out of admin portal',
-                    trailing: const SizedBox.shrink(),
-                    onTap: () => _confirmSignOut(context),
-                  ),
-                  const SizedBox(height: 120),
-                ],
-              ),
+                // Account
+                _SectionTitle(title: 'Account Management'),
+                const SizedBox(height: AppSpacing.md),
+                _SettingRow(
+                  icon: IconlyBold.lock,
+                  iconColor: AppColors.accent,
+                  title: 'Security',
+                  subtitle: 'Update password and keys',
+                  trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppColors.mediumGray),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                _SettingRow(
+                  icon: IconlyBold.logout,
+                  iconColor: AppColors.error,
+                  title: 'Sign Out',
+                  subtitle: 'Exit the administration portal',
+                  trailing: const SizedBox.shrink(),
+                  onTap: () => _confirmSignOut(context),
+                ),
+                
+                const SizedBox(height: 140),
+              ]),
             ),
           ),
         ],
@@ -108,65 +98,32 @@ class AdminSettingsView extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileCard(
-      BuildContext context, AppStore store, bool isDark) {
+  Widget _buildProfileCard(BuildContext context, AppStore store, bool isDark) {
     final theme = Theme.of(context);
     final user = store.user;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary.withOpacity(0.14),
-            AppColors.primary.withOpacity(0.04),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: AppColors.primary.withOpacity(0.2),
-          width: 1.5,
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
         ),
+        boxShadow: isDark ? [] : [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          // Avatar
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF5EB0FF),
-                  AppColors.primary,
-                  Color(0xFF0055CC),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.35),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                (user?.name.isNotEmpty == true
-                        ? user!.name[0].toUpperCase()
-                        : 'A'),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
+          StoreUserAvatar(
+            name: user?.name ?? 'Admin',
+            photoUrl: user?.photoUrl,
+            size: 60,
           ),
           const SizedBox(width: AppSpacing.lg),
           Expanded(
@@ -175,29 +132,27 @@ class AdminSettingsView extends StatelessWidget {
               children: [
                 Text(
                   user?.name ?? 'Administrator',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   user?.email ?? 'admin@appletech.com',
-                  style: theme.textTheme.bodySmall,
+                  style: const TextStyle(color: AppColors.mediumGray, fontSize: 13),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.12),
-                    borderRadius:
-                        BorderRadius.circular(AppRadius.full),
+                    color: AppColors.primary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text(
-                    '● Admin',
+                    'System Administrator',
                     style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.success,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primary,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),

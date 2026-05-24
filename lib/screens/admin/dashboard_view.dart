@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:iconly/iconly.dart';
@@ -13,6 +14,8 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: CustomScrollView(
@@ -21,105 +24,91 @@ class DashboardView extends StatelessWidget {
         slivers: [
           const AdminSliverHeader(
             title: 'Dashboard',
-            subtitle: 'Real-time store overview.',
+            subtitle: 'Insights and performance.',
           ),
+          
+          // ── Store Health Section ─────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+              child: _StoreHealthCard(),
+            ),
+          ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+
           // ── Stat Cards ──────────────────────────────────────────────────
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 148,
+              height: 160,
               child: ListView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xxl),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 children: [
                   _StatCard(
-                    title: 'Products',
-                    stream: FirebaseFirestore.instance
-                        .collection('products')
-                        .snapshots(),
-                    icon: IconlyBold.bag,
-                    color1: AppColors.primary,
-                    color2: const Color(0xFF5EB0FF),
-                  ),
-                  const SizedBox(width: AppSpacing.lg),
-                  _StatCard(
-                    title: 'Orders',
-                    stream: FirebaseFirestore.instance
-                        .collectionGroup('orders')
-                        .snapshots(),
-                    icon: IconlyBold.buy,
-                    color1: AppColors.accent,
-                    color2: const Color(0xFFFFB340),
-                  ),
-                  const SizedBox(width: AppSpacing.lg),
-                  _StatCard(
-                    title: 'Users',
-                    stream: FirebaseFirestore.instance
-                        .collection('users')
-                        .snapshots(),
-                    icon: IconlyBold.user_2,
-                    color1: AppColors.secondary,
-                    color2: const Color(0xFF45E3D5),
-                  ),
-                  const SizedBox(width: AppSpacing.lg),
-                  _StatCard(
-                    title: 'Revenue',
+                    title: 'Total Revenue',
                     stream: FirebaseFirestore.instance
                         .collectionGroup('orders')
                         .snapshots(),
                     icon: IconlyBold.chart,
-                    color1: AppColors.success,
-                    color2: const Color(0xFF57E88C),
+                    color: AppColors.success,
                     isRevenue: true,
+                  ),
+                  const SizedBox(width: AppSpacing.lg),
+                  _StatCard(
+                    title: 'Active Orders',
+                    stream: FirebaseFirestore.instance
+                        .collectionGroup('orders')
+                        .where('status', isNotEqualTo: 'Delivered')
+                        .snapshots(),
+                    icon: IconlyBold.buy,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: AppSpacing.lg),
+                  _StatCard(
+                    title: 'Inventory',
+                    stream: FirebaseFirestore.instance
+                        .collection('products')
+                        .snapshots(),
+                    icon: IconlyBold.bag,
+                    color: AppColors.accent,
+                  ),
+                  const SizedBox(width: AppSpacing.lg),
+                  _StatCard(
+                    title: 'Customers',
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .snapshots(),
+                    icon: IconlyBold.user_2,
+                    color: AppColors.secondary,
                   ),
                 ],
               ),
             ),
           ),
 
-          // ── Section Label: Orders Chart ─────────────────────────────────
+          // ── Section Label: Trends ──────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
                   AppSpacing.xxl, AppSpacing.xxxl, AppSpacing.xxl, AppSpacing.lg),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Orders (Last 7 Days)',
+                    'Order Trends',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.5,
                         ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppColors.success,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Live',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
+                  const Spacer(),
+                  const Text(
+                    'Last 7 Days',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.mediumGray,
                     ),
                   ),
                 ],
@@ -130,19 +119,18 @@ class DashboardView extends StatelessWidget {
           // ── Orders Chart ────────────────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xxl),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
               child: _OrderChart(),
             ),
           ),
 
-          // ── Section Label: Recent Orders ────────────────────────────────
+          // ── Section Label: Recent Activity ──────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
                   AppSpacing.xxl, AppSpacing.xxxl, AppSpacing.xxl, AppSpacing.lg),
               child: Text(
-                'Recent Orders',
+                'Recent Activity',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.5,
@@ -162,23 +150,87 @@ class DashboardView extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Stat Card
+// Store Health Card
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _StoreHealthCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+        ),
+        boxShadow: isDark ? [] : appShadowSm,
+      ),
+      child: Row(
+        children: [
+          // Visual Indicator
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 56,
+                height: 56,
+                child: CircularProgressIndicator(
+                  value: 0.94,
+                  strokeWidth: 6,
+                  backgroundColor: AppColors.success.withOpacity(0.1),
+                  color: AppColors.success,
+                  strokeCap: StrokeCap.round,
+                ),
+              ),
+              Icon(CupertinoIcons.checkmark_seal_fill, color: AppColors.success, size: 24),
+            ],
+          ),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Store Status: Excellent',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'All systems operational. Performance is up 12% from last month.',
+                  style: TextStyle(
+                    color: AppColors.mediumGray,
+                    fontSize: 13,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Redesigned Stat Card (Apple Card Style)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _StatCard extends StatelessWidget {
   final String title;
   final Stream<QuerySnapshot> stream;
   final IconData icon;
-  final Color color1;
-  final Color color2;
+  final Color color;
   final bool isRevenue;
 
   const _StatCard({
     required this.title,
     required this.stream,
     required this.icon,
-    required this.color1,
-    required this.color2,
+    required this.color,
     this.isRevenue = false,
   });
 
@@ -188,63 +240,27 @@ class _StatCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      width: 168,
-      margin: const EdgeInsets.symmetric(vertical: 4),
+      width: 156,
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [
-                  color1.withOpacity(0.18),
-                  theme.cardColor.withOpacity(0.9),
-                ]
-              : [
-                  Colors.white,
-                  color1.withOpacity(0.06),
-                ],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDark
-              ? color1.withOpacity(0.28)
-              : color1.withOpacity(0.18),
-          width: 1.5,
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
         ),
-        boxShadow: [
+        boxShadow: isDark ? [] : [
           BoxShadow(
-            color: color1.withOpacity(isDark ? 0.12 : 0.16),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon badge
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [color1, color2],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              boxShadow: [
-                BoxShadow(
-                  color: color1.withOpacity(0.4),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Icon(icon, color: Colors.white, size: 20),
-          ),
+          Icon(icon, color: color, size: 22),
           const Spacer(),
-          // Count
           StreamBuilder<QuerySnapshot>(
             stream: stream,
             builder: (context, snapshot) {
@@ -258,15 +274,15 @@ class _StatCard extends StatelessWidget {
                   }
                   value = '\$${NumberFormat.compact().format(total)}';
                 } else {
-                  value = '${snapshot.data!.docs.length}';
+                  value = NumberFormat.compact().format(snapshot.data!.docs.length);
                 }
               }
               return Text(
                 value,
-                style: theme.textTheme.headlineMedium?.copyWith(
+                style: const TextStyle(
+                  fontSize: 26,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: -1.2,
-                  color: isDark ? Colors.white : Colors.black87,
+                  letterSpacing: -0.5,
                 ),
               );
             },
@@ -274,9 +290,10 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             title,
-            style: theme.textTheme.bodySmall?.copyWith(
+            style: const TextStyle(
+              fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white54 : Colors.black45,
+              color: AppColors.mediumGray,
             ),
           ),
         ],

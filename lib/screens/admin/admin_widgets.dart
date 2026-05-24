@@ -24,8 +24,8 @@ class AdminSliverHeader extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return SliverAppBar(
-      expandedHeight: 148,
-      collapsedHeight: 72,
+      expandedHeight: 160,
+      collapsedHeight: 76,
       pinned: true,
       stretch: true,
       automaticallyImplyLeading: false,
@@ -34,17 +34,17 @@ class AdminSliverHeader extends StatelessWidget {
       surfaceTintColor: Colors.transparent,
       flexibleSpace: ClipRect(
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
           child: Container(
             decoration: BoxDecoration(
               color: isDark
-                  ? AppColors.darkSurface0.withOpacity(0.82)
-                  : Colors.white.withOpacity(0.88),
+                  ? AppColors.darkSurface0.withOpacity(0.75)
+                  : Colors.white.withOpacity(0.85),
               border: Border(
                 bottom: BorderSide(
                   color: isDark
-                      ? Colors.white.withOpacity(0.08)
-                      : Colors.black.withOpacity(0.06),
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.05),
                   width: 0.5,
                 ),
               ),
@@ -61,35 +61,39 @@ class AdminSliverHeader extends StatelessWidget {
                     children: [
                       // Apple logo badge
                       Container(
-                        width: 34,
-                        height: 34,
+                        width: 32,
+                        height: 32,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF5EB0FF), AppColors.primary],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.4),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                          color: isDark ? Colors.white : Colors.black,
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.apple, size: 20, color: Colors.white),
+                        child: Icon(Icons.apple, size: 20, color: isDark ? Colors.black : Colors.white),
                       ),
                       const SizedBox(width: 10),
-                      Text(
-                        'Admin Portal',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.3,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Admin Portal',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          Text(
+                            'AppleTech Store',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
+                              color: AppColors.mediumGray,
+                            ),
+                          ),
+                        ],
                       ),
                       const Spacer(),
-                      // Theme toggle button wired to AppScope
+                      // Theme toggle button
                       _AdminIconButton(
                         icon: isDark
                             ? CupertinoIcons.sun_max_fill
@@ -100,17 +104,24 @@ class AdminSliverHeader extends StatelessWidget {
                       if (trailingActions != null) ...trailingActions!,
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.xl),
                   // Page title + subtitle
                   Text(
                     title,
                     style: theme.textTheme.headlineLarge?.copyWith(
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -1.0,
+                      letterSpacing: -1.2,
+                      fontSize: 32,
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  Text(subtitle, style: theme.textTheme.bodyMedium),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle, 
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.mediumGray,
+                      fontWeight: FontWeight.w500,
+                    )
+                  ),
                   const SizedBox(height: AppSpacing.lg),
                 ],
               ),
