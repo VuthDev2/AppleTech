@@ -19,26 +19,26 @@ class _ExploreScreenState extends State<ExploreScreen> {
   bool _isFocused = false;
 
   static final List<String> _recentSearches = <String>[
-    'MacBook Pro',
-    'MacBook Air',
-    'iPad Pro',
+    'MacBook Pro M5',
+    'MacBook Air M4',
+    'iPad Pro M5',
   ];
 
   static const List<String> _trendingSearches = <String>[
-    'MacBook Pro 16-inch',
-    'MacBook Air 15',
-    'iPad Pro',
-    'iMac',
+    'MacBook Pro M5 16-inch',
+    'MacBook Air 15 M4',
+    'iPad Pro M5',
+    'iMac M5',
     'Apple Watch Ultra 3',
     'AirPods Pro 3rd gen',
     '512GB SSD',
-    '64GB unified memory',
+    '48GB unified memory',
   ];
 
   final List<Map<String, dynamic>> collectionBanners = <Map<String, dynamic>>[
     {
       'category': 'Mac',
-      'tagline': 'Supercharged for pro workflows.',
+      'tagline': 'Mind-blowing performance.',
       'gradient': const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -55,7 +55,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         end: Alignment.bottomRight,
         colors: [Color(0xFF2C2520), Color(0xFF15110E)],
       ),
-      'imagePath': productImageFor('iphone-16-pro-un'),
+      'imagePath': productImageFor('iphone-16-pro'),
       'accent': const Color(0xFFC9B8A6),
     },
     {
@@ -66,7 +66,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         end: Alignment.bottomRight,
         colors: [Color(0xFF1C2833), Color(0xFF0A121A)],
       ),
-      'imagePath': productImageFor('ipad-pro-13-m4-2024'),
+      'imagePath': productImageFor('ipad-pro-13-m5-2025'),
       'accent': const Color(0xFF9EC5DD),
     },
     {
@@ -88,30 +88,19 @@ class _ExploreScreenState extends State<ExploreScreen> {
         end: Alignment.bottomRight,
         colors: [Color(0xFF252729), Color(0xFF0F1011)],
       ),
-      'imagePath': productImageFor('airpods-pro-2-2022'),
+      'imagePath': productImageFor('airpods-pro-3-2025'),
       'accent': const Color(0xFFE7E9EA),
     },
     {
       'category': 'iMac',
-      'tagline': 'All-in-one. All-in on color.',
+      'tagline': 'All-in-one. All-in on M5.',
       'gradient': const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [Color(0xFF1A2A3A), Color(0xFF0A1218)],
       ),
-      'imagePath': productImageFor('imac-24-m4-2024'),
+      'imagePath': productImageFor('imac-24-m5-2025'),
       'accent': const Color(0xFF5E9FD6),
-    },
-    {
-      'category': 'Accessories',
-      'tagline': 'Essentials for your devices.',
-      'gradient': const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF333333), Color(0xFF111111)],
-      ),
-      'imagePath': productImageFor('magic-mouse-2024'),
-      'accent': const Color(0xFFAAAAAA),
     },
   ];
 
@@ -371,7 +360,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     } else if (sortBy == 'price_desc') {
       filtered.sort((a, b) => b.basePrice.compareTo(a.basePrice));
     } else if (sortBy == 'rating') {
-      filtered.sort((a, b) => a.rating.compareTo(a.rating));
+      filtered.sort((a, b) => b.rating.compareTo(a.rating));
     }
 
     // Filter Stock
@@ -537,7 +526,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
           children: [
             // Gorgeous Apple Store Search Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 8),
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -548,11 +537,21 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           letterSpacing: -0.8,
                         ),
                   ),
-                  StoreUserAvatar(
-                    name: store.user?.name ?? 'AppleTech Customer',
-                    photoUrl: store.user?.photoUrl,
-                    size: 36,
-                    onTap: () => store.setTab(4),
+                  GestureDetector(
+                    onTap: () => store.setTab(4), // navigate to profile
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        CupertinoIcons.person_crop_circle,
+                        color: isDark ? Colors.white : AppColors.black,
+                        size: 24,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -581,7 +580,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           color: isDark ? Colors.white : Colors.black,
                         ),
                         decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)?.searchHint ?? 'Search MacBook, iPad, iPhone…',
+                          hintText: AppLocalizations.of(context)?.searchHint ?? 'Search MacBook M5, 48GB RAM, iPad, iMac…',
                           hintStyle: TextStyle(
                             color: isDark ? Colors.white38 : Colors.black38,
                             fontSize: 15.5,
@@ -684,67 +683,59 @@ class ExploreCollectionCard extends StatefulWidget {
 }
 
 class _ExploreCollectionCardState extends State<ExploreCollectionCard> {
-  bool _isHighlighted = false;
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHighlighted = true),
-      onExit: (_) => setState(() => _isHighlighted = false),
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
-        onTapDown: (_) => setState(() => _isHighlighted = true),
-        onTapUp: (_) => setState(() => _isHighlighted = false),
-        onTapCancel: () => setState(() => _isHighlighted = false),
-        onTap: () {
-          HapticFeedback.lightImpact();
-          widget.onTap();
-        },
+        onTap: widget.onTap,
         child: AnimatedScale(
-          scale: _isHighlighted ? 1.04 : 1.0,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutBack,
-          child: Container(
+          scale: _isHovered ? 1.025 : 1.0,
+          duration: AppAnimations.normal,
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: AppAnimations.normal,
             height: 140,
             margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-            child: Stack(
-              clipBehavior: Clip.none, // Allow images to pop out!
-              children: [
-                // Main Box
-                Positioned.fill(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 400),
-                    decoration: BoxDecoration(
-                      gradient: widget.gradient,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 15,
-                          offset: const Offset(0, 8),
-                        ),
-                        if (_isHighlighted)
-                          BoxShadow(
-                            color: widget.accent.withValues(alpha: 0.3),
-                            blurRadius: 25,
-                            spreadRadius: 2,
-                          ),
-                      ],
-                    ),
-                  ),
+            decoration: BoxDecoration(
+              gradient: widget.gradient,
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: _isHovered ? 0.22 : 0.08),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.accent.withValues(alpha: _isHovered ? 0.38 : 0.12),
+                  blurRadius: _isHovered ? 24 : 12,
+                  offset: _isHovered ? const Offset(0, 10) : const Offset(0, 4),
                 ),
-
-                // Subtle Accent Glow
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Soft Accent Glow Behind Image
                 Positioned(
-                  right: -30,
-                  bottom: -30,
-                  child: Container(
-                    width: 160,
-                    height: 160,
+                  right: -25,
+                  bottom: -25,
+                  child: AnimatedContainer(
+                    duration: AppAnimations.normal,
+                    width: 150,
+                    height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          widget.accent.withValues(alpha: 0.12),
+                          widget.accent.withValues(alpha: _isHovered ? 0.28 : 0.15),
                           widget.accent.withValues(alpha: 0),
                         ],
                       ),
@@ -752,87 +743,102 @@ class _ExploreCollectionCardState extends State<ExploreCollectionCard> {
                   ),
                 ),
 
-                // Text Content
+                // Text Content (Left Side)
                 Positioned(
                   left: 20,
-                  top: 0,
-                  bottom: 0,
-                  right: 130,
+                  top: 20,
+                  bottom: 20,
+                  right: 175,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        widget.category.toUpperCase(),
-                        style: TextStyle(
-                          color: widget.accent.withValues(alpha: 0.8),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
+                      // Accent line indicator
+                      AnimatedContainer(
+                        duration: AppAnimations.normal,
+                        width: _isHovered ? 32 : 16,
+                        height: 3.5,
+                        decoration: BoxDecoration(
+                          color: widget.accent,
+                          borderRadius: BorderRadius.circular(1.75),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 10),
                       Text(
                         widget.category,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
+                          fontSize: 23,
+                          fontWeight: FontWeight.w800,
                           letterSpacing: -0.5,
-                          height: 1.1,
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        widget.tagline,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          height: 1.3,
+                      Expanded(
+                        child: Text(
+                          widget.tagline,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                            height: 1.3,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Explore',
-                            style: TextStyle(
-                              color: widget.accent,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                      const SizedBox(height: 8),
+                      // Action Pill Button
+                      AnimatedContainer(
+                        duration: AppAnimations.normal,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _isHovered ? Colors.white : Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Explore Collection',
+                              style: TextStyle(
+                                color: _isHovered ? Colors.black : Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(CupertinoIcons.chevron_right, size: 10, color: widget.accent),
-                        ],
+                            const SizedBox(width: 4),
+                            Icon(
+                              CupertinoIcons.chevron_right,
+                              size: 11,
+                              color: _isHovered ? Colors.black : Colors.white,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
 
-                // Product Image - THE POP OUT EFFECT
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOutBack,
-                  right: _isHighlighted ? -20 : 5,
-                  bottom: _isHighlighted ? -20 : 10,
-                  top: _isHighlighted ? -20 : 10,
-                  child: AnimatedScale(
-                    scale: _isHighlighted ? 1.20 : 1.0,
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeOutBack,
-                    child: Hero(
-                      tag: 'collection-image-${widget.category}',
-                      child: SizedBox(
-                        width: 160,
-                        child: ProductImageBox(
-                          imagePath: widget.imagePath,
-                          fit: BoxFit.contain,
-                          animate: !_isHighlighted,
+                // Overlapping Image (Right Side)
+                Positioned(
+                  right: 0,
+                  bottom: -10,
+                  top: -10,
+                  child: Center(
+                    child: AnimatedScale(
+                      scale: _isHovered ? 1.15 : 1.05,
+                      duration: AppAnimations.normal,
+                      curve: Curves.easeOutBack,
+                      child: Hero(
+                        tag: 'collection-image-${widget.category}',
+                        child: SizedBox(
+                          width: 165,
+                          height: 145,
+                          child: ProductImageBox(
+                            imagePath: widget.imagePath,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),
@@ -846,3 +852,4 @@ class _ExploreCollectionCardState extends State<ExploreCollectionCard> {
     );
   }
 }
+

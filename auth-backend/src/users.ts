@@ -1,23 +1,9 @@
 import { Router, Request, Response } from 'express';
-import multer from 'multer';
 import { auth, db } from './firebase';
 import { verifyToken } from './middleware/verifyToken';
-import { isR2Configured, uploadProfilePhotoToR2 } from './r2';
 import { z } from 'zod';
 
 const router = Router();
-
-const profilePhotoUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (_req, file, callback) => {
-    if (file.mimetype.startsWith('image/')) {
-      callback(null, true);
-      return;
-    }
-    callback(new Error('Only image uploads are allowed.'));
-  },
-});
 
 // All routes require a valid Firebase ID token.
 router.use(verifyToken);
@@ -25,7 +11,6 @@ router.use(verifyToken);
 const updateProfileSchema = z.object({
   displayName: z.string().min(1).max(100).optional(),
   locale: z.enum(['en', 'km', 'zh']).optional(),
-  photoUrl: z.string().url().max(2048).optional(),
 });
 
 const cartItemSchema = z.object({
@@ -100,7 +85,6 @@ router.get('/me', async (req: Request, res: Response) => {
       emailVerified: userRecord.emailVerified,
       createdAt: userRecord.metadata.creationTime,
       locale: firestoreData?.locale || null,
-      photoUrl: firestoreData?.photoUrl || userRecord.photoURL || null,
     });
   } catch (err: any) {
     console.error('GET /users/me error:', err);
@@ -116,16 +100,12 @@ router.patch('/me', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid input', details: result.error.format() });
     }
 
-    const { displayName, locale, photoUrl } = result.data;
+    const { displayName, locale } = result.data;
     const updates: Record<string, unknown> = {};
 
     if (displayName !== undefined) {
       await auth.updateUser(uid, { displayName });
       updates.displayName = displayName;
-    }
-    if (photoUrl !== undefined) {
-      await auth.updateUser(uid, { photoURL: photoUrl });
-      updates.photoUrl = photoUrl;
     }
     if (locale !== undefined) updates.locale = locale;
 
@@ -139,43 +119,6 @@ router.patch('/me', async (req: Request, res: Response) => {
     return res.status(500).json({ error: err.message });
   }
 });
-
-router.post(
-  '/me/profile-photo',
-  profilePhotoUpload.single('photo'),
-  async (req: Request, res: Response) => {
-    try {
-      if (!isR2Configured()) {
-        return res.status(503).json({
-          error:
-            'Cloudflare R2 is not configured. Set R2_* variables in auth-backend/.env',
-        });
-      }
-
-      const uid = req.uid!;
-      const file = req.file;
-      if (!file) {
-        return res.status(400).json({ error: 'Missing image file (field name: photo).' });
-      }
-
-      const photoUrl = await uploadProfilePhotoToR2(
-        uid,
-        file.buffer,
-        file.mimetype || 'image/jpeg',
-      );
-
-      await Promise.all([
-        auth.updateUser(uid, { photoURL: photoUrl }),
-        db.collection('users').doc(uid).set({ photoUrl }, { merge: true }),
-      ]);
-
-      return res.status(201).json({ photoUrl });
-    } catch (err: any) {
-      console.error('POST /users/me/profile-photo error:', err);
-      return res.status(500).json({ error: err.message });
-    }
-  },
-);
 
 router.get('/me/orders', async (req: Request, res: Response) => {
   try {
