@@ -1,6 +1,9 @@
 import admin from 'firebase-admin';
+import dotenv from 'dotenv';
 import { readFileSync } from 'fs';
 import path from 'path';
+
+dotenv.config();
 
 // Initialize Firebase Admin SDK using service account
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || path.join(__dirname, '..', 'serviceAccountKey.json');

@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import authRouter from './auth';
+import usersRouter from './users';
+import { verifyToken } from './middleware/verifyToken';
 
 dotenv.config();
 
@@ -23,9 +25,15 @@ app.use(
 
 // Routes
 app.use('/auth', authRouter);
+app.use('/users', usersRouter);
+
+// Health check
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // Example protected route
-app.get('/protected', (req, res) => {
+app.get('/protected', verifyToken, (_req, res) => {
   res.json({ message: 'You have accessed a protected endpoint!' });
 });
 

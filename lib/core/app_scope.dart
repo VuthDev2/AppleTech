@@ -14,9 +14,9 @@ class AppScope extends InheritedNotifier<AppStore> {
 }
 
 class AppStore extends ChangeNotifier {
-  AppStore({AuthService? authService})
+  AppStore({AuthService? authService, this.firestoreService})
     : authService = authService ?? LocalAuthService() {
-    // Restore session if available (helps with Hot Restart)
+    // Restore session if already authenticated (e.g., hot restart)
     final existingUser = this.authService.currentUser;
     if (existingUser != null) {
       user = existingUser;
@@ -25,6 +25,105 @@ class AppStore extends ChangeNotifier {
   }
 
   final AuthService authService;
+  final FirestoreService? firestoreService;
+
+  // ── auth state ─────────────────────────────────────────────────────────────
+
+  bool isAuthenticated = false;
+  bool isAuthLoading = false;
+  bool isDataLoading = false;
+  String? authError;
+  bool isDarkMode = false;
+  UserProfile? user;
+  Locale? _locale;
+
+  Locale? get locale => _locale;
+
+  // ── initialize: restore Firestore session on cold start ───────────────────
+
+  Future<void> initialize() async {
+    await loadLocale();
+
+    // If Firebase already has a signed-in user, load their Firestore data.
+    final existingUser = authService.currentUser;
+    if (existingUser != null && firestoreService != null) {
+      user = existingUser;
+      isAuthenticated = true;
+      await _loadFirestoreData(existingUser.uid);
+    }
+  }
+
+  Future<void> _loadFirestoreData(String uid) async {
+    if (firestoreService == null) return;
+    isDataLoading = true;
+    notifyListeners();
+    try {
+      final data = await firestoreService!.loadUserData(uid);
+
+      // Hydrate bag
+      bag
+        ..clear()
+        ..addAll(data.bag);
+
+      // Hydrate wishlist (only valid product IDs)
+      wishlist
+        ..clear()
+        ..addAll(
+          data.wishlist.where(
+            (id) => products.any((p) => p.id == id),
+          ),
+        );
+
+      // Hydrate orders
+      orders
+        ..clear()
+        ..addAll(data.orders);
+
+      // Hydrate addresses (merge with any defaults; Firestore wins if non-empty)
+      if (data.addresses.isNotEmpty) {
+        addresses
+          ..clear()
+          ..addAll(data.addresses);
+      }
+
+      // Hydrate cards (merge similarly)
+      if (data.cards.isNotEmpty) {
+        cards
+          ..clear()
+          ..addAll(data.cards);
+      }
+
+      // Hydrate notifications (Firestore overrides in-memory defaults)
+      if (data.notifications.isNotEmpty) {
+        notifications = data.notifications;
+      }
+
+      // Hydrate locale from Firestore if not already set from SharedPreferences
+      if (data.locale != null && _locale == null) {
+        final code = data.locale!;
+        if (['en', 'km', 'zh'].contains(code)) {
+          _locale = Locale(code);
+        }
+      }
+
+      // Hydrate display name (Firestore profile name takes priority)
+      if (data.displayName != null && user != null) {
+        user = UserProfile(
+          uid: user!.uid,
+          name: data.displayName!,
+          email: user!.email,
+          createdAt: user!.createdAt,
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to load Firestore data: $e');
+    } finally {
+      isDataLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // ── locale ─────────────────────────────────────────────────────────────────
 
   Future<void> loadLocale() async {
     final prefs = await SharedPreferences.getInstance();
@@ -35,24 +134,24 @@ class AppStore extends ChangeNotifier {
     }
   }
 
-  bool isAuthenticated = false;
-  bool isAuthLoading = false;
-  String? authError;
-  bool isDarkMode = false;
-  UserProfile? user;
-  Locale? _locale;
-
-  Locale? get locale => _locale;
-
   Future<void> setLocale(Locale locale) async {
     if (!['en', 'km', 'zh'].contains(locale.languageCode)) return;
     _locale = locale;
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('language_code', locale.languageCode);
+    // Also persist to Firestore
+    if (user != null && firestoreService != null) {
+      firestoreService!.saveUserProfile(user!.uid, locale: locale.languageCode);
+    }
   }
 
+  // ── products ──────────────────────────────────────────────────────────────
+
   final List<Product> products = sampleProducts;
+
+  // ── mutable user data ─────────────────────────────────────────────────────
+
   final List<CartItem> bag = <CartItem>[];
   final Set<String> wishlist = <String>{};
   final List<OrderRecord> orders = <OrderRecord>[];
@@ -145,7 +244,7 @@ class AppStore extends ChangeNotifier {
       expiryDate: '12/28',
       cvv: '123',
       brand: 'Visa Signature',
-      themeColor: Color(0xFF0071E3), // Apple Blue
+      themeColor: Color(0xFF0071E3),
     ),
     const PaymentCard(
       id: 'card-2',
@@ -154,86 +253,11 @@ class AppStore extends ChangeNotifier {
       expiryDate: '09/29',
       cvv: '999',
       brand: 'Apple Card',
-      themeColor: Color(0xFF1F1F1F), // Space Black
+      themeColor: Color(0xFF1F1F1F),
     ),
   ];
 
   String? appliedPromoCode;
-
-  void addAddress(ShippingAddress address) {
-    addresses.add(address);
-    notifyListeners();
-  }
-
-  void removeAddress(String id) {
-    addresses.removeWhere((a) => a.id == id);
-    notifyListeners();
-  }
-
-  void addCard(PaymentCard card) {
-    cards.add(card);
-    notifyListeners();
-  }
-
-  void removeCard(String id) {
-    cards.removeWhere((c) => c.id == id);
-    notifyListeners();
-  }
-
-  bool applyPromoCode(String code) {
-    final cleaned = code.trim().toUpperCase();
-    if (cleaned == 'APPLE10' || cleaned == 'WELCOME') {
-      appliedPromoCode = cleaned;
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  void clearPromoCode() {
-    appliedPromoCode = null;
-    notifyListeners();
-  }
-
-  void addReview(String productId, Review review) {
-    final index = products.indexWhere((p) => p.id == productId);
-    if (index != -1) {
-      final oldProduct = products[index];
-      final newReviews = List<Review>.from(oldProduct.reviews)
-        ..insert(0, review);
-
-      final newReviewCount = oldProduct.reviewCount + 1;
-      final newRating = double.parse(
-        ((oldProduct.rating * oldProduct.reviewCount + review.rating) /
-                newReviewCount)
-            .toStringAsFixed(1),
-      );
-
-      products[index] = Product(
-        id: oldProduct.id,
-        name: oldProduct.name,
-        category: oldProduct.category,
-        tagline: oldProduct.tagline,
-        description: oldProduct.description,
-        detailedDescription: oldProduct.detailedDescription,
-        basePrice: oldProduct.basePrice,
-        specs: oldProduct.specs,
-        accent: oldProduct.accent,
-        icon: oldProduct.icon,
-        imagePath: oldProduct.imagePath,
-        variants: oldProduct.variants,
-        rating: newRating,
-        reviewCount: newReviewCount,
-        reviews: newReviews,
-        warranty: oldProduct.warranty,
-        inStock: oldProduct.inStock,
-        releaseDate: oldProduct.releaseDate,
-        keyFeatures: oldProduct.keyFeatures,
-        featured: oldProduct.featured,
-      );
-      notifyListeners();
-    }
-  }
 
   // Demo status bar settings
   String demoTime = '9:41';
@@ -254,20 +278,31 @@ class AppStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ── auth actions ──────────────────────────────────────────────────────────
+
   Future<bool> signIn({required String email, required String password}) async {
     return _runAuthAction(() async {
       final result = await authService.signIn(email: email, password: password);
       user = result.user;
       isAuthenticated = true;
+      await _loadFirestoreData(result.user.uid);
     });
   }
 
-  // New Google Sign-In method
   Future<bool> signInWithGoogle() async {
     return _runAuthAction(() async {
       final result = await authService.signInWithGoogle();
       user = result.user;
       isAuthenticated = true;
+      // Ensure profile doc exists for Google sign-ins
+      if (firestoreService != null) {
+        await firestoreService!.createUserProfile(
+          result.user.uid,
+          name: result.user.name,
+          email: result.user.email,
+        );
+      }
+      await _loadFirestoreData(result.user.uid);
     });
   }
 
@@ -284,6 +319,14 @@ class AppStore extends ChangeNotifier {
       );
       user = result.user;
       isAuthenticated = true;
+      // Create Firestore profile document for new user
+      if (firestoreService != null) {
+        await firestoreService!.createUserProfile(
+          result.user.uid,
+          name: result.user.name,
+          email: result.user.email,
+        );
+      }
     });
   }
 
@@ -354,6 +397,10 @@ class AppStore extends ChangeNotifier {
         createdAt: DateTime.now(),
       );
     }
+    // Persist to Firestore
+    if (user != null && firestoreService != null) {
+      firestoreService!.saveUserProfile(user!.uid, name: user!.name);
+    }
     notifyListeners();
   }
 
@@ -361,6 +408,45 @@ class AppStore extends ChangeNotifier {
     await authService.signOut();
     isAuthenticated = false;
     user = null;
+    // Clear all in-memory user data
+    bag.clear();
+    wishlist.clear();
+    orders.clear();
+    addresses
+      ..clear()
+      ..add(const ShippingAddress(
+        id: 'addr-1',
+        fullName: 'Kry Saravuth',
+        street: '123 AppleTech Way, Apt 4B',
+        city: 'Cupertino, CA',
+        postalCode: '95014',
+        phone: '+1 (555) 019-2834',
+        isDefault: true,
+      ));
+    cards
+      ..clear()
+      ..addAll([
+        const PaymentCard(
+          id: 'card-1',
+          cardholderName: 'Kry Saravuth',
+          cardNumber: '•••• •••• •••• 4242',
+          expiryDate: '12/28',
+          cvv: '123',
+          brand: 'Visa Signature',
+          themeColor: Color(0xFF0071E3),
+        ),
+        const PaymentCard(
+          id: 'card-2',
+          cardholderName: 'Kry Saravuth',
+          cardNumber: '•••• •••• •••• 8888',
+          expiryDate: '09/29',
+          cvv: '999',
+          brand: 'Apple Card',
+          themeColor: Color(0xFF1F1F1F),
+        ),
+      ]);
+    notifications = _initialNotifications();
+    appliedPromoCode = null;
     notifyListeners();
   }
 
@@ -369,6 +455,8 @@ class AppStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ── notifications ─────────────────────────────────────────────────────────
+
   int get unreadNotificationCount =>
       notifications.where((n) => !n.isRead).length;
 
@@ -376,6 +464,9 @@ class AppStore extends ChangeNotifier {
     final index = notifications.indexWhere((n) => n.id == id);
     if (index == -1 || notifications[index].isRead) return;
     notifications[index] = notifications[index].copyWith(isRead: true);
+    if (user != null && firestoreService != null) {
+      firestoreService!.markNotificationRead(user!.uid, id);
+    }
     notifyListeners();
   }
 
@@ -387,19 +478,34 @@ class AppStore extends ChangeNotifier {
         changed = true;
       }
     }
-    if (changed) notifyListeners();
+    if (changed) {
+      if (user != null && firestoreService != null) {
+        firestoreService!.markAllNotificationsRead(user!.uid);
+      }
+      notifyListeners();
+    }
   }
 
   void removeNotification(String id) {
     final before = notifications.length;
     notifications.removeWhere((n) => n.id == id);
-    if (notifications.length < before) notifyListeners();
+    if (notifications.length < before) {
+      if (user != null && firestoreService != null) {
+        firestoreService!.removeNotification(user!.uid, id);
+      }
+      notifyListeners();
+    }
   }
 
   void pushNotification(AppNotification notification) {
     notifications.insert(0, notification);
+    if (user != null && firestoreService != null) {
+      firestoreService!.saveNotification(user!.uid, notification);
+    }
     notifyListeners();
   }
+
+  // ── products ──────────────────────────────────────────────────────────────
 
   Product productById(String id) => products.firstWhere((p) => p.id == id);
 
@@ -407,21 +513,80 @@ class AppStore extends ChangeNotifier {
     return productById(productId).variants.firstWhere((v) => v.id == variantId);
   }
 
+  void addReview(String productId, Review review) {
+    final index = products.indexWhere((p) => p.id == productId);
+    if (index != -1) {
+      final oldProduct = products[index];
+      final newReviews = List<Review>.from(oldProduct.reviews)
+        ..insert(0, review);
+
+      final newReviewCount = oldProduct.reviewCount + 1;
+      final newRating = double.parse(
+        ((oldProduct.rating * oldProduct.reviewCount + review.rating) /
+                newReviewCount)
+            .toStringAsFixed(1),
+      );
+
+      products[index] = Product(
+        id: oldProduct.id,
+        name: oldProduct.name,
+        category: oldProduct.category,
+        tagline: oldProduct.tagline,
+        description: oldProduct.description,
+        detailedDescription: oldProduct.detailedDescription,
+        basePrice: oldProduct.basePrice,
+        specs: oldProduct.specs,
+        accent: oldProduct.accent,
+        icon: oldProduct.icon,
+        imagePath: oldProduct.imagePath,
+        variants: oldProduct.variants,
+        rating: newRating,
+        reviewCount: newReviewCount,
+        reviews: newReviews,
+        warranty: oldProduct.warranty,
+        inStock: oldProduct.inStock,
+        releaseDate: oldProduct.releaseDate,
+        keyFeatures: oldProduct.keyFeatures,
+        featured: oldProduct.featured,
+      );
+      notifyListeners();
+    }
+  }
+
+  // ── wishlist ──────────────────────────────────────────────────────────────
+
   void toggleWishlist(String productId) {
-    wishlist.contains(productId)
-        ? wishlist.remove(productId)
-        : wishlist.add(productId);
+    if (wishlist.contains(productId)) {
+      wishlist.remove(productId);
+      if (user != null && firestoreService != null) {
+        firestoreService!.removeWishlistItem(user!.uid, productId);
+      }
+    } else {
+      wishlist.add(productId);
+      if (user != null && firestoreService != null) {
+        firestoreService!.addWishlistItem(user!.uid, productId);
+      }
+    }
     notifyListeners();
   }
+
+  // ── bag ───────────────────────────────────────────────────────────────────
 
   void addToBag(Product product, Variant variant) {
     final index = bag.indexWhere(
       (item) => item.productId == product.id && item.variantId == variant.id,
     );
     if (index == -1) {
-      bag.add(CartItem(productId: product.id, variantId: variant.id));
+      final item = CartItem(productId: product.id, variantId: variant.id);
+      bag.add(item);
+      if (user != null && firestoreService != null) {
+        firestoreService!.saveCartItem(user!.uid, item);
+      }
     } else if (bag[index].quantity < variant.stock) {
       bag[index] = bag[index].copyWith(quantity: bag[index].quantity + 1);
+      if (user != null && firestoreService != null) {
+        firestoreService!.saveCartItem(user!.uid, bag[index]);
+      }
     }
     notifyListeners();
   }
@@ -429,21 +594,33 @@ class AppStore extends ChangeNotifier {
   void updateQuantity(CartItem item, int quantity) {
     if (quantity <= 0) {
       bag.remove(item);
+      if (user != null && firestoreService != null) {
+        firestoreService!.removeCartItem(user!.uid, item);
+      }
     } else {
       final variant = variantById(item.productId, item.variantId);
       final index = bag.indexOf(item);
       bag[index] = item.copyWith(quantity: math.min(quantity, variant.stock));
+      if (user != null && firestoreService != null) {
+        firestoreService!.saveCartItem(user!.uid, bag[index]);
+      }
     }
     notifyListeners();
   }
 
   void removeFromBag(CartItem item) {
     bag.remove(item);
+    if (user != null && firestoreService != null) {
+      firestoreService!.removeCartItem(user!.uid, item);
+    }
     notifyListeners();
   }
 
   void clearBag() {
     bag.clear();
+    if (user != null && firestoreService != null) {
+      firestoreService!.clearCart(user!.uid);
+    }
     notifyListeners();
   }
 
@@ -471,30 +648,93 @@ class AppStore extends ChangeNotifier {
 
   int get total => discountedSubtotal + tax;
 
+  // ── checkout ──────────────────────────────────────────────────────────────
+
   void completeCheckout() {
     if (bag.isEmpty) return;
     final orderId = 'AT-${1000 + orders.length}';
-    orders.insert(
-      0,
-      OrderRecord(
-        id: orderId,
-        placedAt: DateTime.now(),
-        total: total,
-        items: List<CartItem>.from(bag),
-        status: 'Preparing for delivery',
-      ),
+    final order = OrderRecord(
+      id: orderId,
+      placedAt: DateTime.now(),
+      total: total,
+      items: List<CartItem>.from(bag),
+      status: 'Preparing for delivery',
     );
-    pushNotification(
-      AppNotification(
-        id: 'notif-order-$orderId',
-        title: 'Order confirmed',
-        body: 'Order $orderId is being prepared for delivery.',
-        createdAt: DateTime.now(),
-        kind: NotificationKind.order,
-      ),
+    orders.insert(0, order);
+
+    // Persist order to Firestore
+    if (user != null && firestoreService != null) {
+      firestoreService!.saveOrder(user!.uid, order);
+    }
+
+    final notification = AppNotification(
+      id: 'notif-order-$orderId',
+      title: 'Order confirmed',
+      body: 'Order $orderId is being prepared for delivery.',
+      createdAt: DateTime.now(),
+      kind: NotificationKind.order,
     );
+    pushNotification(notification);
+
     bag.clear();
+    if (user != null && firestoreService != null) {
+      firestoreService!.clearCart(user!.uid);
+    }
+
     appliedPromoCode = null;
+    notifyListeners();
+  }
+
+  // ── promo codes ───────────────────────────────────────────────────────────
+
+  bool applyPromoCode(String code) {
+    final cleaned = code.trim().toUpperCase();
+    if (cleaned == 'APPLE10' || cleaned == 'WELCOME') {
+      appliedPromoCode = cleaned;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  void clearPromoCode() {
+    appliedPromoCode = null;
+    notifyListeners();
+  }
+
+  // ── addresses ─────────────────────────────────────────────────────────────
+
+  void addAddress(ShippingAddress address) {
+    addresses.add(address);
+    if (user != null && firestoreService != null) {
+      firestoreService!.saveAddress(user!.uid, address);
+    }
+    notifyListeners();
+  }
+
+  void removeAddress(String id) {
+    addresses.removeWhere((a) => a.id == id);
+    if (user != null && firestoreService != null) {
+      firestoreService!.removeAddress(user!.uid, id);
+    }
+    notifyListeners();
+  }
+
+  // ── cards ─────────────────────────────────────────────────────────────────
+
+  void addCard(PaymentCard card) {
+    cards.add(card);
+    if (user != null && firestoreService != null) {
+      firestoreService!.saveCard(user!.uid, card);
+    }
+    notifyListeners();
+  }
+
+  void removeCard(String id) {
+    cards.removeWhere((c) => c.id == id);
+    if (user != null && firestoreService != null) {
+      firestoreService!.removeCard(user!.uid, id);
+    }
     notifyListeners();
   }
 }

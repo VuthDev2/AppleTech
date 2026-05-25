@@ -1,7 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { auth, db } from './firebase';
 import { z } from 'zod';
+import dotenv from 'dotenv';
 // import fetch from 'node-fetch'; // using global fetch in Node 20+
+
+dotenv.config();
 
 const router = Router();
 
@@ -31,6 +34,14 @@ router.post('/register', async (req: Request, res: Response) => {
     }
     const { email, password } = result.data;
     const userRecord = await auth.createUser({ email, password });
+
+    // Create initial Firestore profile document
+    await db.collection('users').doc(userRecord.uid).set({
+      email: userRecord.email,
+      displayName: userRecord.displayName || '',
+      createdAt: new Date(),
+    });
+
     return res.status(201).json({ uid: userRecord.uid, email: userRecord.email });
   } catch (err: any) {
     console.error(err);

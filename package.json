@@ -1,5 +1,13 @@
 {
+  "scripts": {
+    "firebase:login": "firebase login",
+    "firebase:rules:dry-run": "firebase deploy --only firestore:rules --dry-run",
+    "firebase:rules:deploy": "firebase deploy --only firestore:rules"
+  },
   "dependencies": {
     "firebase": "^12.13.0"
+  },
+  "devDependencies": {
+    "firebase-tools": "^15.18.0"
   }
 }

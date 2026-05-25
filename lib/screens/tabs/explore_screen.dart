@@ -692,84 +692,160 @@ class _ExploreCollectionCardState extends State<ExploreCollectionCard> {
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
         onTap: widget.onTap,
-        child: AnimatedContainer(
+        child: AnimatedScale(
+          scale: _isHovered ? 1.025 : 1.0,
           duration: AppAnimations.normal,
-          height: 125,
-          margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-          decoration: BoxDecoration(
-            gradient: widget.gradient,
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-            boxShadow: _isHovered
-                ? [
-                    BoxShadow(
-                      color: widget.accent.withValues(alpha: 0.25),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : appShadowMd,
-          ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // Text Content
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.xl),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      widget.category,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: AppAnimations.normal,
+            height: 140,
+            margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+            decoration: BoxDecoration(
+              gradient: widget.gradient,
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: _isHovered ? 0.22 : 0.08),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.accent.withValues(alpha: _isHovered ? 0.38 : 0.12),
+                  blurRadius: _isHovered ? 24 : 12,
+                  offset: _isHovered ? const Offset(0, 10) : const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Soft Accent Glow Behind Image
+                Positioned(
+                  right: -25,
+                  bottom: -25,
+                  child: AnimatedContainer(
+                    duration: AppAnimations.normal,
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          widget.accent.withValues(alpha: _isHovered ? 0.28 : 0.15),
+                          widget.accent.withValues(alpha: 0),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    SizedBox(
-                      width: 170, // Limit width to avoid overlap with image
-                      child: Text(
-                        widget.tagline,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          height: 1.3,
+                  ),
+                ),
+
+                // Text Content (Left Side)
+                Positioned(
+                  left: 20,
+                  top: 20,
+                  bottom: 20,
+                  right: 175,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Accent line indicator
+                      AnimatedContainer(
+                        duration: AppAnimations.normal,
+                        width: _isHovered ? 32 : 16,
+                        height: 3.5,
+                        decoration: BoxDecoration(
+                          color: widget.accent,
+                          borderRadius: BorderRadius.circular(1.75),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 10),
+                      Text(
+                        widget.category,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 23,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Expanded(
+                        child: Text(
+                          widget.tagline,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Action Pill Button
+                      AnimatedContainer(
+                        duration: AppAnimations.normal,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _isHovered ? Colors.white : Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Explore Collection',
+                              style: TextStyle(
+                                color: _isHovered ? Colors.black : Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              CupertinoIcons.chevron_right,
+                              size: 11,
+                              color: _isHovered ? Colors.black : Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              // Overlapping Image
-              Positioned(
-                right: -10,
-                bottom: -10,
-                top: -10,
-                child: Center(
-                  child: AnimatedScale(
-                    scale: _isHovered ? 1.08 : 1.0,
-                    duration: AppAnimations.normal,
-                    child: Hero(
-                      tag: 'collection-image-${widget.category}',
-                      child: SizedBox(
-                        width: 150,
-                        height: 120,
-                        child: ProductImageBox(
-                          imagePath: widget.imagePath,
-                          fit: BoxFit.contain,
+
+                // Overlapping Image (Right Side)
+                Positioned(
+                  right: 0,
+                  bottom: -10,
+                  top: -10,
+                  child: Center(
+                    child: AnimatedScale(
+                      scale: _isHovered ? 1.15 : 1.05,
+                      duration: AppAnimations.normal,
+                      curve: Curves.easeOutBack,
+                      child: Hero(
+                        tag: 'collection-image-${widget.category}',
+                        child: SizedBox(
+                          width: 165,
+                          height: 145,
+                          child: ProductImageBox(
+                            imagePath: widget.imagePath,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

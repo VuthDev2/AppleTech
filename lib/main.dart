@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -6,6 +7,7 @@ import 'package:appletech/l10n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +19,7 @@ import 'firebase_options.dart';
 part 'core/app_scope.dart';
 part 'core/app_theme.dart';
 part 'data/auth_service.dart';
+part 'data/firestore_service.dart';
 part 'models/app_models.dart';
 part 'data/apple_product_images.dart';
 part 'data/product_catalog.dart';
@@ -37,32 +40,41 @@ part 'widgets/shared_widgets.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final authService = await createAuthService();
+  final (authService, firestoreService) = await _createServices();
 
   runApp(
     DevicePreview(
       enabled: !kReleaseMode,
-      builder: (context) => AppleTechApp(authService: authService),
+      builder: (context) => AppleTechApp(
+        authService: authService,
+        firestoreService: firestoreService,
+      ),
     ),
   );
 }
 
-Future<AuthService> createAuthService() async {
+Future<(AuthService, FirestoreService?)> _createServices() async {
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    return FirebaseAuthService();
+    return (FirebaseAuthService(), FirestoreService());
   } catch (e) {
     // If Firebase initialization fails (e.g., missing config), fall back to mock service.
-    return LocalAuthService();
+    debugPrint('Firebase init failed: $e');
+    return (LocalAuthService(), null);
   }
 }
 
 class AppleTechApp extends StatefulWidget {
-  const AppleTechApp({required this.authService, super.key});
+  const AppleTechApp({
+    required this.authService,
+    this.firestoreService,
+    super.key,
+  });
 
   final AuthService authService;
+  final FirestoreService? firestoreService;
 
   @override
   State<AppleTechApp> createState() => _AppleTechAppState();
@@ -74,7 +86,12 @@ class _AppleTechAppState extends State<AppleTechApp> {
   @override
   void initState() {
     super.initState();
-    store = AppStore(authService: widget.authService);
+    store = AppStore(
+      authService: widget.authService,
+      firestoreService: widget.firestoreService,
+    );
+    // Restore persisted session from Firestore on cold start
+    store.initialize();
   }
 
   @override
