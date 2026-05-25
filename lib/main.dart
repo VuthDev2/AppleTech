@@ -173,7 +173,8 @@ class _AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = firebase_auth.FirebaseAuth.instance.currentUser;
+    final store = AppScope.of(context);
+    final user = store.user;
 
     if (user == null) {
       // This case should ideally not be reached if store.isAuthenticated is true,
@@ -181,26 +182,12 @@ class _AuthGate extends StatelessWidget {
       return const WelcomeAuthScreen();
     }
 
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
-
-        if (snapshot.hasError) {
-          
-          return const Scaffold(body: Center(child: Text('Error fetching user data.')));
-        }
-
-        if (snapshot.hasData && snapshot.data!.exists) {
-          final data = snapshot.data!.data() as Map<String, dynamic>;
-          if (data['role'] == 'admin') {
-            return const AdminShell(); 
-          }
-        }
-        return const StoreShell(); 
-      },
-    );
+    // Redirect to AdminShell if the user has the admin role, 
+    // otherwise show the regular StoreShell.
+    if (user.isAdmin) {
+      return const AdminShell();
+    }
+    
+    return const StoreShell();
   }
 }
