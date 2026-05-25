@@ -52,9 +52,9 @@ class DashboardView extends StatelessWidget {
                 ),
                 _buildStatCard(
                   context,
-                  IcPlay as String meonlyBold.user_2 as Stream<QuerySnapshot<Object?>>,
-                  'Registered Users' as IconData,
-                  FirebaseFirestore.instance.collection('users').snapshots() as Color,
+                  'Registered Users',
+                  FirebaseFirestore.instance.collection('users').snapshots(),
+                  IconlyBold.user_2,
                   Colors.green,
                 ),
               ],
@@ -87,7 +87,7 @@ class DashboardView extends StatelessWidget {
     String title,
     Stream<QuerySnapshot> stream,
     IconData icon,
-    Color color, MaterialColor green,
+    Color color,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -156,11 +156,4 @@ class DashboardView extends StatelessWidget {
           ),
     );
   }
-}
-
-class meonlyBold {
-  static get user_2 => null;
-}
-
-class IcPlay {
 }

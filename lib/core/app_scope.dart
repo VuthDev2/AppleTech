@@ -718,12 +718,12 @@ class AppStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  int get bagCount => bag.fold(0, (sum, item) => sum + item.quantity);
+  int get bagCount => bag.fold(0, (acc, item) => acc + item.quantity);
 
   int get subtotal {
-    return bag.fold(0, (sum, item) {
+    return bag.fold(0, (acc, item) {
       final variant = variantById(item.productId, item.variantId);
-      return sum + (variant.price * item.quantity);
+      return acc + (variant.price * item.quantity);
     });
   }
 
@@ -755,9 +755,9 @@ class AppStore extends ChangeNotifier {
     if (itemsToCheckout.isEmpty) return;
 
     // Calculate total for these specific items
-    final checkoutSubtotal = itemsToCheckout.fold(0, (sum, item) {
+    final checkoutSubtotal = itemsToCheckout.fold(0, (acc, item) {
       final variant = variantById(item.productId, item.variantId);
-      return sum + (variant.price * item.quantity);
+      return acc + (variant.price * item.quantity);
     });
     
     // Apply discount proportionally if it's a percentage, or just use current logic if it's the whole bag
