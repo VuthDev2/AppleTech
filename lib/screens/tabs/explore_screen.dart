@@ -537,7 +537,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
           children: [
             // Gorgeous Apple Store Search Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

@@ -18,7 +18,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:appletech/screens/admin/admin_shell.dart'; // Import AdminShell
+import 'package:appletech/screens/admin/admin_shell.dart'; // Import AdminShell   
 import 'package:device_preview/device_preview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
@@ -34,7 +34,14 @@ part 'data/apple_product_images.dart';
 part 'data/product_catalog.dart';
 part 'data/product_catalog_expansion.dart';
 part 'data/sample_products.dart';
+part 'screens/auth/auth_components.dart';
+part 'screens/auth/forgot-pw.dart';
+part 'screens/auth/login.dart';
+part 'screens/auth/reset-pw.dart';
+part 'screens/auth/signup.dart';
+part 'screens/auth/verify.dart';
 part 'screens/auth/welcome_auth_screen.dart';
+
 part 'screens/store_shell.dart';
 part 'screens/tabs/home_screen.dart';
 part 'widgets/product_cards.dart';
@@ -182,17 +189,17 @@ class _AuthGate extends StatelessWidget {
         }
 
         if (snapshot.hasError) {
-          // Handle error, e.g., show an error message or log out
+          
           return const Scaffold(body: Center(child: Text('Error fetching user data.')));
         }
 
         if (snapshot.hasData && snapshot.data!.exists) {
           final data = snapshot.data!.data() as Map<String, dynamic>;
           if (data['role'] == 'admin') {
-            return const AdminShell(); // Admin view
+            return const AdminShell(); 
           }
         }
-        return const StoreShell(); // Regular user view or if role is not 'admin'
+        return const StoreShell(); 
       },
     );
   }

@@ -73,11 +73,7 @@ class AppStore extends ChangeNotifier {
       // Hydrate wishlist (only valid product IDs)
       wishlist
         ..clear()
-        ..addAll(
-          data.wishlist.where(
-            (id) => products.any((p) => p.id == id),
-          ),
-        );
+        ..addAll(data.wishlist.where((id) => products.any((p) => p.id == id)));
 
       // Hydrate orders
       orders
@@ -403,8 +399,11 @@ class AppStore extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final cleanName = name.trim().isEmpty ? 'AppleTech Customer' : name.trim();
-      final cleanEmail = canEditEmail && email != null && email.trim().isNotEmpty
+      final cleanName = name.trim().isEmpty
+          ? 'AppleTech Customer'
+          : name.trim();
+      final cleanEmail =
+          canEditEmail && email != null && email.trim().isNotEmpty
           ? email.trim()
           : user!.email;
 
@@ -469,15 +468,17 @@ class AppStore extends ChangeNotifier {
     orders.clear();
     addresses
       ..clear()
-      ..add(const ShippingAddress(
-        id: 'addr-1',
-        fullName: 'Kry Saravuth',
-        street: '123 AppleTech Way, Apt 4B',
-        city: 'Cupertino, CA',
-        postalCode: '95014',
-        phone: '+1 (555) 019-2834',
-        isDefault: true,
-      ));
+      ..add(
+        const ShippingAddress(
+          id: 'addr-1',
+          fullName: 'Kry Saravuth',
+          street: '123 AppleTech Way, Apt 4B',
+          city: 'Cupertino, CA',
+          postalCode: '95014',
+          phone: '+1 (555) 019-2834',
+          isDefault: true,
+        ),
+      );
     cards
       ..clear()
       ..addAll([
@@ -647,8 +648,10 @@ class AppStore extends ChangeNotifier {
         ),
       );
     }
-    
-    print('Wishlist updated: ${wishlist.length} items. Added: $isAdding'); // DEBUG
+
+    print(
+      'Wishlist updated: ${wishlist.length} items. Added: $isAdding',
+    ); // DEBUG
     notifyListeners();
 
     // Background sync
@@ -746,28 +749,28 @@ class AppStore extends ChangeNotifier {
     String? customerPhone,
     String? customerAddress,
     DateTime? visitTime,
+    List<CartItem>? specificItems,
   }) {
-    if (bag.isEmpty) return;
+    final itemsToCheckout = specificItems ?? List<CartItem>.from(bag);
+    if (itemsToCheckout.isEmpty) return;
+
+    // Calculate total for these specific items
+    final checkoutSubtotal = itemsToCheckout.fold(0, (sum, item) {
+      final variant = variantById(item.productId, item.variantId);
+      return sum + (variant.price * item.quantity);
+    });
     
-    // If there's an existing scheduled visit, we update it instead of creating a new one
-    final existingIndex = orders.indexWhere((o) => o.status == 'Visit Scheduled');
-    if (existingIndex != -1) {
-      updateVisit(
-        orderId: orders[existingIndex].id,
-        customerName: customerName,
-        customerPhone: customerPhone,
-        customerAddress: customerAddress,
-        visitTime: visitTime,
-      );
-      return;
-    }
+    // Apply discount proportionally if it's a percentage, or just use current logic if it's the whole bag
+    // For simplicity in this demo, we'll just calculate a simple tax on these items
+    final checkoutTax = (checkoutSubtotal * 0.08).round();
+    final checkoutTotal = checkoutSubtotal + checkoutTax;
 
     final orderId = 'AT-${1000 + orders.length}';
     final order = OrderRecord(
       id: orderId,
       placedAt: DateTime.now(),
-      total: total,
-      items: List<CartItem>.from(bag),
+      total: checkoutTotal,
+      items: itemsToCheckout,
       status: 'Visit Scheduled',
       customerName: customerName,
       customerPhone: customerPhone,
@@ -794,8 +797,19 @@ class AppStore extends ChangeNotifier {
     );
     pushNotification(notification);
 
-    appliedPromoCode = null;
-    notifyListeners();
+    if (specificItems == null) {
+      appliedPromoCode = null;
+      clearBag();
+    } else {
+      // Remove only the checked out items from the bag
+      for (final item in itemsToCheckout) {
+        bag.removeWhere((i) => i.productId == item.productId && i.variantId == item.variantId);
+        if (user != null && firestoreService != null) {
+          firestoreService!.removeCartItem(user!.uid, item);
+        }
+      }
+      notifyListeners();
+    }
   }
 
   void updateVisit({
@@ -804,6 +818,8 @@ class AppStore extends ChangeNotifier {
     String? customerPhone,
     String? customerAddress,
     DateTime? visitTime,
+    List<CartItem>? items,
+    int? total,
   }) {
     final index = orders.indexWhere((o) => o.id == orderId);
     if (index == -1) return;
@@ -811,8 +827,8 @@ class AppStore extends ChangeNotifier {
     final updatedOrder = OrderRecord(
       id: orderId,
       placedAt: orders[index].placedAt,
-      total: total, // Recalculate based on current bag
-      items: List<CartItem>.from(bag),
+      total: total ?? orders[index].total,
+      items: items ?? orders[index].items,
       status: 'Visit Scheduled',
       customerName: customerName ?? orders[index].customerName,
       customerPhone: customerPhone ?? orders[index].customerPhone,

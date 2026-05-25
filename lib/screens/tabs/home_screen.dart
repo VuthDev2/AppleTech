@@ -24,7 +24,6 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        top: false,
         bottom: false,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -33,7 +32,7 @@ class HomeScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.xxl,
-                  AppSpacing.md,
+                  AppSpacing.lg,
                   AppSpacing.xxl,
                   AppSpacing.lg,
                 ),
@@ -273,10 +272,16 @@ class _AutomatedTextLoopState extends State<AutomatedTextLoop> {
         return FadeTransition(
           opacity: animation,
           child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.3),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+            position:
+                Tween<Offset>(
+                  begin: const Offset(0, 0.3),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  ),
+                ),
             child: child,
           ),
         );
@@ -306,10 +311,7 @@ class StoreHeader extends StatelessWidget {
         : AppColors.lightGray.withAlpha(100);
 
     final l10n = AppLocalizations.of(context);
-    final greetings = [
-      l10n?.welcome ?? 'Welcome',
-      
-    ];
+    final greetings = [l10n?.welcome ?? 'Welcome'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,99 +320,165 @@ class StoreHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const StoreBrandMark(height: 34),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _StoreHeaderIconButton(
-                  onPressed: () => showNotificationsSheet(context),
-                  backgroundColor: chipBg,
-                  icon: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      const Icon(CupertinoIcons.bell_fill, size: 20),
-                      if (store.unreadNotificationCount > 0)
-                        Positioned(
-                          right: -4,
-                          top: -4,
-                          child: Container(
-                            padding: const EdgeInsets.all(3),
-                            constraints: const BoxConstraints(
-                              minWidth: 16,
-                              minHeight: 16,
-                            ),
-                            decoration: const BoxDecoration(
-                              color: AppColors.error,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              store.unreadNotificationCount > 9
-                                  ? '9+'
-                                  : '${store.unreadNotificationCount}',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                height: 1,
+            const StoreBrandMark(height: 38),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : AppColors.lightGray.withAlpha(80),
+                borderRadius: BorderRadius.circular(AppRadius.full),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.12)
+                      : Colors.black.withValues(alpha: 0.05),
+                ),
+                boxShadow: isDark
+                    ? [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                    : null,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _StoreHeaderIconButton(
+                    onPressed: () => showNotificationsSheet(context),
+                    backgroundColor: Colors.transparent,
+                    icon: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Icon(
+                          CupertinoIcons.bell_fill,
+                          size: 19,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                        if (store.unreadNotificationCount > 0)
+                          Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(2.5),
+                              constraints: const BoxConstraints(
+                                minWidth: 14,
+                                minHeight: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.error,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                store.unreadNotificationCount > 9
+                                    ? '9+'
+                                    : '${store.unreadNotificationCount}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                _StoreHeaderIconButton(
-                  onPressed: onToggleTheme,
-                  backgroundColor: chipBg,
-                  icon: Icon(
-                    isDark
-                        ? CupertinoIcons.sun_max_fill
-                        : CupertinoIcons.moon_fill,
-                    size: 20,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Container(
+                      width: 1,
+                      height: 14,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.15)
+                          : Colors.black.withValues(alpha: 0.1),
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                _StoreHeaderIconButton(
-                  onPressed: () {
-                    final store = AppScope.of(context);
-                    final current = store.locale?.languageCode ?? 'en';
-                    if (current == 'en') {
-                      store.setLocale(const Locale('km'));
-                    } else if (current == 'km') {
-                      store.setLocale(const Locale('zh'));
-                    } else {
-                      store.setLocale(const Locale('en'));
-                    }
-                  },
-                  backgroundColor: chipBg,
-                  icon: Text(
-                    store.locale?.languageCode == 'km'
-                        ? '🇰🇭'
-                        : store.locale?.languageCode == 'zh'
-                        ? '🇨🇳'
-                        : '🇺🇸',
-                    style: const TextStyle(fontSize: 18),
+                  _StoreHeaderIconButton(
+                    onPressed: onToggleTheme,
+                    backgroundColor: Colors.transparent,
+                    icon: Icon(
+                      isDark
+                          ? CupertinoIcons.sun_max_fill
+                          : CupertinoIcons.moon_fill,
+                      size: 19,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Container(
+                      width: 1,
+                      height: 14,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.15)
+                          : Colors.black.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  _StoreHeaderIconButton(
+                    onPressed: () {
+                      final store = AppScope.of(context);
+                      final current = store.locale?.languageCode ?? 'en';
+                      if (current == 'en') {
+                        store.setLocale(const Locale('km'));
+                      } else if (current == 'km') {
+                        store.setLocale(const Locale('zh'));
+                      } else {
+                        store.setLocale(const Locale('en'));
+                      }
+                    },
+                    backgroundColor: Colors.transparent,
+                    icon: Container(
+                      decoration: isDark ? BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                          )
+                        ]
+                      ) : null,
+                      child: Text(
+                        store.locale?.languageCode == 'km'
+                            ? '🇰🇭'
+                            : store.locale?.languageCode == 'zh'
+                            ? '🇨🇳'
+                            : '🇺🇸',
+                        style: const TextStyle(fontSize: 17),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
 
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         AutomatedTextLoop(
-          texts: greetings.map((g) => store.user?.name != null ? '$g, ${store.user!.name.split(' ').first}' : g).toList(),
+          texts: greetings
+              .map(
+                (g) => store.user?.name != null
+                    ? '$g, ${store.user!.name.split(' ').first}'
+                    : g,
+              )
+              .toList(),
           style: theme.textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            fontSize: 28,
             height: 1.1,
-            letterSpacing: -0.8,
+            letterSpacing: -1.0,
             color: onSurface,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
       ],
     );
   }
@@ -674,7 +742,7 @@ class _AnimatedHintTextFieldState extends State<AnimatedHintTextField> {
       children: [
         ProfessionalTextField(
           controller: widget.controller,
-          hintText: '', 
+          hintText: '',
           prefixIcon: widget.prefixIcon,
           onFieldSubmitted: widget.onFieldSubmitted,
         ),
@@ -711,7 +779,8 @@ class _BlinkingCursor extends StatefulWidget {
   State<_BlinkingCursor> createState() => _BlinkingCursorState();
 }
 
-class _BlinkingCursorState extends State<_BlinkingCursor> with SingleTickerProviderStateMixin {
+class _BlinkingCursorState extends State<_BlinkingCursor>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -952,10 +1021,15 @@ class _PromoBannerCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           Positioned.fill(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(28, 20, 24, 20), // Increased right padding to 24
+              padding: const EdgeInsets.fromLTRB(
+                28,
+                20,
+                24,
+                20,
+              ), // Increased right padding to 24
               child: Row(
                 children: [
                   Expanded(flex: 12, child: _PromoBannerCopy(banner: banner)),
@@ -1003,10 +1077,7 @@ class _PromoBannerCopy extends StatelessWidget {
           children: [
             // Professional Tag
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
@@ -1148,4 +1219,3 @@ class _StoreHeaderIconButton extends StatelessWidget {
     );
   }
 }
-

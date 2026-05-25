@@ -21,9 +21,7 @@ Product _desktopMacProduct({
   required Map<String, int> storageDeltas,
   bool featured = false,
 }) {
-  const colors = <_ColorOption>[
-    _ColorOption('Silver', Color(0xFFD9DADB)),
-  ];
+  const colors = <_ColorOption>[_ColorOption('Silver', Color(0xFFD9DADB))];
   final variants = <Variant>[];
   for (final color in colors) {
     for (final storage in storageOptions) {
@@ -44,11 +42,18 @@ Product _desktopMacProduct({
     name: name,
     category: 'Mac',
     tagline: tagline,
-    description: '$name with $chip — desktop power for creative and pro workflows.',
+    description:
+        '$name with $chip — desktop power for creative and pro workflows.',
     detailedDescription:
         'Configure $name ($year) with $chip. Choose SSD capacity and connect Studio Display or Pro Display XDR.',
     basePrice: basePrice,
-    specs: [chip, 'Configurable SSD', 'Thunderbolt', 'macOS', 'Wi‑Fi + Ethernet'],
+    specs: [
+      chip,
+      'Configurable SSD',
+      'Thunderbolt',
+      'macOS',
+      'Wi‑Fi + Ethernet',
+    ],
     keyFeatures: const [
       'Pro-level performance',
       'Configurable SSD',
@@ -71,7 +76,14 @@ Product _desktopMacProduct({
 }
 
 List<Product> _buildMacDesktops() {
-  const ssd = <String>['256GB SSD', '512GB SSD', '1TB SSD', '2TB SSD', '4TB SSD', '8TB SSD'];
+  const ssd = <String>[
+    '256GB SSD',
+    '512GB SSD',
+    '1TB SSD',
+    '2TB SSD',
+    '4TB SSD',
+    '8TB SSD',
+  ];
   const ssdDeltas = <String, int>{
     '256GB SSD': 0,
     '512GB SSD': 200,
@@ -336,7 +348,12 @@ List<Product> _buildAppleHomeProducts() {
       year: 2024,
       tagline: 'Binge-worthy. Brilliant.',
       basePrice: 149,
-      specs: const ['A16 Bionic', '4K Dolby Vision', 'Thread', 'Siri Remote USB-C'],
+      specs: const [
+        'A16 Bionic',
+        '4K Dolby Vision',
+        'Thread',
+        'Siri Remote USB-C',
+      ],
       icon: Icons.tv,
       featured: true,
     ),
@@ -426,7 +443,12 @@ List<Product> _buildVisionAndDisplays() {
       year: 2022,
       tagline: 'A sight to behold.',
       basePrice: 1599,
-      specs: const ['27-inch 5K Retina', '12MP Center Stage', 'Six speakers', 'Thunderbolt'],
+      specs: const [
+        '27-inch 5K Retina',
+        '12MP Center Stage',
+        'Six speakers',
+        'Thunderbolt',
+      ],
       icon: Icons.monitor,
       featured: true,
     ),
@@ -437,7 +459,12 @@ List<Product> _buildVisionAndDisplays() {
       year: 2019,
       tagline: 'Reference mode. Real world.',
       basePrice: 4999,
-      specs: const ['32-inch 6K', '1000 nits sustained', 'P3 wide color', 'Pro Stand optional'],
+      specs: const [
+        '32-inch 6K',
+        '1000 nits sustained',
+        'P3 wide color',
+        'Pro Stand optional',
+      ],
       icon: Icons.monitor_outlined,
     ),
   ];
@@ -462,11 +489,7 @@ Product _accessoryProduct({
     detailedDescription: '$name. ${specs.join(' · ')}.',
     basePrice: basePrice,
     specs: specs,
-    keyFeatures: const [
-      'Apple-designed',
-      'Seamless pairing',
-      'Premium build',
-    ],
+    keyFeatures: const ['Apple-designed', 'Seamless pairing', 'Premium build'],
     accent: const Color(0xFF9AA5B1),
     icon: icon,
     imagePath: productImageFor(id),
@@ -503,11 +526,16 @@ List<Product> _buildAppleAccessories() {
     ),
     _accessoryProduct(
       id: 'magic-keyboard-touch-2024',
-      name: 'Magic Keyboard with Touch ID',
+      name: 'Magic Keyboard with Touch ID and Numeric Keypad',
       year: 2024,
       tagline: 'Unlock with a touch.',
-      basePrice: 149,
-      specs: const ['Touch ID', 'USB-C', 'Numeric keypad option'],
+      basePrice: 199,
+      specs: const [
+        'Touch ID',
+        'USB-C',
+        'Numeric keypad',
+        'Apple silicon Mac models',
+      ],
       icon: Icons.keyboard_alt_outlined,
       featured: true,
     ),
@@ -516,7 +544,7 @@ List<Product> _buildAppleAccessories() {
       name: 'Magic Mouse',
       year: 2024,
       tagline: 'Multi-Touch. Wireless.',
-      basePrice: 79,
+      basePrice: 99,
       specs: const ['Multi-Touch surface', 'USB-C', 'Ambidextrous'],
       icon: Icons.mouse_outlined,
     ),
@@ -525,7 +553,7 @@ List<Product> _buildAppleAccessories() {
       name: 'Magic Trackpad',
       year: 2024,
       tagline: 'Force Touch. Wireless.',
-      basePrice: 129,
+      basePrice: 149,
       specs: const ['Force Touch', 'USB-C', 'Large surface'],
       icon: Icons.touch_app_outlined,
     ),
@@ -554,17 +582,63 @@ List<Product> _buildAppleAccessories() {
       year: 2021,
       tagline: 'Lose your knack for losing things.',
       basePrice: 99,
-      specs: const ['Precision Finding', 'UWB', 'Replaceable battery', 'Find My'],
+      specs: const [
+        'Precision Finding',
+        'UWB',
+        'Replaceable battery',
+        'Find My',
+      ],
       icon: Icons.location_on_outlined,
     ),
     _accessoryProduct(
       id: 'magsafe-charger-2024',
-      name: 'MagSafe Charger',
-      year: 2024,
+      name: 'MagSafe Charger (1 m)',
+      year: 2025,
       tagline: 'Snap. Charge.',
       basePrice: 39,
-      specs: const ['15W wireless', 'MagSafe', 'USB-C cable included'],
+      specs: const ['MagSafe wireless charging', '1 m woven cable', 'USB-C'],
       icon: Icons.battery_charging_full,
+    ),
+    _accessoryProduct(
+      id: 'usb-c-power-adapter-20w-2025',
+      name: '20W USB-C Power Adapter',
+      year: 2025,
+      tagline: 'Fast, efficient charging.',
+      basePrice: 19,
+      specs: const ['20W output', 'USB-C', 'Compact wall adapter'],
+      icon: Icons.power,
+    ),
+    _accessoryProduct(
+      id: 'usb-c-charge-cable-240w-2024',
+      name: '240W USB-C Charge Cable (2 m)',
+      year: 2024,
+      tagline: 'Powerful woven USB-C charging.',
+      basePrice: 29,
+      specs: const [
+        '240W charging support',
+        '2 m woven cable',
+        'USB 2 data transfer',
+      ],
+      icon: Icons.cable,
+    ),
+    _accessoryProduct(
+      id: 'usb-c-digital-av-adapter-2024',
+      name: 'USB-C Digital AV Multiport Adapter',
+      year: 2024,
+      tagline: 'HDMI, USB, and USB-C in one adapter.',
+      basePrice: 69,
+      specs: const ['HDMI', 'USB-A', 'USB-C charging passthrough'],
+      icon: Icons.settings_input_hdmi,
+    ),
+    _accessoryProduct(
+      id: 'thunderbolt-5-pro-cable-2025',
+      name: 'Thunderbolt 5 (USB-C) Pro Cable (1 m)',
+      year: 2025,
+      tagline: 'Pro data, display, and charging.',
+      basePrice: 69,
+      specs: const ['Thunderbolt 5', 'USB-C', 'Braided design', '1 m'],
+      icon: Icons.cable,
+      featured: true,
     ),
   ];
 }

@@ -8,7 +8,7 @@ const _appleCdnBase =
 String productImageUrl(String slug, {int size = 1200}) =>
     '$_appleCdnBase/$slug?wid=$size&hei=$size&fmt=png-alpha';
 
-/// Resolved image paths: prioritizes local high-quality assets, 
+/// Resolved image paths: prioritizes local high-quality assets,
 /// falls back to official Apple CDN for unique product display.
 String productImageFor(String productId) {
   // 1. Check for specific local mapping
@@ -37,7 +37,7 @@ String _genericFallback(String productId) {
   if (productId.startsWith('imac-')) return 'assets/images/imac_blue.png';
   if (productId.startsWith('mac-mini')) return 'assets/images/mac_mini.png';
   if (productId.startsWith('mac-studio')) return 'assets/images/mac_studio.png';
-  
+
   return 'assets/images/iphone_16_pro.png';
 }
 
@@ -51,7 +51,6 @@ const Map<String, String> _localProductImageMappings = {
   'mba-15-m3-2024': 'mba15_starlight',
   'mba-15-m4-2025': 'macbook_air_un_1',
   'mba-15-m5-2025': 'macbook_air_un_2', // Cleaned from 'm5' request
-  
   // MacBook Pro
   'mbp-14-m4p-2024': 'mbp14_silver',
   'mbp-14-m4m-2024': 'mbp14_spaceblack',
@@ -113,29 +112,34 @@ const Map<String, String> _cdnProductImageSlugs = {
   'mbp-13-2018': 'macbook-pro-13-spacegray-select-201807',
   'mac-pro-m2u-2023': 'mac-pro-tower-select-202306',
   'mac-studio-m1m-2022': 'mac-studio-select-202203',
-  
+
   // iPad
   'ipad-9-2021': 'ipad-9-select-wifi-spacegray-202109',
   'ipad-mini-6-2021': 'ipad-mini-select-wifi-pink-202109',
   'ipad-pro-11-2018': 'ipad-pro-11-select-wifi-spacegray-201810',
-  
+
   // iPhone
   'iphone-13': 'iphone-13-blue-select-2021',
   'iphone-12': 'iphone-12-purple-select-2021',
   'iphone-11': 'iphone-11-white-select-2019',
-  
+
   // Accessories
-  'magic-keyboard-touch-2024': 'magic-keyboard-touch-id-select-202108',
-  'magic-mouse-2024': 'magic-mouse-select-202108',
-  'magic-trackpad-2024': 'magic-trackpad-select-202108',
-  'apple-pencil-pro-2024': 'apple-pencil-pro-select-202405',
+  'magic-keyboard-touch-2024': 'MXK83',
+  'magic-mouse-2024': 'MXK63',
+  'magic-trackpad-2024': 'MXKA3',
+  'apple-pencil-pro-2024': 'MX2D3',
+  'apple-pencil-usb-2023': 'MUWA3',
+  'magsafe-charger-2024': 'MGD74',
+  'usb-c-power-adapter-20w-2025': 'MWVV3',
+  'usb-c-charge-cable-240w-2024': 'MU2G3',
+  'usb-c-digital-av-adapter-2024': 'MUF82',
+  'thunderbolt-5-pro-cable-2025': 'MDW94',
   'airtag-4pack-2021': 'airtag-4pack-select-202104',
-  'magsafe-charger-2024': 'magsafe-charger-select-202010',
-  
+
   // Vision
   'vision-pro-2024': 'apple-vision-pro-select-202401',
   'vision-pro-m5-2025': 'apple-vision-pro-select-202401',
-  
+
   // Displays
   'studio-display-2022': 'studio-display-select-202203',
   'pro-display-xdr-2019': 'pro-display-xdr-select-201912',

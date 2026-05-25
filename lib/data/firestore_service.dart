@@ -57,7 +57,7 @@ abstract class UserDataRepository {
 
 class DirectFirestoreService implements UserDataRepository {
   DirectFirestoreService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
@@ -69,25 +69,51 @@ class DirectFirestoreService implements UserDataRepository {
     final doc = await _firestore.collection('users').doc(uid).get();
     final data = doc.data() ?? {};
 
-    final bagSnap = await _firestore.collection('users').doc(uid).collection('bag').get();
-    final wishlistSnap = await _firestore.collection('users').doc(uid).collection('wishlist').get();
-    final ordersSnap = await _firestore.collection('users').doc(uid).collection('orders').get();
-    final notificationsSnap = await _firestore.collection('users').doc(uid).collection('notifications').get();
+    final bagSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('bag')
+        .get();
+    final wishlistSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('wishlist')
+        .get();
+    final ordersSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('orders')
+        .get();
+    final notificationsSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .get();
 
     return UserFirestoreData(
-      bag: bagSnap.docs.map((d) => FirestoreService._cartItemFromJson(d.data())).toList(),
+      bag: bagSnap.docs
+          .map((d) => FirestoreService._cartItemFromJson(d.data()))
+          .toList(),
       wishlist: wishlistSnap.docs.map((d) => d.id).toSet(),
-      orders: ordersSnap.docs.map((d) => FirestoreService._orderFromJson(d.data())).toList(),
+      orders: ordersSnap.docs
+          .map((d) => FirestoreService._orderFromJson(d.data()))
+          .toList(),
       addresses: [], // Simplified for now
       cards: [],
-      notifications: notificationsSnap.docs.map((d) => FirestoreService._notificationFromJson(d.data())).toList(),
+      notifications: notificationsSnap.docs
+          .map((d) => FirestoreService._notificationFromJson(d.data()))
+          .toList(),
       displayName: data['displayName'] as String?,
       photoUrl: data['photoUrl'] as String?,
     );
   }
 
   @override
-  Future<void> createUserProfile(String uid, {required String name, required String email}) async {
+  Future<void> createUserProfile(
+    String uid, {
+    required String name,
+    required String email,
+  }) async {
     await _firestore.collection('users').doc(uid).set({
       'displayName': name,
       'email': email,
@@ -96,7 +122,12 @@ class DirectFirestoreService implements UserDataRepository {
   }
 
   @override
-  Future<void> saveUserProfile(String uid, {String? name, String? locale, String? photoUrl}) async {
+  Future<void> saveUserProfile(
+    String uid, {
+    String? name,
+    String? locale,
+    String? photoUrl,
+  }) async {
     final data = <String, dynamic>{};
     if (name != null) data['displayName'] = name;
     if (photoUrl != null) data['photoUrl'] = photoUrl;
@@ -106,22 +137,36 @@ class DirectFirestoreService implements UserDataRepository {
   @override
   Future<void> saveCartItem(String uid, CartItem item) async {
     final id = '${item.productId}__${item.variantId}';
-    await _firestore.collection('users').doc(uid).collection('bag').doc(id).set({
-      'productId': item.productId,
-      'variantId': item.variantId,
-      'quantity': item.quantity,
-    });
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('bag')
+        .doc(id)
+        .set({
+          'productId': item.productId,
+          'variantId': item.variantId,
+          'quantity': item.quantity,
+        });
   }
 
   @override
   Future<void> removeCartItem(String uid, CartItem item) async {
     final id = '${item.productId}__${item.variantId}';
-    await _firestore.collection('users').doc(uid).collection('bag').doc(id).delete();
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('bag')
+        .doc(id)
+        .delete();
   }
 
   @override
   Future<void> clearCart(String uid) async {
-    final snap = await _firestore.collection('users').doc(uid).collection('bag').get();
+    final snap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('bag')
+        .get();
     for (final doc in snap.docs) {
       await doc.reference.delete();
     }
@@ -129,33 +174,50 @@ class DirectFirestoreService implements UserDataRepository {
 
   @override
   Future<void> addWishlistItem(String uid, String productId) async {
-    await _firestore.collection('users').doc(uid).collection('wishlist').doc(productId).set({
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('wishlist')
+        .doc(productId)
+        .set({'timestamp': FieldValue.serverTimestamp()});
   }
 
   @override
   Future<void> removeWishlistItem(String uid, String productId) async {
-    await _firestore.collection('users').doc(uid).collection('wishlist').doc(productId).delete();
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('wishlist')
+        .doc(productId)
+        .delete();
   }
 
   @override
   Future<void> saveOrder(String uid, OrderRecord order) async {
-    await _firestore.collection('users').doc(uid).collection('orders').doc(order.id).set({
-      'id': order.id,
-      'total': order.total,
-      'status': order.status,
-      'placedAt': order.placedAt.toIso8601String(),
-      'items': order.items.map((i) => {
-        'productId': i.productId,
-        'variantId': i.variantId,
-        'quantity': i.quantity,
-      }).toList(),
-      'customerName': order.customerName,
-      'customerPhone': order.customerPhone,
-      'customerAddress': order.customerAddress,
-      'visitTime': order.visitTime?.toIso8601String(),
-    });
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('orders')
+        .doc(order.id)
+        .set({
+          'id': order.id,
+          'total': order.total,
+          'status': order.status,
+          'placedAt': order.placedAt.toIso8601String(),
+          'items': order.items
+              .map(
+                (i) => {
+                  'productId': i.productId,
+                  'variantId': i.variantId,
+                  'quantity': i.quantity,
+                },
+              )
+              .toList(),
+          'customerName': order.customerName,
+          'customerPhone': order.customerPhone,
+          'customerAddress': order.customerAddress,
+          'visitTime': order.visitTime?.toIso8601String(),
+        });
   }
 
   @override
@@ -163,33 +225,49 @@ class DirectFirestoreService implements UserDataRepository {
   @override
   Future<void> removeAddress(String uid, String addressId) async {}
   @override
-  Future<void> saveAllAddresses(String uid, List<ShippingAddress> addresses) async {}
+  Future<void> saveAllAddresses(
+    String uid,
+    List<ShippingAddress> addresses,
+  ) async {}
   @override
   Future<void> saveCard(String uid, PaymentCard card) async {}
   @override
   Future<void> removeCard(String uid, String cardId) async {}
   @override
   Future<void> saveNotification(String uid, AppNotification notif) async {
-    await _firestore.collection('users').doc(uid).collection('notifications').doc(notif.id).set({
-      'id': notif.id,
-      'title': notif.title,
-      'body': notif.body,
-      'kind': notif.kind.name,
-      'isRead': notif.isRead,
-      'createdAt': notif.createdAt.toIso8601String(),
-    });
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .doc(notif.id)
+        .set({
+          'id': notif.id,
+          'title': notif.title,
+          'body': notif.body,
+          'kind': notif.kind.name,
+          'isRead': notif.isRead,
+          'createdAt': notif.createdAt.toIso8601String(),
+        });
   }
 
   @override
   Future<void> markNotificationRead(String uid, String notifId) async {
-    await _firestore.collection('users').doc(uid).collection('notifications').doc(notifId).update({
-      'isRead': true,
-    });
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .doc(notifId)
+        .update({'isRead': true});
   }
 
   @override
   Future<void> markAllNotificationsRead(String uid) async {
-    final snap = await _firestore.collection('users').doc(uid).collection('notifications').where('isRead', isEqualTo: false).get();
+    final snap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .where('isRead', isEqualTo: false)
+        .get();
     final batch = _firestore.batch();
     for (final doc in snap.docs) {
       batch.update(doc.reference, {'isRead': true});
@@ -199,7 +277,12 @@ class DirectFirestoreService implements UserDataRepository {
 
   @override
   Future<void> removeNotification(String uid, String notifId) async {
-    await _firestore.collection('users').doc(uid).collection('notifications').doc(notifId).delete();
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .doc(notifId)
+        .delete();
   }
 }
 
@@ -487,6 +570,10 @@ class FirestoreService implements UserDataRepository {
       total: (json['total'] as num?)?.toInt() ?? 0,
       status: json['status'] as String? ?? 'Preparing for delivery',
       items: rawItems.map(_cartItemFromJson).toList(),
+      customerName: json['customerName'] as String?,
+      customerPhone: json['customerPhone'] as String?,
+      customerAddress: json['customerAddress'] as String?,
+      visitTime: _parseDate(json['visitTime']),
     );
   }
 

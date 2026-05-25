@@ -182,12 +182,27 @@ class StoreBrandMark extends StatelessWidget {
       );
     }
 
-    return Image.asset(
+    Widget logo = Image.asset(
       'assets/images/logo_apt.png',
       height: height,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.high,
     );
+
+    if (isDark) {
+      return ColorFiltered(
+        // Invert colors: white background becomes black, black logo becomes white
+        colorFilter: const ColorFilter.matrix([
+          -1, 0, 0, 0, 255,
+          0, -1, 0, 0, 255,
+          0, 0, -1, 0, 255,
+          0, 0, 0, 1, 0,
+        ]),
+        child: logo,
+      );
+    }
+
+    return logo;
   }
 }
 
@@ -887,6 +902,9 @@ class _ProfessionalTextFieldState extends State<ProfessionalTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -903,16 +921,18 @@ class _ProfessionalTextFieldState extends State<ProfessionalTextField> {
           validator: widget.validator,
           onChanged: widget.onChanged,
           onFieldSubmitted: widget.onFieldSubmitted,
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: theme.textTheme.bodyLarge,
           decoration: InputDecoration(
             hintText: widget.hintText,
             filled: true,
-            fillColor: _isFocused ? AppColors.white : AppColors.lightGray,
+            fillColor: _isFocused
+                ? (isDark ? AppColors.darkSurface3 : AppColors.white)
+                : (isDark ? AppColors.darkSurface2 : AppColors.lightGray),
             prefixIcon: widget.prefixIcon != null
                 ? Icon(
                     widget.prefixIcon,
                     color: _isFocused
-                        ? AppColors.primary
+                        ? (isDark ? AppColors.white : AppColors.primary)
                         : AppColors.mediumGray,
                   )
                 : null,
@@ -920,20 +940,25 @@ class _ProfessionalTextFieldState extends State<ProfessionalTextField> {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg),
               borderSide: BorderSide(
-                color: _isFocused ? AppColors.black : AppColors.lightGray,
+                color: _isFocused
+                    ? (isDark ? AppColors.white : AppColors.black)
+                    : (isDark ? AppColors.darkSeparator : AppColors.lightGray),
                 width: _isFocused ? 2 : 1,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              borderSide: const BorderSide(
-                color: AppColors.lightGray,
+              borderSide: BorderSide(
+                color: isDark ? AppColors.darkSeparator : AppColors.lightGray,
                 width: 1,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              borderSide: const BorderSide(color: AppColors.black, width: 2),
+              borderSide: BorderSide(
+                color: isDark ? AppColors.white : AppColors.black,
+                width: 2,
+              ),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
