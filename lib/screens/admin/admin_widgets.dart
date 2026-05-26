@@ -2,7 +2,10 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../widgets/notification_sheet.dart';
+import 'admin_notification_button.dart';
 import '../../main.dart';
 
 /// Shared glassmorphic SliverAppBar used by all admin views.
@@ -37,94 +40,50 @@ class AdminSliverHeader extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
           child: Container(
             decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.darkSurface0.withOpacity(0.75)
-                  : Colors.white.withOpacity(0.85),
-              border: Border(
-                bottom: BorderSide(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.black.withOpacity(0.05),
-                  width: 0.5,
-                ),
+              gradient: LinearGradient(
+                colors: isDark
+                    ? [Colors.black.withOpacity(0.6), Colors.black.withOpacity(0.4)]
+                    : [Colors.white.withOpacity(0.8), Colors.white.withOpacity(0.6)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-            child: SafeArea(
-              bottom: false,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Top row: branding + actions
-                  Row(
-                    children: [
-                      // Apple logo badge
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.white : Colors.black,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(Icons.apple, size: 20, color: isDark ? Colors.black : Colors.white),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Admin Portal',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.5,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          Text(
-                            'AppleTech Store',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 10,
-                              color: AppColors.mediumGray,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      // Theme toggle button
-                      _AdminIconButton(
-                        icon: isDark
-                            ? CupertinoIcons.sun_max_fill
-                            : CupertinoIcons.moon_fill,
-                        onTap: () => AppScope.of(context).toggleTheme(),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Text('Admin', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Spacer(),
+                      AdminNotificationButton(),
                       if (trailingActions != null) ...trailingActions!,
-                    ],
+                  ],
+                ),
+                SizedBox(height: AppSpacing.xl),
+                // Page title
+                Text(
+                  title,
+                  style: theme.textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1.2,
+                    fontSize: 32,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  // Page title + subtitle
-                  Text(
-                    title,
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -1.2,
-                      fontSize: 32,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle, 
+                ),
+                const SizedBox(height: 2),
+                AnimatedOpacity(
+                  opacity: 1.0,
+                  duration: const Duration(milliseconds: 500),
+                  child: Text(
+                    subtitle,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppColors.mediumGray,
                       fontWeight: FontWeight.w500,
-                    )
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.lg),
-                ],
-              ),
+                ),
+                SizedBox(height: AppSpacing.lg),
+              ],
             ),
           ),
         ),
@@ -163,6 +122,55 @@ class _AdminIconButton extends StatelessWidget {
           icon,
           size: 16,
           color: Theme.of(context).colorScheme.onSurface,
+        ),
+      ),
+    );
+  }
+}
+
+/// A reusable glassmorphic card for the admin panel
+class AdminGlassCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double? width;
+  final double? height;
+  final BorderRadius? borderRadius;
+
+  const AdminGlassCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(AppSpacing.xl),
+    this.width,
+    this.height,
+    this.borderRadius,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectiveRadius = borderRadius ?? BorderRadius.circular(24);
+
+    return ClipRRect(
+      borderRadius: effectiveRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          width: width,
+          height: height,
+          padding: padding,
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withOpacity(0.05)
+                : Colors.white.withOpacity(0.7),
+            borderRadius: effectiveRadius,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.white.withOpacity(0.8),
+            ),
+            boxShadow: isDark ? [] : appShadowSm,
+          ),
+          child: child,
         ),
       ),
     );

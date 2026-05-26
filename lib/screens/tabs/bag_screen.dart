@@ -172,7 +172,7 @@ class _CartItemWrapper extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         alignment: Alignment.centerRight,
         decoration: BoxDecoration(
-          color: AppColors.error.withOpacity(0.8),
+          color: AppColors.error.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(24),
         ),
         child: const Icon(CupertinoIcons.trash, color: Colors.white),
@@ -241,12 +241,12 @@ class ScheduledVisitsPanel extends StatelessWidget {
         children: [
           const Text(
             'Scheduled Store Visits',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, letterSpacing: -0.5),
           ),
           const SizedBox(height: 16),
           for (final visit in visits) ...[
             _ScheduledVisitCard(visit: visit),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
           ],
         ],
       ),
@@ -265,63 +265,115 @@ class _ScheduledVisitCard extends StatelessWidget {
     final visitTime = visit.visitTime;
     final scheduleText = visitTime == null
         ? 'Time not selected'
-        : '${DateFormat('MMM dd, yyyy').format(visitTime)} at ${DateFormat('h:mm a').format(visitTime)}';
+        : '${DateFormat('MMM dd').format(visitTime)} at ${DateFormat('h:mm a').format(visitTime)}';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF009688).withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF009688).withOpacity(0.1)),
+        color: isDark ? AppColors.darkSurface1 : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(CupertinoIcons.checkmark_seal_fill, color: Color(0xFF009688), size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '${visit.id} • $scheduleText',
-                  style: const TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF009688), fontSize: 12),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
                 ),
+                child: const Icon(CupertinoIcons.checkmark_seal_fill, color: AppColors.success, size: 16),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Visit Scheduled',
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                    ),
+                    Text(
+                      scheduleText,
+                      style: TextStyle(fontWeight: FontWeight.w500, color: isDark ? Colors.white70 : Colors.black54, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: () => store.cancelVisit(visit.id),
+                icon: Icon(CupertinoIcons.xmark_circle_fill, color: isDark ? Colors.white30 : Colors.black26, size: 22),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          for (final item in visit.items) ...[
-            _ScheduledVisitProductRow(item: item),
-            if (item != visit.items.last) const SizedBox(height: 8),
-          ],
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF9F9F9),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                for (final item in visit.items) ...[
+                  _ScheduledVisitProductRow(item: item),
+                  if (item != visit.items.last) 
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Divider(height: 1, color: isDark ? Colors.white10 : Colors.black12),
+                    ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Total: \$${visit.total}',
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
-              ),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextButton(
-                    onPressed: () {
-                      showModalBottomSheet<void>(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (_) => MultiStepCheckoutSheet(editOrderId: visit.id),
-                      );
-                    },
-                    child: const Text('Edit', style: TextStyle(color: Color(0xFF009688), fontWeight: FontWeight.w700)),
-                  ),
-                  IconButton(
-                    onPressed: () => store.cancelVisit(visit.id),
-                    icon: const Icon(CupertinoIcons.xmark_circle, color: AppColors.error, size: 18),
-                    visualDensity: VisualDensity.compact,
+                  const Text('Total To Pay', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                  Text(
+                    '\$${visit.total}',
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
                   ),
                 ],
+              ),
+              FilledButton.icon(
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => MultiStepCheckoutSheet(editOrderId: visit.id),
+                  );
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.05),
+                  foregroundColor: isDark ? Colors.white : Colors.black,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  elevation: 0,
+                ),
+                icon: const Icon(CupertinoIcons.pencil, size: 14),
+                label: const Text('Edit Details', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
               ),
             ],
           ),
@@ -343,50 +395,55 @@ class _ScheduledVisitProductRow extends StatelessWidget {
     final variant = store.variantById(item.productId, item.variantId);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white10 : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            child: ProductImageBox(
-              imagePath: product.imagePath,
-              category: product.category,
-              fit: BoxFit.contain,
-              animate: false,
-            ),
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white,
+            borderRadius: BorderRadius.circular(10),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                ),
-                Text(
-                  '${variant.colorName} • ${variant.configurationLabel}',
-                  maxLines: 1,
-                  style: const TextStyle(color: Colors.grey, fontSize: 10),
-                ),
-              ],
-            ),
+          child: ProductImageBox(
+            imagePath: product.imagePath,
+            category: product.category,
+            fit: BoxFit.contain,
+            animate: false,
           ),
-          const SizedBox(width: 8),
-          Text(
-            'x${item.quantity}',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                product.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              ),
+              Text(
+                '${variant.colorName} • ${variant.storage}',
+                maxLines: 1,
+                style: TextStyle(color: isDark ? Colors.white60 : Colors.black54, fontSize: 11),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            'Qty: ${item.quantity}',
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -454,14 +511,12 @@ class CartItemTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // Price Tag
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: isDark ? Colors.white12 : const Color(0xFF1E1E1E),
                         borderRadius: BorderRadius.circular(24),
@@ -475,70 +530,77 @@ class CartItemTile extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Individual Checkout Button
-                    TextButton(
-                      onPressed: () => showModalBottomSheet<void>(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (_) => MultiStepCheckoutSheet(checkoutItems: [item]),
-                      ),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        visualDensity: VisualDensity.compact,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
-                        'Reserve This',
-                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                      ),
-                    ),
-                    // Quantity Dropdown style
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
-                        border: Border.all(color: isDark ? Colors.white24 : const Color(0xFFE5E5E5)),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${item.quantity}',
-                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: isDark ? Colors.white : Colors.black),
+                    Row(
+                      children: [
+                        // Quantity Dropdown style
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                            border: Border.all(color: isDark ? Colors.white24 : const Color(0xFFE5E5E5)),
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            CupertinoIcons.chevron_down,
-                            size: 12,
-                            color: isDark ? Colors.white60 : Colors.black87,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${item.quantity}',
+                                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: isDark ? Colors.white : Colors.black),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                CupertinoIcons.chevron_down,
+                                size: 12,
+                                color: isDark ? Colors.white60 : Colors.black87,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ).onTap(() {
-                       _showQuantityPicker(context, store, item);
-                    }),
-                    // Trash Icon
-                    GestureDetector(
-                      onTap: () => store.removeFromBag(item),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          border: Border.all(color: AppColors.error.withOpacity(0.3)),
-                          shape: BoxShape.circle,
+                        ).onTap(() {
+                           _showQuantityPicker(context, store, item);
+                        }),
+                        const SizedBox(width: 8),
+                        // Trash Icon
+                        GestureDetector(
+                          onTap: () => store.removeFromBag(item),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.trash,
+                              size: 16,
+                              color: AppColors.error,
+                            ),
+                          ),
                         ),
-                        child: const Icon(
-                          CupertinoIcons.trash,
-                          size: 18,
-                          color: AppColors.error,
-                        ),
-                      ),
+                      ],
                     ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                // Individual Checkout Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => MultiStepCheckoutSheet(checkoutItems: [item]),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                    ),
+                    child: const Text(
+                      'Reserve This Item Only',
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                    ),
+                  ),
                 ),
               ],
             ),

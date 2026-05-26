@@ -1,4 +1,4 @@
-enum NotificationKind { order, promo, product, system }
+
 
 class AppNotification {
   const AppNotification({
@@ -6,7 +6,6 @@ class AppNotification {
     required this.title,
     required this.body,
     required this.createdAt,
-    required this.kind,
     this.isRead = false,
   });
 
@@ -14,7 +13,6 @@ class AppNotification {
   final String title;
   final String body;
   final DateTime createdAt;
-  final NotificationKind kind;
   final bool isRead;
 
   AppNotification copyWith({bool? isRead}) {
@@ -23,7 +21,6 @@ class AppNotification {
       title: title,
       body: body,
       createdAt: createdAt,
-      kind: kind,
       isRead: isRead ?? this.isRead,
     );
   }

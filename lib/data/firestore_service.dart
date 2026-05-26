@@ -105,6 +105,7 @@ class DirectFirestoreService implements UserDataRepository {
           .toList(),
       displayName: data['displayName'] as String?,
       photoUrl: data['photoUrl'] as String?,
+      isAdmin: data['role'] == 'admin',
     );
   }
 
@@ -346,6 +347,7 @@ class FirestoreService implements UserDataRepository {
       locale: profile['locale'] as String?,
       displayName: profile['displayName'] as String?,
       photoUrl: profile['photoUrl'] as String?,
+      isAdmin: profile['role'] == 'admin',
     );
   }
 
@@ -658,6 +660,7 @@ class UserFirestoreData {
     this.locale,
     this.displayName,
     this.photoUrl,
+    this.isAdmin = false,
   });
 
   final List<CartItem> bag;
@@ -669,4 +672,5 @@ class UserFirestoreData {
   final String? locale;
   final String? displayName;
   final String? photoUrl;
+  final bool isAdmin;
 }

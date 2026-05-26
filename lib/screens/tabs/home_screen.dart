@@ -1,8 +1,10 @@
 part of '../../main.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+/// Stub function for notification sheet (can be expanded later)
+void showNotificationsSheet(BuildContext context) {}
 
+  class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
   @override
   Widget build(BuildContext context) {
     final store = AppScope.of(context);
@@ -24,7 +26,6 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        top: false,
         bottom: false,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -629,7 +630,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
               0.0,
               constraints.maxWidth - horizontalPadding,
             );
-            final carouselHeight = (cardWidth * 0.42).clamp(218.0, 292.0);
+            final carouselHeight = (cardWidth * 0.35).clamp(180.0, 240.0);
 
             return SizedBox(
               height: carouselHeight,
@@ -699,56 +700,49 @@ class _PromoBannerCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
-        boxShadow: appShadowMd,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
+          // Background accents
           Positioned(
-            right: -42,
-            top: -54,
+            right: -20,
+            top: -30,
             child: Container(
-              width: 190,
-              height: 190,
+              width: 180,
+              height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.white.withAlpha(22),
+                color: Colors.white.withValues(alpha: 0.08),
               ),
             ),
           ),
-          Positioned(
-            right: 36,
-            bottom: -70,
-            child: Container(
-              width: 170,
-              height: 170,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.white.withAlpha(14),
-              ),
-            ),
-          ),
+          
           Positioned.fill(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 10, 20),
+              padding: const EdgeInsets.fromLTRB(28, 20, 24, 20), // Increased right padding to 24
               child: Row(
                 children: [
-                  Expanded(flex: 11, child: _PromoBannerCopy(banner: banner)),
-                  const SizedBox(width: 8),
+                  Expanded(flex: 12, child: _PromoBannerCopy(banner: banner)),
+                  const SizedBox(width: 12),
                   Expanded(
                     flex: 10,
-                    child: Align(
-                      alignment: Alignment.centerRight,
+                    child: Center(
                       child: FractionallySizedBox(
-                        widthFactor: 1,
+                        widthFactor: 1.0,
                         heightFactor: banner.imageHeightFactor,
-                        child: Image.asset(
-                          banner.imagePath,
+                        child: ProductImageBox(
+                          imagePath: banner.imagePath,
                           fit: BoxFit.contain,
-                          alignment: Alignment.centerRight,
-                          filterQuality: FilterQuality.high,
-                          gaplessPlayback: true,
+                          animate: true,
                         ),
                       ),
                     ),
@@ -923,76 +917,3 @@ class _StoreHeaderIconButton extends StatelessWidget {
 }
 
 // FIXED: Completed truncated method definition
-void showNotificationsSheet(BuildContext context) {
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (sheetContext) {
-      final store = AppScope.of(sheetContext);
-      final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
-      final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.82;
-
-      return ListenableBuilder(
-        listenable: store,
-        builder: (context, _) {
-          return Padding(
-            padding: EdgeInsets.only(
-              top: MediaQuery.paddingOf(sheetContext).top + AppSpacing.lg,
-            ),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Material(
-                color: isDark ? AppColors.darkGray : Colors.white,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(AppRadius.xxl),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: SizedBox(
-                  height: maxHeight,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: AppSpacing.md),
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.mediumGray.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.xxl,
-                          AppSpacing.xl,
-                          AppSpacing.lg,
-                          AppSpacing.md,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Notifications',
-                                style: Theme.of(sheetContext)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.w800),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Expanded(
-                        child: Center(child: Text('No new notifications')),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}

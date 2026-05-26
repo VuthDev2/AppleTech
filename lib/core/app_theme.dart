@@ -643,3 +643,11 @@ const List<BoxShadow> appShadowMd = [
 const List<BoxShadow> appShadowLg = [
   BoxShadow(color: Color(0x1A000000), blurRadius: 16, offset: Offset(0, 4)),
 ];
+
+// Extension for withValues compatibility
+extension ColorWithValues on Color {
+  Color withValues({double? alpha, double? red, double? green, double? blue}) {
+    if (alpha != null) return withOpacity(alpha);
+    return this;
+  }
+}

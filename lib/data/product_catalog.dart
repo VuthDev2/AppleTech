@@ -18,10 +18,30 @@ bool productMatchesSearch(Product product, String rawQuery) {
   if (q.isEmpty) return true;
 
   final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
+  final productName = product.name.toLowerCase();
+  final productCategory = product.category.toLowerCase();
+
+  // 1. Check for exact name match (all tokens in name)
+  bool nameMatch = tokens.every((t) => productName.contains(t));
+  if (nameMatch) return true;
+
+  // 2. Check for exact category match
+  if (tokens.length == 1 && productCategory == q) return true;
+
+  // 3. If it's a multi-word query like "Apple Pencil", and it's NOT a name match,
+  // we should be very careful about showing it just because "Apple" is everywhere.
+  final specificKeywords = ['pencil', 'keyboard', 'mouse', 'airtag', 'magsafe', 'earpods', 'vision', 'adapter', 'cable'];
+  for (final kw in specificKeywords) {
+    if (tokens.contains(kw) && !productName.contains(kw) && !productCategory.contains(kw)) {
+      return false;
+    }
+  }
+
+  // 4. Fallback to broad search but with higher threshold
   final haystack = StringBuffer()
-    ..write(product.name.toLowerCase())
+    ..write(productName)
     ..write(' ')
-    ..write(product.category.toLowerCase())
+    ..write(productCategory)
     ..write(' ')
     ..write(product.tagline.toLowerCase())
     ..write(' ')
@@ -48,6 +68,9 @@ bool productMatchesSearch(Product product, String rawQuery) {
   }
 
   final text = haystack.toString();
+  
+  // If all tokens are present, it's a match, but we already filtered out 
+  // "mentions" of specific accessory terms above.
   return tokens.every(text.contains);
 }
 

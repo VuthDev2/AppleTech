@@ -19,31 +19,36 @@ class _WishlistScreenState extends State<WishlistScreen> {
         title: Text(AppLocalizations.of(context)?.wishlist ?? 'Favorites'),
         actions: [
           if (saved.isNotEmpty)
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              ),
-              onPressed: () {
-                for (final prod in saved) {
-                  store.addToBag(prod, prod.variants.first);
-                }
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Added all ${saved.length} items to Store Selection'),
-                    behavior: SnackBarBehavior.floating,
-                    action: SnackBarAction(
-                      label: 'View Selection',
-                      textColor: AppColors.primary,
-                      onPressed: () => store.setTab(3),
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.md),
+              child: TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  backgroundColor: AppColors.primary.withAlpha(20),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                ),
+                onPressed: () {
+                  for (final prod in saved) {
+                    store.addToBag(prod, prod.variants.first);
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Added ${saved.length} items to Cart'),
+                      behavior: SnackBarBehavior.floating,
+                      action: SnackBarAction(
+                        label: 'View Cart',
+                        textColor: AppColors.primary,
+                        onPressed: () => store.setTab(2),
+                      ),
                     ),
-                  ),
-                );
-              },
-              icon: const Icon(CupertinoIcons.add_circled_solid, size: 16),
-              label: const Text(
-                'Add All to Selection',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  );
+                },
+                icon: const Icon(CupertinoIcons.add_circled_solid, size: 16),
+                label: const Text(
+                  'Add All to Cart',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                ),
               ),
             ),
         ],
@@ -71,31 +76,31 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 ),
               )
             : ListView.builder(
-                key: const ValueKey('list'),
-                padding: const EdgeInsets.all(AppSpacing.xxl),
-                itemCount: saved.length,
-                itemBuilder: (context, index) {
-                  final product = saved[index];
-                  return Dismissible(
-                    key: ValueKey('wish-${product.id}'),
-                    direction: DismissDirection.endToStart,
-                    onDismissed: (_) {
-                      store.toggleWishlist(product.id);
-                    },
-                    background: Container(
-                      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-                      alignment: Alignment.centerRight,
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent.shade700,
-                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                  key: const ValueKey('list'),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.lg),
+                  itemCount: saved.length,
+                  itemBuilder: (context, index) {
+                    final product = saved[index];
+                    return Dismissible(
+                      key: ValueKey('wish-${product.id}'),
+                      direction: DismissDirection.endToStart,
+                      onDismissed: (_) {
+                        store.toggleWishlist(product.id);
+                      },
+                      background: Container(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                        alignment: Alignment.centerRight,
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent.shade700,
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                        ),
+                        child: const Icon(CupertinoIcons.trash, color: Colors.white),
                       ),
-                      child: const Icon(CupertinoIcons.trash, color: Colors.white),
-                    ),
-                    child: WishlistItemTile(product: product),
-                  );
-                },
-              ),
+                      child: WishlistItemTile(product: product),
+                    );
+                  },
+                ),
       ),
     );
   }
@@ -113,101 +118,93 @@ class WishlistItemTile extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(
-          color: isDark ? AppColors.darkGray.withAlpha(80) : AppColors.lightGray,
-        ),
-        boxShadow: appShadowSm,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 1. PRODUCT IMAGE
-              Container(
-                width: 120,
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withAlpha(10) : Colors.black.withAlpha(5),
-                ),
-                child: ProductImageBox(
-                  imagePath: product.imagePath,
-                  category: product.category,
-                  fit: BoxFit.contain,
-                  animate: false,
-                ),
-              ),
-              
-              // 2. DESCRIPTIVE TEXT
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        product.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 17,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        product.tagline,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: isDark ? Colors.white70 : AppColors.mediumGray,
-                          fontSize: 13,
-                          height: 1.3,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '\$${variant.price}',
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // 3. ACTION BUTTON
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                child: Center(
-                  child: IconButton.filledTonal(
-                    onPressed: () {
-                      final store = AppScope.of(context);
-                      store.addToBag(product, variant);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Added ${product.name} to Visit'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                    icon: const Icon(CupertinoIcons.plus_circle, size: 22),
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.primary.withAlpha(20),
-                      foregroundColor: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(
+            color: isDark ? AppColors.darkGray.withAlpha(80) : AppColors.lightGray,
           ),
+          boxShadow: appShadowSm,
+        ),
+        child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Image
+            Container(
+              width: 120,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              color: isDark ? Colors.white.withAlpha(10) : Colors.black.withAlpha(5),
+              child: ProductImageBox(
+                imagePath: product.imagePath,
+                category: product.category,
+                fit: BoxFit.contain,
+                animate: false,
+              ),
+            ),
+            // Details
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      product.name,
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: -0.4),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      product.tagline,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: isDark ? Colors.white70 : AppColors.mediumGray,
+                        fontSize: 13,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '\$${variant.price}',
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Action
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: Center(
+                child: FilledButton(
+                  onPressed: () {
+                    final store = AppScope.of(context);
+                    store.addToBag(product, variant);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Added ${product.name} to Cart'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary.withAlpha(20),
+                    foregroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                  child: const Icon(CupertinoIcons.plus, size: 20),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

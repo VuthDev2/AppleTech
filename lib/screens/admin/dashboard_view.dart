@@ -156,18 +156,7 @@ class DashboardView extends StatelessWidget {
 class _StoreHealthCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
-        ),
-        boxShadow: isDark ? [] : appShadowSm,
-      ),
+    return AdminGlassCard(
       child: Row(
         children: [
           // Visual Indicator
@@ -185,19 +174,19 @@ class _StoreHealthCard extends StatelessWidget {
                   strokeCap: StrokeCap.round,
                 ),
               ),
-              Icon(CupertinoIcons.checkmark_seal_fill, color: AppColors.success, size: 24),
+              const Icon(CupertinoIcons.checkmark_seal_fill, color: AppColors.success, size: 24),
             ],
           ),
           const SizedBox(width: AppSpacing.lg),
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Store Status: Excellent',
                   style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   'All systems operational. Performance is up 12% from last month.',
                   style: TextStyle(
@@ -236,26 +225,8 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
+    return AdminGlassCard(
       width: 156,
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
-        ),
-        boxShadow: isDark ? [] : [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -321,28 +292,10 @@ class _OrderChart extends StatelessWidget {
       return DateTime(d.year, d.month, d.day);
     });
 
-    return Container(
-      height: 240,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [
-                  theme.cardColor.withOpacity(0.85),
-                  theme.cardColor.withOpacity(0.5),
-                ]
-              : [Colors.white, Colors.white.withOpacity(0.9)],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withOpacity(0.08)
-              : Colors.black.withOpacity(0.06),
-        ),
-        boxShadow: isDark ? [] : appShadowLg,
-      ),
+    return AdminGlassCard(
       padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
+      height: 240,
+
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collectionGroup('orders')
@@ -519,72 +472,68 @@ class _RecentOrdersList extends StatelessWidget {
 
               final statusColor = _statusColor(status);
 
-              return Container(
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? theme.cardColor.withOpacity(0.8)
-                      : Colors.white,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.xl),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.08)
-                        : Colors.black.withOpacity(0.06),
-                  ),
-                  boxShadow: isDark ? [] : appShadowSm,
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-                  leading: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(IconlyBold.buy,
-                        color: AppColors.primary, size: 20),
-                  ),
-                  title: Text(
-                    '#${orderId.substring(0, orderId.length.clamp(0, 8)).toUpperCase()}',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  subtitle: Text(
-                    date,
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '\$$total',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white : Colors.black87,
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                        border: Border.all(
+                          color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.8),
                         ),
+                        boxShadow: isDark ? [] : appShadowSm,
                       ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.12),
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.full),
-                        ),
-                        child: Text(
-                          status,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: statusColor,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+                        leading: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
                           ),
+                          child: const Icon(IconlyBold.buy, color: AppColors.primary, size: 20),
+                        ),
+                        title: Text(
+                          '#${orderId.substring(0, orderId.length.clamp(0, 8)).toUpperCase()}',
+                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        subtitle: Text(date, style: theme.textTheme.bodySmall),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '\$$total',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: statusColor.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(AppRadius.full),
+                              ),
+                              child: Text(
+                                status,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: statusColor,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );

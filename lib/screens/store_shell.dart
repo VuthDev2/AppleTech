@@ -72,11 +72,12 @@ class _StoreShellState extends State<StoreShell> {
           children: screens,
         ),
         bottomNavigationBar: SafeArea(
+          bottom: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: LayoutBuilder(
               builder: (context, constraints) {
                 final tabWidth = constraints.maxWidth / 5;

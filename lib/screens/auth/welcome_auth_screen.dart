@@ -247,8 +247,8 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
             current == 'km'
                 ? '🇰🇭'
                 : current == 'zh'
-                ? '🇨🇳'
-                : '🇺🇸',
+                    ? '🇨🇳'
+                    : '🇺🇸',
             style: const TextStyle(fontSize: 18),
           ),
         ),

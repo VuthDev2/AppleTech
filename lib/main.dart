@@ -53,7 +53,8 @@ part 'screens/tabs/wishlist_screen.dart';
 part 'screens/tabs/bag_screen.dart';
 part 'screens/tabs/profile_screen.dart';
 part 'widgets/shared_widgets.dart';
-part 'widgets/notification_sheet.dart';
+part 'utils/responsive.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

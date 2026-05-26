@@ -112,6 +112,7 @@ class AppStore extends ChangeNotifier {
           email: user!.email,
           createdAt: user!.createdAt,
           photoUrl: data.photoUrl ?? user!.photoUrl,
+          isAdmin: user!.isAdmin || data.isAdmin,
         );
       }
     } catch (e) {

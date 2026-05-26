@@ -25,14 +25,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
   ];
 
   static const List<String> _trendingSearches = <String>[
-    'MacBook Pro M5 16-inch',
-    'MacBook Air 15 M4',
-    'iPad Pro M5',
-    'iMac M5',
-    'Apple Watch Ultra 3',
-    'AirPods Pro 3rd gen',
+    'Apple Pencil Pro',
+    'Magic Keyboard',
+    'MacBook Pro M5',
+    'iPad Pro M4',
+    'iPhone 16 Pro',
+    'AirTag',
+    'MagSafe Charger',
     '512GB SSD',
-    '48GB unified memory',
   ];
 
   final List<Map<String, dynamic>> collectionBanners = <Map<String, dynamic>>[
@@ -55,7 +55,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         end: Alignment.bottomRight,
         colors: [Color(0xFF2C2520), Color(0xFF15110E)],
       ),
-      'imagePath': productImageFor('iphone-16-pro'),
+      'imagePath': productImageFor('iphone-16-pro-un'),
       'accent': const Color(0xFFC9B8A6),
     },
     {
@@ -491,16 +491,31 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
                 )
               : isGridView
-                  ? GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                      itemCount: filtered.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 14,
-                        mainAxisSpacing: 14,
-                        childAspectRatio: 0.72,
-                      ),
-                      itemBuilder: (context, index) => ProductGridCard(product: filtered[index]),
+                  ? LayoutBuilder(
+                      builder: (context, constraints) {
+                        int crossAxisCount;
+                        double maxWidth = constraints.maxWidth;
+                        if (maxWidth < 600) {
+                          crossAxisCount = 1;
+                        } else if (maxWidth < 900) {
+                          crossAxisCount = 2;
+                        } else {
+                          crossAxisCount = 3;
+                        }
+                        // Adjust aspect ratio based on width
+                        double childAspectRatio = maxWidth / (crossAxisCount * 300);
+                        return GridView.builder(
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                          itemCount: filtered.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: 14,
+                            mainAxisSpacing: 14,
+                            childAspectRatio: childAspectRatio,
+                          ),
+                          itemBuilder: (context, index) => ProductGridCard(product: filtered[index]),
+                        );
+                      },
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -539,18 +554,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
                   GestureDetector(
                     onTap: () => store.setTab(4), // navigate to profile
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        CupertinoIcons.person_crop_circle,
-                        color: isDark ? Colors.white : AppColors.black,
-                        size: 24,
-                      ),
+                    child: StoreUserAvatar(
+                      name: store.user?.name ?? 'AppleTech Customer',
+                      photoUrl: store.user?.photoUrl,
+                      size: 36,
                     ),
                   ),
                 ],
@@ -692,160 +699,91 @@ class _ExploreCollectionCardState extends State<ExploreCollectionCard> {
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
         onTap: widget.onTap,
-        child: AnimatedScale(
-          scale: _isHovered ? 1.025 : 1.0,
+        child: AnimatedContainer(
           duration: AppAnimations.normal,
-          curve: Curves.easeOutCubic,
-          child: AnimatedContainer(
-            duration: AppAnimations.normal,
-            height: 140,
-            margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-            decoration: BoxDecoration(
-              gradient: widget.gradient,
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: _isHovered ? 0.22 : 0.08),
-                width: 1.2,
+          height: 130,
+          margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+          decoration: BoxDecoration(
+            gradient: widget.gradient,
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: widget.accent.withValues(alpha: 0.35),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Text Content
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.xl),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.category,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: 170, // Limit width to avoid overlap with image
+                      child: Text(
+                        widget.tagline,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: widget.accent.withValues(alpha: _isHovered ? 0.38 : 0.12),
-                  blurRadius: _isHovered ? 24 : 12,
-                  offset: _isHovered ? const Offset(0, 10) : const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Soft Accent Glow Behind Image
-                Positioned(
-                  right: -25,
-                  bottom: -25,
-                  child: AnimatedContainer(
+              // Overlapping Image
+              Positioned(
+                right: 8,
+                bottom: 8,
+                top: 8,
+                child: Center(
+                  child: AnimatedScale(
+                    scale: _isHovered ? 1.35 : 1.0,
                     duration: AppAnimations.normal,
-                    width: 150,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          widget.accent.withValues(alpha: _isHovered ? 0.28 : 0.15),
-                          widget.accent.withValues(alpha: 0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Text Content (Left Side)
-                Positioned(
-                  left: 20,
-                  top: 20,
-                  bottom: 20,
-                  right: 175,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Accent line indicator
-                      AnimatedContainer(
-                        duration: AppAnimations.normal,
-                        width: _isHovered ? 32 : 16,
-                        height: 3.5,
-                        decoration: BoxDecoration(
-                          color: widget.accent,
-                          borderRadius: BorderRadius.circular(1.75),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        widget.category,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 23,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Expanded(
-                        child: Text(
-                          widget.tagline,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w500,
-                            height: 1.3,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Action Pill Button
-                      AnimatedContainer(
-                        duration: AppAnimations.normal,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: _isHovered ? Colors.white : Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Explore Collection',
-                              style: TextStyle(
-                                color: _isHovered ? Colors.black : Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              CupertinoIcons.chevron_right,
-                              size: 11,
-                              color: _isHovered ? Colors.black : Colors.white,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Overlapping Image (Right Side)
-                Positioned(
-                  right: 0,
-                  bottom: -10,
-                  top: -10,
-                  child: Center(
-                    child: AnimatedScale(
-                      scale: _isHovered ? 1.15 : 1.05,
-                      duration: AppAnimations.normal,
-                      curve: Curves.easeOutBack,
-                      child: Hero(
-                        tag: 'collection-image-${widget.category}',
-                        child: SizedBox(
-                          width: 165,
-                          height: 145,
-                          child: ProductImageBox(
-                            imagePath: widget.imagePath,
-                            fit: BoxFit.contain,
-                          ),
+                    curve: Curves.easeOutBack,
+                    child: Hero(
+                      tag: 'collection-image-${widget.category}',
+                      child: SizedBox(
+                        width: 140,
+                        height: 114,
+                        child: ProductImageBox(
+                          imagePath: widget.imagePath,
+                          fit: BoxFit.contain,
                         ),
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

@@ -70,8 +70,11 @@ class _OrdersViewState extends State<OrdersView> {
                           decoration: BoxDecoration(
                             color: selected 
                               ? AppColors.primary 
-                              : (isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04)),
-                            borderRadius: BorderRadius.circular(14),
+                              : (isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04)),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              color: selected ? AppColors.primary : (isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05)),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -196,21 +199,14 @@ class _OrdersList extends StatelessWidget {
 
               final statusColor = _color(status);
 
-              return Container(
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? theme.cardColor.withOpacity(0.85)
-                      : Colors.white,
-                  borderRadius:
-                      BorderRadius.circular(AppRadius.xl),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.08)
-                        : Colors.black.withOpacity(0.06),
-                  ),
-                  boxShadow: isDark ? [] : appShadowSm,
-                ),
-                child: ExpansionTile(
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: AdminGlassCard(
+                  padding: EdgeInsets.zero,
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
                   tilePadding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.lg,
                       vertical: AppSpacing.xs),
@@ -369,8 +365,10 @@ class _OrdersList extends StatelessWidget {
                     ),
                   ],
                 ),
-              );
-            },
+              ),
+              ),
+            );
+          },
           ),
         );
       },
