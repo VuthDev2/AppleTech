@@ -63,10 +63,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get createAccount => 'បង្កើតគណនី';
 
   @override
-  String get createAccountButton => 'Create Account';
+  String get createAccountButton => 'បង្កើតគណនី';
 
   @override
-  String get continueButton => 'Continue';
+  String get continueButton => 'បន្ត';
 
   @override
   String get fullName => 'ឈ្មោះ​ពេញ';
@@ -122,20 +122,21 @@ class AppLocalizationsKm extends AppLocalizations {
   String get resend => 'មិនទទួលបានកូដមែនទេ? ផ្ញើឡើងវិញ';
 
   @override
-  String get resendCode => 'Resend code';
+  String get resendCode => 'ផ្ញើកូដម្ដងទៀត';
 
   @override
   String resendInSeconds(int seconds) {
-    return '${seconds}s';
+    return '$secondsវិនាទី';
   }
 
   @override
   String verificationCodeSent(String email) {
-    return 'Verification code sent to $email';
+    return 'កូដផ្ទៀងផ្ទាត់ត្រូវបានផ្ញើទៅ $email';
   }
 
   @override
-  String get verifyInstructions => 'Check your inbox for verification code';
+  String get verifyInstructions =>
+      'ពិនិត្យមើលប្រអប់សាររបស់អ្នកសម្រាប់កូដផ្ទៀងផ្ទាត់';
 
   @override
   String get store => 'ហាង';
@@ -344,4 +345,221 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get checkout => 'បញ្ជាក់ការមកហាង';
+
+  @override
+  String get biometricCheckout => 'ការកក់ប្រកបដោយសុវត្ថិភាព';
+
+  @override
+  String get requireFaceIdDesc => 'ការពារការកក់របស់អ្នកជាមួយ Biometrics';
+
+  @override
+  String get manageVisitsDesc =>
+      'ការគ្រប់គ្រងការមកហាងមាននៅក្នុងប្រវត្តិរបស់អ្នក។';
+
+  @override
+  String get supportDesc =>
+      'ជំនួយ AppleTech រួចរាល់ក្នុងការជួយដល់ការមកហាង និងឧបករណ៍របស់អ្នក។';
+
+  @override
+  String get privacyDesc =>
+      'ការត្រួតពិនិត្យឯកជនភាពត្រូវបានការពារនៅក្នុងបទពិសោធន៍សាកល្បងនេះ។';
+
+  @override
+  String get faq1Q => 'តើគោលការណ៍ប្តូរវិញរបស់ AppleTech ជាអ្វី?';
+
+  @override
+  String get faq1A =>
+      'យើងផ្តល់ជូននូវគោលការណ៍ប្តូរវិញកម្រិតខ្ពស់រយៈពេល 14 ថ្ងៃលើរាល់ទំនិញផ្នែករឹង។ ឧបករណ៍ត្រូវតែត្រឡប់មកវិញក្នុងវេចខ្ចប់ដើមរបស់ពួកគេជាមួយនឹងគ្រឿងបន្លាស់ទាំងអស់ និងភស្តុតាងនៃការទិញ។ ការប្តូរវិញគឺឥតគិតថ្លៃទាំងស្រុង។';
+
+  @override
+  String get faq2Q => 'តើ AppleTech ដឹកជញ្ជូនទូទាំងពិភពលោកឬទេ?';
+
+  @override
+  String get faq2A =>
+      'បាទ! យើងដឹកជញ្ជូនអន្តរជាតិទៅកាន់ជាង 80 ប្រទេសជុំវិញពិភពលោក។ ការដឹកជញ្ជូនរហ័សគឺឥតគិតថ្លៃសម្រាប់ការបញ្ជាទិញលើសពី \$500។ ពន្ធគយ និងពន្ធក្នុងស្រុកត្រូវបានគណនានៅពេលបញ្ជាក់ការបញ្ជាទិញដោយស្វ័យប្រវត្តិ។';
+
+  @override
+  String get faq3Q => 'តើការដឹកជញ្ជូនស្តង់ដារចំណាយពេលប៉ុន្មាន?';
+
+  @override
+  String get faq3A =>
+      'ការដឹកជញ្ជូនក្នុងស្រុកស្តង់ដារចំណាយពេលពី 1 ទៅ 2 ថ្ងៃនៃថ្ងៃធ្វើការ។ ការដឹកជញ្ជូនរហ័សត្រូវបានដឹកជញ្ជូននៅថ្ងៃបន្ទាប់ប្រសិនបើបានកក់មុនម៉ោង 3:00 រសៀល។ រយៈពេលដឹកជញ្ជូនអន្តរជាតិប្រែប្រួលតាមប្រទេស ប៉ុន្តែជាមធ្យមពី 3 ទៅ 5 ថ្ងៃនៃថ្ងៃធ្វើការ។';
+
+  @override
+  String get faq4Q => 'តើមានការធានាអ្វីខ្លះរួមបញ្ចូល?';
+
+  @override
+  String get faq4A =>
+      'ផលិតផលផ្នែករឹងថ្មីទាំងអស់របស់ AppleTech រួមមានការធានាផ្នែករឹងមានកំណត់រយៈពេល 1 ឆ្នាំ និងការគាំទ្របច្ចេកទេសឥតគិតថ្លៃរយៈពេល 90 ថ្ងៃ។ អ្នកអាចទិញ AppleTech Care+ ដើម្បីបន្តការគ្របដណ្តប់រហូតដល់ 3 ឆ្នាំ។';
+
+  @override
+  String get cartTitle => 'កន្ត្រក';
+
+  @override
+  String get clearBagTitle => 'សម្អាតកន្ត្រក';
+
+  @override
+  String get clearBagContent =>
+      'តើអ្នកពិតជាចង់លុបមុខទំនិញទាំងអស់ចេញពីកន្ត្រករបស់អ្នកមែនទេ?';
+
+  @override
+  String get clearAll => 'សម្អាតទាំងអស់';
+
+  @override
+  String get discount => 'បញ្ចុះតម្លៃ';
+
+  @override
+  String get scheduledVisits => 'ការចូលមើលហាងដែលបានកំណត់';
+
+  @override
+  String get timeNotSelected => 'មិនបានជ្រើសរើសពេលវេលា';
+
+  @override
+  String get visitScheduled => 'ការចូលមើលត្រូវបានកំណត់';
+
+  @override
+  String get totalToPay => 'សរុបត្រូវបង់';
+
+  @override
+  String get editDetails => 'កែសម្រួលព័ត៌មានលម្អិត';
+
+  @override
+  String get qty => 'ចំនួន';
+
+  @override
+  String get size => 'ទំហំ';
+
+  @override
+  String get color => 'ពណ៌';
+
+  @override
+  String get reserveThisItemOnly => 'កក់មុខទំនិញនេះតែមួយ';
+
+  @override
+  String get selectQuantity => 'ជ្រើសរើសចំនួន';
+
+  @override
+  String get enterPromoCode => 'បញ្ចូលលេខកូដប្រូម៉ូសិន';
+
+  @override
+  String get remove => 'ដកចេញ';
+
+  @override
+  String get applyCode => 'ប្រើកូដ';
+
+  @override
+  String get accountUpper => 'គណនី';
+
+  @override
+  String couldNotOpenPhoto(Object error) {
+    return 'មិនអាចបើកបណ្ណាល័យរូបថតបានទេ: $error';
+  }
+
+  @override
+  String get changePhoto => 'ផ្លាស់ប្តូររូបថត';
+
+  @override
+  String get codeVerifiedNewPassword =>
+      'កូដត្រូវបានផ្ទៀងផ្ទាត់។ សូមបង្កើតពាក្យសម្ងាត់ថ្មី។';
+
+  @override
+  String get passwordUpdatedSignIn =>
+      'ពាក្យសម្ងាត់ត្រូវបានធ្វើបច្ចុប្បន្នភាព។ អ្នកអាចចូលឥឡូវនេះបាន។';
+
+  @override
+  String addToStoreSelection(Object price) {
+    return 'បញ្ចូលទៅក្នុងកន្ត្រក - \$$price';
+  }
+
+  @override
+  String get writeReview => 'សរសេរមតិ';
+
+  @override
+  String viewAllReviews(Object count) {
+    return 'មើលមតិទាំង $count';
+  }
+
+  @override
+  String get yourReview => 'មតិរបស់អ្នក';
+
+  @override
+  String get notificationsTitle => 'ការជូនដំណឹង';
+
+  @override
+  String get noRecentNotifications => 'មិនមានការជូនដំណឹងថ្មីៗទេ';
+
+  @override
+  String get clear => 'សម្អាត';
+
+  @override
+  String get defaultOrder => 'លំដាប់លំនាំដើម';
+
+  @override
+  String get priceLowHigh => 'តម្លៃ: ទាបទៅខ្ពស់';
+
+  @override
+  String get priceHighLow => 'តម្លៃ: ខ្ពស់ទៅទាប';
+
+  @override
+  String get topRated => 'មានការវាយតម្លៃខ្ពស់';
+
+  @override
+  String get itemRemovedFromCart => 'មុខទំនិញត្រូវបានដកចេញពីកន្ត្រក';
+
+  @override
+  String addedItemsToCart(Object count) {
+    return 'បានបញ្ចូល $count មុខទំនិញទៅក្នុងកន្ត្រក';
+  }
+
+  @override
+  String get exploreProducts => 'ស្វែងរកផលិតផល';
+
+  @override
+  String addedProductToCart(Object name) {
+    return 'បានបញ្ចូល $name ទៅក្នុងកន្ត្រក';
+  }
+
+  @override
+  String get noOrdersFound => 'មិនមានការបញ្ជាទិញទេ។';
+
+  @override
+  String noFilteredOrders(Object filter) {
+    return 'មិនមានការបញ្ជាទិញ $filter ទេ។';
+  }
+
+  @override
+  String get deleteProduct => 'លុបផលិតផល';
+
+  @override
+  String get deleteProductConfirm =>
+      'តើអ្នកពិតជាចង់លុបផលិតផលនេះមែនទេ? ការលុបនេះមិនអាចត្រឡប់វិញបានទេ។';
+
+  @override
+  String get delete => 'លុប';
+
+  @override
+  String get add => 'បន្ថែម';
+
+  @override
+  String get noProductsYet => 'មិនទាន់មានផលិតផលទេ';
+
+  @override
+  String get tapAddProduct => 'ចុចប៊ូតុងបន្ថែមដើម្បីបញ្ចូលផលិតផល។';
+
+  @override
+  String errorMsg(Object error) {
+    return 'កំហុស: $error';
+  }
+
+  @override
+  String get noImagePreview => 'មិនមានការបង្ហាញរូបថត';
+
+  @override
+  String get inStock => 'មានក្នុងស្តុក';
+
+  @override
+  String get admin => 'អ្នកគ្រប់គ្រង';
+
+  @override
+  String get analyticsComingSoon => 'តារាងវិភាគនឹងមកដល់ក្នុងពេលឆាប់ៗនេះ...';
 }

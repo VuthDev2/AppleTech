@@ -254,7 +254,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 ),
                 TextButton(
                   onPressed: () => setState(() => _recentSearches.clear()),
-                  child: const Text('Clear', style: TextStyle(color: AppColors.primary, fontSize: 13)),
+                  child: Text(AppLocalizations.of(context)?.clear ?? 'Clear', style: TextStyle(color: AppColors.primary, fontSize: 13)),
                 ),
               ],
             ),
@@ -397,10 +397,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       tooltip: 'Sort results',
                       onSelected: (val) => setState(() => sortBy = val),
                       itemBuilder: (context) => [
-                        const PopupMenuItem(value: 'none', child: Text('Default Order')),
-                        const PopupMenuItem(value: 'price_asc', child: Text('Price: Low to High')),
-                        const PopupMenuItem(value: 'price_desc', child: Text('Price: High to Low')),
-                        const PopupMenuItem(value: 'rating', child: Text('Top Rated')),
+                        PopupMenuItem(value: 'none', child: Text(AppLocalizations.of(context)?.defaultOrder ?? 'Default Order')),
+                        PopupMenuItem(value: 'price_asc', child: Text(AppLocalizations.of(context)?.priceLowHigh ?? 'Price: Low to High')),
+                        PopupMenuItem(value: 'price_desc', child: Text(AppLocalizations.of(context)?.priceHighLow ?? 'Price: High to Low')),
+                        PopupMenuItem(value: 'rating', child: Text(AppLocalizations.of(context)?.topRated ?? 'Top Rated')),
                       ],
                     ),
                   ),

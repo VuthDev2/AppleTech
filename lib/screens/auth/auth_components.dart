@@ -17,14 +17,23 @@ class SocialAuthButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final disabled = onPressed == null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final buttonColor = disabled
+        ? (isDark ? const Color(0xFF2C2C2E) : AppColors.lightGray)
+        : (isDark ? const Color(0xFF1C1C1E) : AppColors.white);
+
+    final borderColor = isDark
+        ? const Color(0xFF3A3A3C)
+        : AppColors.lightGray;
 
     return Material(
       color: Colors.transparent,
       child: Ink(
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.lightGray, width: 1.5),
+          border: Border.all(color: borderColor, width: 1.5),
           borderRadius: BorderRadius.circular(16),
-          color: disabled ? AppColors.lightGray : AppColors.white,
+          color: buttonColor,
         ),
         child: InkWell(
           onTap: onPressed,
@@ -35,20 +44,24 @@ class SocialAuthButton extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (isLoading)
-                  const SizedBox(
+                  SizedBox(
                     width: 22,
                     height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   )
                 else
                   logo,
                 const SizedBox(width: 10),
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -101,7 +114,11 @@ class AuthSocialActions extends StatelessWidget {
           children: [
             Expanded(
               child: SocialAuthButton(
-                logo: const Icon(Icons.apple, size: 22, color: Colors.black),
+                logo: Icon(
+                  Icons.apple,
+                  size: 22,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
                 label: 'Apple',
                 onPressed: isBusy ? null : onAppleAuth,
               ),
@@ -109,12 +126,34 @@ class AuthSocialActions extends StatelessWidget {
             const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: SocialAuthButton(
-                logo: Image.asset(
-                  'assets/images/google_icon.png',
-                  width: 30,
-                  height: 30,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
+                logo: Builder(
+                  builder: (context) {
+                    final isDark =
+                        Theme.of(context).brightness == Brightness.dark;
+                    final img = Image.asset(
+                      'assets/images/google_icon.png',
+                      width: 26,
+                      height: 26,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                    );
+                    if (isDark) {
+                      // Wrap in a small white circle so the colorful Google
+                      // logo stays crisp — the circle is small enough to look
+                      // intentional rather than a full white button background.
+                      return Container(
+                        width: 30,
+                        height: 30,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(2),
+                        child: img,
+                      );
+                    }
+                    return img;
+                  },
                 ),
                 label: 'Google',
                 isLoading: isGoogleLoading,
@@ -146,7 +185,7 @@ class AuthSubmitButton extends StatelessWidget {
       onPressed: onPressed,
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-        backgroundColor: AppColors.primary,
+        backgroundColor: const Color.fromARGB(255, 18, 21, 24),
         foregroundColor: AppColors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iconly/iconly.dart';
+import 'package:appletech/l10n/app_localizations.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
@@ -71,9 +72,9 @@ class DashboardView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: theme.colorScheme.outline),
               ),
-              child: const Center(
-                child: Text('Analytics charts coming soon...',
-                    style: TextStyle(color: Colors.grey)),
+              child: Center(
+                child: Text(AppLocalizations.of(context)?.analyticsComingSoon ?? 'Analytics charts coming soon...',
+                    style: const TextStyle(color: Colors.grey)),
               ),
             ),
           ],

@@ -49,12 +49,13 @@ const Map<String, String> _localProductImageMappings = {
   'mba-13-m3-2024': 'mba13_skyblue',
   'mba-15-m2-2023': 'mba15_midnight',
   'mba-15-m3-2024': 'mba15_starlight',
+  'mba-13-m4-2025': 'macbook_air_un_1',
   'mba-15-m4-2025': 'macbook_air_un_1',
   'mba-15-m5-2025': 'macbook_air_un_2', // Cleaned from 'm5' request
   // MacBook Pro
-  'mbp-14-m4p-2024': 'mbp14_silver',
+  'mbp-14-m4p-2024': 'macbook_pro',
   'mbp-14-m4m-2024': 'mbp14_spaceblack',
-  'mbp-16-m4p-2024': 'mbp16_silver',
+  'mbp-16-m4p-2024': 'macbook_pro',
   'mbp-16-m4m-2024': 'mbp16_spaceblack',
   'mbp-14-m5p-2025': 'mbp14_spaceblack_1',
   'mbp-16-m5p-2025': 'mbp16_silver_1',
@@ -72,7 +73,7 @@ const Map<String, String> _localProductImageMappings = {
   'ipad-2022-hero-blue-wifi-select': 'ipad_2022_blue',
 
   // iPhones
-  'iphone-16-pro-max': 'iphone_16_pro_6_deserttitanium',
+  'iphone-16-pro-max': 'iphone_16_pro_un_1',
   'iphone-16-pro': 'iphone_16_pro_6_naturaltitanium',
   'iphone-16-pro-un': 'iphone_16_pro_un_1',
   'iphone-16': 'iphone_16_6_teal',

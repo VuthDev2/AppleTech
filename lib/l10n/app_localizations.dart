@@ -753,6 +753,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finalize Visit Selection'**
   String get checkout;
+
+  /// No description provided for @biometricCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Booking'**
+  String get biometricCheckout;
+
+  /// No description provided for @requireFaceIdDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect your bookings with Biometrics'**
+  String get requireFaceIdDesc;
+
+  /// No description provided for @manageVisitsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit management is available in your history.'**
+  String get manageVisitsDesc;
+
+  /// No description provided for @supportDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'AppleTech Support is ready to help with your visit and devices.'**
+  String get supportDesc;
+
+  /// No description provided for @privacyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy controls are protected in this demo experience.'**
+  String get privacyDesc;
+
+  /// No description provided for @faq1Q.
+  ///
+  /// In en, this message translates to:
+  /// **'What is the AppleTech return policy?'**
+  String get faq1Q;
+
+  /// No description provided for @faq1A.
+  ///
+  /// In en, this message translates to:
+  /// **'We offer a 14-day premium return policy on all hardware items. Devices must be returned in their original packaging with all accessories and proof of purchase. Returns are completely free of charge.'**
+  String get faq1A;
+
+  /// No description provided for @faq2Q.
+  ///
+  /// In en, this message translates to:
+  /// **'Does AppleTech ship globally?'**
+  String get faq2Q;
+
+  /// No description provided for @faq2A.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes! We ship internationally to over 80 countries worldwide. Fast express shipping is free on orders above \$500. Duties and local taxes are calculated at checkout automatically.'**
+  String get faq2A;
+
+  /// No description provided for @faq3Q.
+  ///
+  /// In en, this message translates to:
+  /// **'How long does standard delivery take?'**
+  String get faq3Q;
+
+  /// No description provided for @faq3A.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard local deliveries take 1 to 2 business days. Express shipping is delivered next day if ordered before 3:00 PM. International delivery times vary by country but usually average 3 to 5 business days.'**
+  String get faq3A;
+
+  /// No description provided for @faq4Q.
+  ///
+  /// In en, this message translates to:
+  /// **'What warranties are included?'**
+  String get faq4Q;
+
+  /// No description provided for @faq4A.
+  ///
+  /// In en, this message translates to:
+  /// **'All new AppleTech hardware products include a 1-Year Limited Hardware Warranty and 90 days of complimentary technical support. You can purchase AppleTech Care+ to extend coverage up to 3 years.'**
+  String get faq4A;
+
+  /// No description provided for @cartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart'**
+  String get cartTitle;
+
+  /// No description provided for @clearBagTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Bag'**
+  String get clearBagTitle;
+
+  /// No description provided for @clearBagContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove all items from your bag?'**
+  String get clearBagContent;
+
+  /// No description provided for @clearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get clearAll;
+
+  /// No description provided for @discount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get discount;
+
+  /// No description provided for @scheduledVisits.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled Store Visits'**
+  String get scheduledVisits;
+
+  /// No description provided for @timeNotSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Time not selected'**
+  String get timeNotSelected;
+
+  /// No description provided for @visitScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit Scheduled'**
+  String get visitScheduled;
+
+  /// No description provided for @totalToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Total To Pay'**
+  String get totalToPay;
+
+  /// No description provided for @editDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Details'**
+  String get editDetails;
+
+  /// No description provided for @qty.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty'**
+  String get qty;
+
+  /// No description provided for @size.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get size;
+
+  /// No description provided for @color.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get color;
+
+  /// No description provided for @reserveThisItemOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserve This Item Only'**
+  String get reserveThisItemOnly;
+
+  /// No description provided for @selectQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Quantity'**
+  String get selectQuantity;
+
+  /// No description provided for @enterPromoCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter promo code'**
+  String get enterPromoCode;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @applyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply code'**
+  String get applyCode;
+
+  /// No description provided for @accountUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountUpper;
+
+  /// No description provided for @couldNotOpenPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open photo library: {error}'**
+  String couldNotOpenPhoto(Object error);
+
+  /// No description provided for @changePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get changePhoto;
+
+  /// No description provided for @codeVerifiedNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Code verified. Create a new password.'**
+  String get codeVerifiedNewPassword;
+
+  /// No description provided for @passwordUpdatedSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated. You can sign in now.'**
+  String get passwordUpdatedSignIn;
+
+  /// No description provided for @addToStoreSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Store Selection - \${price}'**
+  String addToStoreSelection(Object price);
+
+  /// No description provided for @writeReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a Review'**
+  String get writeReview;
+
+  /// No description provided for @viewAllReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'View all {count} reviews'**
+  String viewAllReviews(Object count);
+
+  /// No description provided for @yourReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Review'**
+  String get yourReview;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @noRecentNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent notifications'**
+  String get noRecentNotifications;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @defaultOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Order'**
+  String get defaultOrder;
+
+  /// No description provided for @priceLowHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: Low to High'**
+  String get priceLowHigh;
+
+  /// No description provided for @priceHighLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: High to Low'**
+  String get priceHighLow;
+
+  /// No description provided for @topRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Rated'**
+  String get topRated;
+
+  /// No description provided for @itemRemovedFromCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Item removed from cart'**
+  String get itemRemovedFromCart;
+
+  /// No description provided for @addedItemsToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} items to Cart'**
+  String addedItemsToCart(Object count);
+
+  /// No description provided for @exploreProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore Products'**
+  String get exploreProducts;
+
+  /// No description provided for @addedProductToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {name} to Cart'**
+  String addedProductToCart(Object name);
+
+  /// No description provided for @noOrdersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders found.'**
+  String get noOrdersFound;
+
+  /// No description provided for @noFilteredOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No {filter} orders.'**
+  String noFilteredOrders(Object filter);
+
+  /// No description provided for @deleteProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Product'**
+  String get deleteProduct;
+
+  /// No description provided for @deleteProductConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this product? This cannot be undone.'**
+  String get deleteProductConfirm;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @noProductsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No products yet'**
+  String get noProductsYet;
+
+  /// No description provided for @tapAddProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the Add button to add a product.'**
+  String get tapAddProduct;
+
+  /// No description provided for @errorMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String errorMsg(Object error);
+
+  /// No description provided for @noImagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'No image preview'**
+  String get noImagePreview;
+
+  /// No description provided for @inStock.
+  ///
+  /// In en, this message translates to:
+  /// **'In Stock'**
+  String get inStock;
+
+  /// No description provided for @admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get admin;
+
+  /// No description provided for @analyticsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics charts coming soon...'**
+  String get analyticsComingSoon;
 }
 
 class _AppLocalizationsDelegate

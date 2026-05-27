@@ -7,6 +7,7 @@ import 'package:iconly/iconly.dart';
 
 import '../../main.dart';
 import 'admin_widgets.dart';
+import 'package:appletech/l10n/app_localizations.dart';
 
 class ProductsView extends StatefulWidget {
   const ProductsView({super.key});
@@ -145,7 +146,7 @@ class _AddProductButton extends StatelessWidget {
             BoxShadow(color: AppColors.primary.withOpacity(0.35), blurRadius: 12, offset: const Offset(0, 4)),
           ],
         ),
-        child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.add_rounded, color: Colors.white, size: 16), SizedBox(width: 4), Text('Add', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700))]),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.add_rounded, color: Colors.white, size: 16), const SizedBox(width: 4), Text(AppLocalizations.of(context)?.add ?? 'Add', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700))]),
       ),
     );
   }
@@ -254,9 +255,9 @@ class _EmptyProducts extends StatelessWidget {
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Container(padding: const EdgeInsets.all(24), decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04), shape: BoxShape.circle), child: const Icon(IconlyLight.bag, size: 40, color: Colors.grey)),
         const SizedBox(height: AppSpacing.xl),
-        Text('No products yet', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        Text(AppLocalizations.of(context)?.noProductsYet ?? 'No products yet', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: AppSpacing.sm),
-        Text('Tap the Add button to add a product.', style: Theme.of(context).textTheme.bodyMedium),
+        Text(AppLocalizations.of(context)?.tapAddProduct ?? 'Tap the Add button to add a product.', style: Theme.of(context).textTheme.bodyMedium),
       ]),
     );
   }
@@ -277,11 +278,11 @@ Future<void> _confirmDelete(BuildContext context, QueryDocumentSnapshot doc) asy
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Delete Product'),
-      content: const Text('Are you sure you want to delete this product? This cannot be undone.'),
+      title: Text(AppLocalizations.of(context)?.deleteProduct ?? 'Delete Product'),
+      content: Text(AppLocalizations.of(context)?.deleteProductConfirm ?? 'Are you sure you want to delete this product? This cannot be undone.'),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-        FilledButton(onPressed: () => Navigator.pop(ctx, true), style: FilledButton.styleFrom(backgroundColor: AppColors.error), child: const Text('Delete')),
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel')),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), style: FilledButton.styleFrom(backgroundColor: AppColors.error), child: Text(AppLocalizations.of(context)?.delete ?? 'Delete')),
       ],
     ),
   );
@@ -358,7 +359,7 @@ class _ProductFormSheetState extends State<_ProductFormSheet> {
     } catch (e) {
       setState(() => _saving = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)?.errorMsg(e.toString()) ?? 'Error: $e')));
       }
     }
   }
@@ -420,13 +421,13 @@ class _ProductFormSheetState extends State<_ProductFormSheet> {
                                   fit: BoxFit.contain,
                                   errorBuilder: (_, __, ___) => const Center(child: Icon(IconlyLight.image, size: 40, color: AppColors.mediumGray)),
                                 )
-                              : const Center(
+                              : Center(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(IconlyLight.image, size: 32, color: AppColors.mediumGray),
                                       SizedBox(height: 8),
-                                      Text('No image preview', style: TextStyle(color: AppColors.mediumGray, fontSize: 13)),
+                                      Text(AppLocalizations.of(context)?.noImagePreview ?? 'No image preview', style: TextStyle(color: AppColors.mediumGray, fontSize: 13)),
                                     ],
                                   ),
                                 ),
@@ -453,7 +454,7 @@ class _ProductFormSheetState extends State<_ProductFormSheet> {
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
                       decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03), borderRadius: BorderRadius.circular(AppRadius.lg)),
                       child: Row(children: [
-                        Text('In Stock', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                        Text(AppLocalizations.of(context)?.inStock ?? 'In Stock', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
                         const Spacer(),
                         Switch.adaptive(value: _inStock, onChanged: (v) => setState(() => _inStock = v), activeColor: AppColors.primary),
                       ]),

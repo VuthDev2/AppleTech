@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../main.dart';
+import 'package:appletech/core/app_colors.dart';
+import 'package:appletech/l10n/app_localizations.dart';
 
 /// Shows a draggable bottom sheet with recent orders for admin notifications.
-void showNotificationsSheet(BuildContext context) {
+void showAdminNotificationsSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -60,14 +61,14 @@ class _AdminNotificationSheetState extends State<_AdminNotificationSheet> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Notifications', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                    Text(AppLocalizations.of(context)?.notificationsTitle ?? 'Notifications', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
                     _markAllLoading
                         ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
-                        : TextButton(onPressed: _markAllRead, child: const Text('Mark all as read')),
+                        : TextButton(onPressed: _markAllRead, child: Text(AppLocalizations.of(context)?.markAllRead ?? 'Mark all as read')),
                   ],
                 ),
               ),
@@ -85,7 +86,7 @@ class _AdminNotificationSheetState extends State<_AdminNotificationSheet> {
                     }
                     final docs = snapshot.data?.docs ?? [];
                     if (docs.isEmpty) {
-                      return const Center(child: Text('No recent notifications'));
+                      return Center(child: Text(AppLocalizations.of(context)?.noRecentNotifications ?? 'No recent notifications'));
                     }
                     return ListView.builder(
                       controller: scrollController,

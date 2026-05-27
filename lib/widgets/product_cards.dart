@@ -37,8 +37,8 @@ class _HeroProductCardState extends State<HeroProductCard> {
             boxShadow: isDark ? null : (_isHovered ? appShadowMd : appShadowSm),
             border: Border.all(
               color: _isHovered
-                  ? primary.withValues(alpha: isDark ? 0.55 : 0.45)
-                  : primary.withValues(alpha: isDark ? 0.28 : 0.22),
+                  ? primary.withOpacity(isDark ? 0.55 : 0.45)
+                  : primary.withOpacity(isDark ? 0.28 : 0.22),
               width: 1.5,
             ),
           ),
@@ -66,7 +66,7 @@ class _HeroProductCardState extends State<HeroProductCard> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: isDark ? 0.18 : 0.12),
+                  color: primary.withOpacity(isDark ? 0.18 : 0.12),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Text(
@@ -148,7 +148,7 @@ class _HeroProductCardState extends State<HeroProductCard> {
                               ? [
                                   BoxShadow(
                                     color: (isDark ? primary : AppColors.black)
-                                        .withValues(alpha: 0.25),
+                                        .withOpacity(0.25),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),
@@ -251,13 +251,13 @@ class _ProductListTileState extends State<ProductListTile> {
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: _isHovered
-                  ? primary.withValues(alpha: isDark ? 0.5 : 0.3)
-                  : (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04)),
+                  ? primary.withOpacity(isDark ? 0.5 : 0.3)
+                  : (isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04)),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                color: Colors.black.withOpacity(isDark ? 0.15 : 0.04),
                 blurRadius: _isHovered ? 16 : 8,
                 offset: Offset(0, _isHovered ? 8 : 4),
               ),
@@ -270,7 +270,7 @@ class _ProductListTileState extends State<ProductListTile> {
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
+                  color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Hero(
@@ -302,7 +302,7 @@ class _ProductListTileState extends State<ProductListTile> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.1),
+                        color: primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -367,7 +367,7 @@ class _ProductListTileState extends State<ProductListTile> {
                     _SmallCircleButton(
                       onPressed: () => store.toggleWishlist(widget.product.id),
                       icon: isSaved ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
-                      color: isSaved ? Colors.redAccent : secondaryText.withValues(alpha: 0.7),
+                      color: isSaved ? Colors.redAccent : secondaryText.withOpacity(0.7),
                       isDark: isDark,
                     ),
                     const SizedBox(height: 12),
@@ -414,7 +414,7 @@ class _SmallCircleButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isPrimary 
               ? color 
-              : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04)),
+              : (isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.04)),
           shape: BoxShape.circle,
         ),
         child: Icon(

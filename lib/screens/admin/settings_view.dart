@@ -5,6 +5,7 @@ import 'package:iconly/iconly.dart';
 
 import '../../main.dart';
 import 'admin_widgets.dart';
+import 'package:appletech/l10n/app_localizations.dart';
 
 class AdminSettingsView extends StatelessWidget {
   const AdminSettingsView({super.key});
@@ -168,7 +169,7 @@ class AdminSettingsView extends StatelessWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Sign Out'),
+        title: Text(AppLocalizations.of(context)?.signOut ?? 'Sign Out'),
         content: const Text(
             'Are you sure you want to sign out of the admin portal?'),
         actions: [
@@ -180,7 +181,7 @@ class AdminSettingsView extends StatelessWidget {
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(
                 backgroundColor: AppColors.error),
-            child: const Text('Sign Out'),
+            child: Text(AppLocalizations.of(context)?.signOut ?? 'Sign Out'),
           ),
         ],
       ),

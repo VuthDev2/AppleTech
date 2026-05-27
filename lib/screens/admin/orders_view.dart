@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../main.dart';
 import 'admin_widgets.dart';
+import 'package:appletech/l10n/app_localizations.dart';
 
 class OrdersView extends StatefulWidget {
   const OrdersView({super.key});
@@ -146,8 +147,8 @@ class _OrdersList extends StatelessWidget {
           );
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const SliverFillRemaining(
-            child: Center(child: Text('No orders found.')),
+          return SliverFillRemaining(
+            child: Center(child: Text(AppLocalizations.of(context)?.noOrdersFound ?? 'No orders found.')),
           );
         }
 

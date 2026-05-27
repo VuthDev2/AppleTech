@@ -1,3 +1,4 @@
+
 part of '../../main.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             const StoreBrandMark(height: 22),
             const SizedBox(width: AppSpacing.md),
-            const Text('Account'),
+            Text(AppLocalizations.of(context)?.accountUpper ?? 'Account'),
           ],
         ),
         actions: [
@@ -217,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Could not open photo library: $error'),
+                    content: Text(AppLocalizations.of(context)?.couldNotOpenPhoto(error.toString()) ?? 'Could not open photo library: $error'),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -309,7 +310,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Center(
                           child: TextButton(
                             onPressed: pickPhoto,
-                            child: const Text('Change photo'),
+                            child: Text(AppLocalizations.of(context)?.changePhoto ?? 'Change photo'),
                           ),
                         ),
                       ],
@@ -367,7 +368,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onPressed: store.isProfileUpdating
                                   ? null
                                   : () => Navigator.pop(context),
-                              child: const Text('Cancel'),
+                              child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.lg),
@@ -432,7 +433,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : const Text('Save'),
+                                  : Text(AppLocalizations.of(context)?.save ?? 'Save'),
                             ),
                           ),
                         ],
@@ -583,25 +584,25 @@ class _SettingsPanel extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         _SettingsGroup(
-          title: 'Account',
+          title: AppLocalizations.of(context)?.account ?? 'Account',
           children: [
             _SettingsRow(
               icon: CupertinoIcons.person_crop_circle,
-              title: 'Personal information',
-              subtitle: 'Name, email, and customer profile',
+              title: AppLocalizations.of(context)?.personalInformation ?? 'Personal information',
+              subtitle: AppLocalizations.of(context)?.nameEmailProfile ?? 'Name, email, and customer profile',
               onTap: onEditProfile,
             ),
             _SettingsRow(
               icon: CupertinoIcons.location,
-              title: 'Delivery addresses',
-              subtitle: 'Default shipping location and contact phone',
-              trailingText: '1 saved',
+              title: AppLocalizations.of(context)?.deliveryAddresses ?? 'Delivery addresses',
+              subtitle: AppLocalizations.of(context)?.defaultShipping ?? 'Default shipping location and contact phone',
+              trailingText: '1 ${AppLocalizations.of(context)?.saved ?? 'saved'}',
               onTap: onManageAddresses,
             ),
             _SettingsRow(
               icon: CupertinoIcons.lock_shield,
-              title: 'Secure checkout',
-              subtitle: 'Require Face ID or passcode before payment',
+              title: AppLocalizations.of(context)?.secureCheckout ?? 'Secure checkout',
+              subtitle: AppLocalizations.of(context)?.requireFaceId ?? 'Require Face ID or passcode before payment',
               trailing: Switch.adaptive(
                 value: biometricCheckoutEnabled,
                 activeTrackColor: AppColors.primary,
@@ -612,14 +613,16 @@ class _SettingsPanel extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         _SettingsGroup(
-          title: 'Preferences',
+          title: AppLocalizations.of(context)?.preferences ?? 'Preferences',
           children: [
             _SettingsRow(
               icon: isDarkMode
                   ? CupertinoIcons.moon_fill
                   : CupertinoIcons.sun_max_fill,
-              title: 'Appearance',
-              subtitle: isDarkMode ? 'Dark mode enabled' : 'Light mode enabled',
+              title: AppLocalizations.of(context)?.appearance ?? 'Appearance',
+              subtitle: isDarkMode 
+                  ? (AppLocalizations.of(context)?.darkModeEnabled ?? 'Dark mode enabled')
+                  : (AppLocalizations.of(context)?.lightModeEnabled ?? 'Light mode enabled'),
               trailing: Switch.adaptive(
                 value: isDarkMode,
                 activeTrackColor: AppColors.primary,
@@ -635,8 +638,8 @@ class _SettingsPanel extends StatelessWidget {
             ),
             _SettingsRow(
               icon: CupertinoIcons.bell,
-              title: 'Order updates',
-              subtitle: 'Delivery alerts, receipts, and pickup status',
+              title: AppLocalizations.of(context)?.orderUpdates ?? 'Order updates',
+              subtitle: AppLocalizations.of(context)?.deliveryAlerts ?? 'Delivery alerts, receipts, and pickup status',
               trailing: Switch.adaptive(
                 value: orderUpdatesEnabled,
                 activeTrackColor: AppColors.primary,
@@ -645,8 +648,8 @@ class _SettingsPanel extends StatelessWidget {
             ),
             _SettingsRow(
               icon: CupertinoIcons.tag,
-              title: 'Offers and product news',
-              subtitle: 'Personalized deals, launches, and availability',
+              title: AppLocalizations.of(context)?.offersAndNews ?? 'Offers and product news',
+              subtitle: AppLocalizations.of(context)?.personalizedDeals ?? 'Personalized deals, launches, and availability',
               trailing: Switch.adaptive(
                 value: offersEnabled,
                 activeTrackColor: AppColors.primary,
@@ -655,8 +658,8 @@ class _SettingsPanel extends StatelessWidget {
             ),
             _SettingsRow(
               icon: CupertinoIcons.checkmark_shield,
-              title: 'AppleTech Care reminders',
-              subtitle: 'Coverage renewal and warranty notifications',
+              title: AppLocalizations.of(context)?.appleTechCareReminders ?? 'AppleTech Care reminders',
+              subtitle: AppLocalizations.of(context)?.coverageRenewal ?? 'Coverage renewal and warranty notifications',
               trailing: Switch.adaptive(
                 value: appleCareReminderEnabled,
                 activeTrackColor: AppColors.primary,
@@ -667,19 +670,19 @@ class _SettingsPanel extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         _SettingsGroup(
-          title: 'Support',
+          title: AppLocalizations.of(context)?.support ?? 'Support',
           children: [
             _SettingsRow(
               icon: CupertinoIcons.chat_bubble_2,
-              title: 'Contact support',
-              subtitle: 'Get help with orders, returns, and setup',
+              title: AppLocalizations.of(context)?.contactSupport ?? 'Contact support',
+              subtitle: AppLocalizations.of(context)?.getHelpWithOrders ?? 'Get help with orders, returns, and setup',
               trailingText: '24/7',
               onTap: onSupport,
             ),
             _SettingsRow(
               icon: CupertinoIcons.doc_text,
-              title: 'Privacy and terms',
-              subtitle: 'Data use, purchase terms, and return policy',
+              title: AppLocalizations.of(context)?.privacyAndTerms ?? 'Privacy and terms',
+              subtitle: AppLocalizations.of(context)?.dataUse ?? 'Data use, purchase terms, and return policy',
               onTap: onPrivacy,
             ),
           ],

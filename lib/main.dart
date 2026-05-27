@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:appletech/l10n/app_localizations.dart';
+import 'package:appletech/core/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,11 +19,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:appletech/screens/admin/admin_shell.dart'; // Import AdminShell   
+import 'package:appletech/screens/admin/admin_shell.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 
+part 'widgets/user_notification_sheet.dart';
 part 'core/app_scope.dart';
 part 'core/app_theme.dart';
 part 'data/auth_service.dart';
@@ -62,7 +64,7 @@ Future<void> main() async {
 
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode,
+      enabled: kDebugMode,
       builder: (context) => AppleTechApp(
         authService: authService,
         firestoreService: firestoreService,

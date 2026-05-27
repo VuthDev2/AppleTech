@@ -29,6 +29,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
   Widget build(BuildContext context) {
     final store = AppScope.of(context);
     final isSaved = store.wishlist.contains(widget.product.id);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -95,33 +96,43 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                         AppSpacing.xxxl,
                         AppSpacing.lg,
                       ),
-                      child: Hero(
-                        tag: 'product-image-${widget.product.id}',
-                        child: AnimatedSwitcher(
-                          duration: AppAnimations.slow,
-                          switchInCurve: AppAnimations.easeOut,
-                          switchOutCurve: AppAnimations.easeIn,
-                          transitionBuilder: (child, animation) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: ScaleTransition(
-                                scale: Tween<double>(begin: 0.94, end: 1).animate(animation),
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: ProductImageBox(
-                            key: ValueKey(selected.colorName),
-                            imagePath: widget.product.imagePath,
-                            category: widget.product.category,
-                            fit: BoxFit.contain,
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSpacing.xl),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(AppRadius.xxl),
+                          border: Border.all(
+                            color: isDark ? Colors.white12 : Colors.black.withOpacity(0.05),
+                          ),
+                        ),
+                        child: Hero(
+                          tag: 'product-image-${widget.product.id}',
+                          child: AnimatedSwitcher(
+                            duration: AppAnimations.slow,
+                            switchInCurve: AppAnimations.easeOut,
+                            switchOutCurve: AppAnimations.easeIn,
+                            transitionBuilder: (child, animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: ScaleTransition(
+                                  scale: Tween<double>(begin: 0.94, end: 1).animate(animation),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: ProductImageBox(
+                              key: ValueKey(selected.colorName),
+                              imagePath: widget.product.imagePath,
+                              category: widget.product.category,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    bottom: AppSpacing.xl,
+                    bottom: AppSpacing.md,
                     left: 0,
                     right: 0,
                     child: Center(
@@ -151,91 +162,154 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.xxl, AppSpacing.xxl, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.product.name,
-                                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -1,
+                padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl, 0),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(AppRadius.xxl),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.product.name,
+                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.6,
+                                    height: 1.1,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withAlpha(20),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: AppColors.primary.withAlpha(50)),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                const SizedBox(height: 12),
+                                Row(
                                   children: [
-                                    Icon(CupertinoIcons.location_solid, size: 12, color: AppColors.primary),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'Pay at Store • Test in-person',
-                                      style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 10,
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(CupertinoIcons.location_solid, size: 12, color: AppColors.primary),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            'Pay at Store',
+                                            style: TextStyle(
+                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
+                                    if (widget.product.inStock)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.success.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: const Text(
+                                          'In Stock',
+                                          style: TextStyle(
+                                            color: AppColors.success,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ),
                                   ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'From',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: AppColors.mediumGray,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              Text(
+                                '\$${widget.product.basePrice}',
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Text(
-                          'From \$${widget.product.basePrice}',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        RatingStars(rating: widget.product.rating),
-                        const SizedBox(width: AppSpacing.md),
-                        Text(
-                          '${widget.product.rating}',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          '(${widget.product.reviewCount} reviews)',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.mediumGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      widget.product.tagline,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppColors.mediumGray,
-                        fontWeight: FontWeight.w500,
-                        height: 1.6,
+                        ],
                       ),
-                    ),
-                  ],
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Divider(height: 1),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                RatingStars(rating: widget.product.rating, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${widget.product.rating}',
+                                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '${widget.product.reviewCount} reviews',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.mediumGray,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        widget.product.tagline,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: isDark ? Colors.white70 : Colors.black87,
+                          fontWeight: FontWeight.w500,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -272,8 +346,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
       bottomSheet: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor.withAlpha(240),
-          border: const Border(
-            top: BorderSide(color: AppColors.lightGray, width: 1),
+          border: Border(
+            top: BorderSide(
+              color: isDark ? AppColors.darkSeparator : AppColors.lightGray,
+              width: 1,
+            ),
           ),
         ),
         padding: EdgeInsets.fromLTRB(
@@ -327,7 +404,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                     },
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(60),
-                backgroundColor: AppColors.black,
+                backgroundColor: isDark ? AppColors.white : AppColors.black,
+                foregroundColor: isDark ? AppColors.black : AppColors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.xl),
                 ),
@@ -337,7 +415,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                 children: [
                   const Icon(CupertinoIcons.add_circled, size: 20),
                   const SizedBox(width: AppSpacing.md),
-                  Text('Add to Store Selection - \$${selected.price}'),
+                  Text(AppLocalizations.of(context)?.addToStoreSelection('\$${selected.price}') ?? 'Add to Store Selection - \$${selected.price}'),
                 ],
               ),
             ),
@@ -389,7 +467,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                     child: Text(
                       feature,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.black,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w500,
                         height: 1.5,
                       ),
@@ -548,7 +626,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
               TextButton.icon(
                 onPressed: () => _showWriteReviewSheet(context),
                 icon: const Icon(CupertinoIcons.pencil, size: 16),
-                label: const Text('Write a Review'),
+                label: Text(AppLocalizations.of(context)?.writeReview ?? 'Write a Review'),
               ),
             ],
           ),
@@ -569,7 +647,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
               ),
-              child: Text('View all ${widget.product.reviewCount} reviews'),
+              child: Text(AppLocalizations.of(context)?.viewAllReviews(widget.product.reviewCount.toString()) ?? 'View all ${widget.product.reviewCount} reviews'),
             ),
         ],
       ),
@@ -1007,7 +1085,7 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
               ),
               const SizedBox(height: AppSpacing.lg),
               
-              Text('Your Review', style: theme.textTheme.labelLarge),
+              Text(AppLocalizations.of(context)?.yourReview ?? 'Your Review', style: theme.textTheme.labelLarge),
               const SizedBox(height: AppSpacing.sm),
               TextFormField(
                 controller: _contentController,

@@ -1,7 +1,9 @@
 part of '../../main.dart';
 
 /// Stub function for notification sheet (can be expanded later)
-void showNotificationsSheet(BuildContext context) {}
+void showNotificationsSheet(BuildContext context) {
+  showUserNotificationsSheet(context);
+}
 
   class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

@@ -1,3 +1,4 @@
+
 part of '../../main.dart';
 
 class BagScreen extends StatelessWidget {
@@ -35,7 +36,7 @@ class BagScreen extends StatelessWidget {
           ),
         ),
         title: Text(
-          'Cart',
+          AppLocalizations.of(context)?.cartTitle ?? 'Cart',
           style: TextStyle(
             fontWeight: FontWeight.w900,
             fontSize: 24,
@@ -82,16 +83,17 @@ class BagScreen extends StatelessWidget {
                           _PromoCodeField(store: store),
                           const SizedBox(height: 32),
                           _buildOrderSummary(context, store),
+                          const SizedBox(height: 32),
+                          const CheckoutActionButton(),
                         ],
                         
-                        const SizedBox(height: 140),
+                        const SizedBox(height: 48),
                       ],
                     ),
                   ),
                 ],
               ),
       ),
-      bottomSheet: store.bag.isEmpty ? null : const CheckoutSummarySheet(),
     );
   }
 
@@ -100,19 +102,19 @@ class BagScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Clear Bag', style: TextStyle(fontWeight: FontWeight.w800)),
-        content: const Text('Are you sure you want to remove all items from your bag?'),
+        title: Text(AppLocalizations.of(context)?.clearBagTitle ?? 'Clear Bag', style: const TextStyle(fontWeight: FontWeight.w800)),
+        content: Text(AppLocalizations.of(context)?.clearBagContent ?? 'Are you sure you want to remove all items from your bag?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.mediumGray)),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel', style: const TextStyle(color: AppColors.mediumGray)),
           ),
           TextButton(
             onPressed: () {
               store.clearBag();
               Navigator.pop(context);
             },
-            child: const Text('Clear All', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w700)),
+            child: Text(AppLocalizations.of(context)?.clearAll ?? 'Clear All', style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -129,20 +131,20 @@ class BagScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _SummaryRow(label: 'Subtotal:', value: store.total),
+          _SummaryRow(label: AppLocalizations.of(context)?.subtotal ?? 'Subtotal:', value: store.total),
           const SizedBox(height: 16),
-          const _SummaryRow(label: 'Taxes:', value: 0),
+          _SummaryRow(label: AppLocalizations.of(context)?.tax ?? 'Taxes:', value: 0),
           const SizedBox(height: 16),
-          const _SummaryRow(label: 'Shipping:', value: 0, isFree: true),
+          _SummaryRow(label: AppLocalizations.of(context)?.shipping ?? 'Shipping:', value: 0, isFree: true),
           if (store.appliedPromoCode != null) ...[
             const SizedBox(height: 16),
-            const _SummaryRow(label: 'Discount:', value: 0, isDiscount: true),
+            _SummaryRow(label: AppLocalizations.of(context)?.discount ?? 'Discount:', value: 0, isDiscount: true),
           ],
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
             child: Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
           ),
-          _SummaryRow(label: 'Total', value: store.total, isTotal: true),
+          _SummaryRow(label: AppLocalizations.of(context)?.total ?? 'Total', value: store.total, isTotal: true),
         ],
       ),
     );
@@ -162,8 +164,8 @@ class _CartItemWrapper extends StatelessWidget {
       onDismissed: (_) {
         store.removeFromBag(item);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Item removed from cart'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.itemRemovedFromCart ?? 'Item removed from cart'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -239,9 +241,9 @@ class ScheduledVisitsPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Scheduled Store Visits',
-            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, letterSpacing: -0.5),
+          Text(
+            AppLocalizations.of(context)?.scheduledVisits ?? 'Scheduled Store Visits',
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, letterSpacing: -0.5),
           ),
           const SizedBox(height: 16),
           for (final visit in visits) ...[
@@ -264,7 +266,7 @@ class _ScheduledVisitCard extends StatelessWidget {
     final store = AppScope.of(context);
     final visitTime = visit.visitTime;
     final scheduleText = visitTime == null
-        ? 'Time not selected'
+        ? (AppLocalizations.of(context)?.timeNotSelected ?? 'Time not selected')
         : '${DateFormat('MMM dd').format(visitTime)} at ${DateFormat('h:mm a').format(visitTime)}';
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -303,9 +305,9 @@ class _ScheduledVisitCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Visit Scheduled',
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                    Text(
+                      AppLocalizations.of(context)?.visitScheduled ?? 'Visit Scheduled',
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                     ),
                     Text(
                       scheduleText,
@@ -349,7 +351,7 @@ class _ScheduledVisitCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Total To Pay', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                  Text(AppLocalizations.of(context)?.totalToPay ?? 'Total To Pay', style: const TextStyle(fontSize: 11, color: Colors.grey)),
                   Text(
                     '\$${visit.total}',
                     style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
@@ -373,7 +375,7 @@ class _ScheduledVisitCard extends StatelessWidget {
                   elevation: 0,
                 ),
                 icon: const Icon(CupertinoIcons.pencil, size: 14),
-                label: const Text('Edit Details', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                label: Text(AppLocalizations.of(context)?.editDetails ?? 'Edit Details', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
               ),
             ],
           ),
@@ -439,7 +441,7 @@ class _ScheduledVisitProductRow extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            'Qty: ${item.quantity}',
+            '${AppLocalizations.of(context)?.qty ?? "Qty"}: ${item.quantity}',
             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
           ),
         ),
@@ -503,7 +505,7 @@ class CartItemTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Size: ${variant.storage}   Color: ${variant.colorName}',
+                  '${AppLocalizations.of(context)?.size ?? "Size"}: ${variant.storage}   ${AppLocalizations.of(context)?.color ?? "Color"}: ${variant.colorName}',
                   style: TextStyle(
                     color: isDark ? Colors.white54 : Colors.grey[600],
                     fontSize: 13,
@@ -596,9 +598,9 @@ class CartItemTile extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
-                    child: const Text(
-                      'Reserve This Item Only',
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                    child: Text(
+                      AppLocalizations.of(context)?.reserveThisItemOnly ?? 'Reserve This Item Only',
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                     ),
                   ),
                 ),
@@ -624,9 +626,9 @@ class CartItemTile extends StatelessWidget {
           children: [
             const SizedBox(height: 12),
             Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
-            const Padding(
-              padding: EdgeInsets.all(24.0),
-              child: Text('Select Quantity', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Text(AppLocalizations.of(context)?.selectQuantity ?? 'Select Quantity', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
             ),
             Flexible(
               child: ListView.builder(
@@ -661,21 +663,24 @@ extension OnTapExtension on Widget {
   }
 }
 
-class CheckoutSummarySheet extends StatelessWidget {
-  const CheckoutSummarySheet({super.key});
+class CheckoutActionButton extends StatelessWidget {
+  const CheckoutActionButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final store = AppScope.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      color: Colors.transparent,
-      padding: EdgeInsets.fromLTRB(
-        20,
-        0,
-        20,
-        MediaQuery.of(context).padding.bottom + 20,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(isDark ? 0.3 : 0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: FilledButton(
         onPressed: () => showModalBottomSheet<void>(
@@ -685,18 +690,27 @@ class CheckoutSummarySheet extends StatelessWidget {
           builder: (_) => const MultiStepCheckoutSheet(),
         ),
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(64),
-          backgroundColor: const Color.fromARGB(255, 27, 25, 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+          minimumSize: const Size.fromHeight(68),
+          backgroundColor: isDark ? AppColors.primary : AppColors.black,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
         ),
-        child: const Text(
-          'Checkout',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-            color: Colors.white,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              AppLocalizations.of(context)?.checkout ?? 'Checkout',
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+                letterSpacing: -0.2,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Icon(CupertinoIcons.arrow_right, size: 20),
+          ],
         ),
       ),
     );
@@ -742,9 +756,9 @@ class _PromoCodeFieldState extends State<_PromoCodeField> {
               controller: _controller,
               enabled: !hasPromo,
               style: const TextStyle(fontWeight: FontWeight.w600),
-              decoration: const InputDecoration(
-                hintText: 'Enter promo code',
-                hintStyle: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)?.enterPromoCode ?? 'Enter promo code',
+                hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
                 filled: false,
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -773,7 +787,7 @@ class _PromoCodeFieldState extends State<_PromoCodeField> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
               ),
               child: Text(
-                hasPromo ? 'Remove' : 'Apply code',
+                hasPromo ? (AppLocalizations.of(context)?.remove ?? 'Remove') : (AppLocalizations.of(context)?.applyCode ?? 'Apply code'),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),

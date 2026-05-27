@@ -343,4 +343,219 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkout => 'Finalize Visit Selection';
+
+  @override
+  String get biometricCheckout => 'Secure Booking';
+
+  @override
+  String get requireFaceIdDesc => 'Protect your bookings with Biometrics';
+
+  @override
+  String get manageVisitsDesc =>
+      'Visit management is available in your history.';
+
+  @override
+  String get supportDesc =>
+      'AppleTech Support is ready to help with your visit and devices.';
+
+  @override
+  String get privacyDesc =>
+      'Privacy controls are protected in this demo experience.';
+
+  @override
+  String get faq1Q => 'What is the AppleTech return policy?';
+
+  @override
+  String get faq1A =>
+      'We offer a 14-day premium return policy on all hardware items. Devices must be returned in their original packaging with all accessories and proof of purchase. Returns are completely free of charge.';
+
+  @override
+  String get faq2Q => 'Does AppleTech ship globally?';
+
+  @override
+  String get faq2A =>
+      'Yes! We ship internationally to over 80 countries worldwide. Fast express shipping is free on orders above \$500. Duties and local taxes are calculated at checkout automatically.';
+
+  @override
+  String get faq3Q => 'How long does standard delivery take?';
+
+  @override
+  String get faq3A =>
+      'Standard local deliveries take 1 to 2 business days. Express shipping is delivered next day if ordered before 3:00 PM. International delivery times vary by country but usually average 3 to 5 business days.';
+
+  @override
+  String get faq4Q => 'What warranties are included?';
+
+  @override
+  String get faq4A =>
+      'All new AppleTech hardware products include a 1-Year Limited Hardware Warranty and 90 days of complimentary technical support. You can purchase AppleTech Care+ to extend coverage up to 3 years.';
+
+  @override
+  String get cartTitle => 'Cart';
+
+  @override
+  String get clearBagTitle => 'Clear Bag';
+
+  @override
+  String get clearBagContent =>
+      'Are you sure you want to remove all items from your bag?';
+
+  @override
+  String get clearAll => 'Clear All';
+
+  @override
+  String get discount => 'Discount';
+
+  @override
+  String get scheduledVisits => 'Scheduled Store Visits';
+
+  @override
+  String get timeNotSelected => 'Time not selected';
+
+  @override
+  String get visitScheduled => 'Visit Scheduled';
+
+  @override
+  String get totalToPay => 'Total To Pay';
+
+  @override
+  String get editDetails => 'Edit Details';
+
+  @override
+  String get qty => 'Qty';
+
+  @override
+  String get size => 'Size';
+
+  @override
+  String get color => 'Color';
+
+  @override
+  String get reserveThisItemOnly => 'Reserve This Item Only';
+
+  @override
+  String get selectQuantity => 'Select Quantity';
+
+  @override
+  String get enterPromoCode => 'Enter promo code';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get applyCode => 'Apply code';
+
+  @override
+  String get accountUpper => 'Account';
+
+  @override
+  String couldNotOpenPhoto(Object error) {
+    return 'Could not open photo library: $error';
+  }
+
+  @override
+  String get changePhoto => 'Change photo';
+
+  @override
+  String get codeVerifiedNewPassword => 'Code verified. Create a new password.';
+
+  @override
+  String get passwordUpdatedSignIn => 'Password updated. You can sign in now.';
+
+  @override
+  String addToStoreSelection(Object price) {
+    return 'Add to Store Selection - \$$price';
+  }
+
+  @override
+  String get writeReview => 'Write a Review';
+
+  @override
+  String viewAllReviews(Object count) {
+    return 'View all $count reviews';
+  }
+
+  @override
+  String get yourReview => 'Your Review';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get noRecentNotifications => 'No recent notifications';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get defaultOrder => 'Default Order';
+
+  @override
+  String get priceLowHigh => 'Price: Low to High';
+
+  @override
+  String get priceHighLow => 'Price: High to Low';
+
+  @override
+  String get topRated => 'Top Rated';
+
+  @override
+  String get itemRemovedFromCart => 'Item removed from cart';
+
+  @override
+  String addedItemsToCart(Object count) {
+    return 'Added $count items to Cart';
+  }
+
+  @override
+  String get exploreProducts => 'Explore Products';
+
+  @override
+  String addedProductToCart(Object name) {
+    return 'Added $name to Cart';
+  }
+
+  @override
+  String get noOrdersFound => 'No orders found.';
+
+  @override
+  String noFilteredOrders(Object filter) {
+    return 'No $filter orders.';
+  }
+
+  @override
+  String get deleteProduct => 'Delete Product';
+
+  @override
+  String get deleteProductConfirm =>
+      'Are you sure you want to delete this product? This cannot be undone.';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get noProductsYet => 'No products yet';
+
+  @override
+  String get tapAddProduct => 'Tap the Add button to add a product.';
+
+  @override
+  String errorMsg(Object error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get noImagePreview => 'No image preview';
+
+  @override
+  String get inStock => 'In Stock';
+
+  @override
+  String get admin => 'Admin';
+
+  @override
+  String get analyticsComingSoon => 'Analytics charts coming soon...';
 }

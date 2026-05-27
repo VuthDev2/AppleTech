@@ -81,7 +81,6 @@
   "learnMore": "Learn More",
   "exploreUltra": "Explore Ultra",
   "latestRelease": "LATEST RELEASE",
-  
   "personalInformation": "Personal information",
   "nameEmailProfile": "Name, email, and customer profile",
   "deliveryAddresses": "Store Visits",
@@ -117,14 +116,11 @@
   "markAllRead": "Mark all read",
   "allCaughtUp": "All caught up",
   "noNotifications": "You have no notifications right now.",
-  
   "searchHint": "Search MacBook M5, iPad, iMac, RAM, SSD…",
   "discover": "Discover",
   "searchPlaceholder": "Search for products...",
-  
   "emptyWishlist": "Nothing Saved Yet",
   "wishlistEmptyDesc": "Products you love or want to keep track of will appear here.",
-  
   "yourBag": "Items to Buy at Store",
   "emptyBag": "Your selection is empty",
   "bagEmptyDesc": "Add items you intend to test and buy at the store.",
@@ -133,5 +129,104 @@
   "free": "Free",
   "tax": "Estimated Tax",
   "total": "Total",
-  "checkout": "Finalize Visit Selection"
+  "checkout": "Finalize Visit Selection",
+  "biometricCheckout": "Secure Booking",
+  "requireFaceIdDesc": "Protect your bookings with Biometrics",
+  "manageVisitsDesc": "Visit management is available in your history.",
+  "supportDesc": "AppleTech Support is ready to help with your visit and devices.",
+  "privacyDesc": "Privacy controls are protected in this demo experience.",
+  "faq1Q": "What is the AppleTech return policy?",
+  "faq1A": "We offer a 14-day premium return policy on all hardware items. Devices must be returned in their original packaging with all accessories and proof of purchase. Returns are completely free of charge.",
+  "faq2Q": "Does AppleTech ship globally?",
+  "faq2A": "Yes! We ship internationally to over 80 countries worldwide. Fast express shipping is free on orders above $500. Duties and local taxes are calculated at checkout automatically.",
+  "faq3Q": "How long does standard delivery take?",
+  "faq3A": "Standard local deliveries take 1 to 2 business days. Express shipping is delivered next day if ordered before 3:00 PM. International delivery times vary by country but usually average 3 to 5 business days.",
+  "faq4Q": "What warranties are included?",
+  "faq4A": "All new AppleTech hardware products include a 1-Year Limited Hardware Warranty and 90 days of complimentary technical support. You can purchase AppleTech Care+ to extend coverage up to 3 years.",
+  "cartTitle": "Cart",
+  "clearBagTitle": "Clear Bag",
+  "clearBagContent": "Are you sure you want to remove all items from your bag?",
+  "clearAll": "Clear All",
+  "discount": "Discount",
+  "scheduledVisits": "Scheduled Store Visits",
+  "timeNotSelected": "Time not selected",
+  "visitScheduled": "Visit Scheduled",
+  "totalToPay": "Total To Pay",
+  "editDetails": "Edit Details",
+  "qty": "Qty",
+  "size": "Size",
+  "color": "Color",
+  "reserveThisItemOnly": "Reserve This Item Only",
+  "selectQuantity": "Select Quantity",
+  "enterPromoCode": "Enter promo code",
+  "remove": "Remove",
+  "applyCode": "Apply code",
+  "accountUpper": "Account",
+  "couldNotOpenPhoto": "Could not open photo library: {error}",
+  "@couldNotOpenPhoto": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "changePhoto": "Change photo",
+  "codeVerifiedNewPassword": "Code verified. Create a new password.",
+  "passwordUpdatedSignIn": "Password updated. You can sign in now.",
+  "addToStoreSelection": "Add to Store Selection - ${price}",
+  "@addToStoreSelection": {
+    "placeholders": {
+      "price": {}
+    }
+  },
+  "writeReview": "Write a Review",
+  "viewAllReviews": "View all {count} reviews",
+  "@viewAllReviews": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "yourReview": "Your Review",
+  "notificationsTitle": "Notifications",
+  "noRecentNotifications": "No recent notifications",
+  "clear": "Clear",
+  "defaultOrder": "Default Order",
+  "priceLowHigh": "Price: Low to High",
+  "priceHighLow": "Price: High to Low",
+  "topRated": "Top Rated",
+  "itemRemovedFromCart": "Item removed from cart",
+  "addedItemsToCart": "Added {count} items to Cart",
+  "@addedItemsToCart": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "exploreProducts": "Explore Products",
+  "addedProductToCart": "Added {name} to Cart",
+  "@addedProductToCart": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "noOrdersFound": "No orders found.",
+  "noFilteredOrders": "No {filter} orders.",
+  "@noFilteredOrders": {
+    "placeholders": {
+      "filter": {}
+    }
+  },
+  "deleteProduct": "Delete Product",
+  "deleteProductConfirm": "Are you sure you want to delete this product? This cannot be undone.",
+  "delete": "Delete",
+  "add": "Add",
+  "noProductsYet": "No products yet",
+  "tapAddProduct": "Tap the Add button to add a product.",
+  "errorMsg": "Error: {error}",
+  "@errorMsg": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noImagePreview": "No image preview",
+  "inStock": "In Stock",
+  "admin": "Admin",
+  "analyticsComingSoon": "Analytics charts coming soon..."
 }

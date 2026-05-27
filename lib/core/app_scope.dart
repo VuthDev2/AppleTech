@@ -105,14 +105,15 @@ class AppStore extends ChangeNotifier {
       }
 
       // Hydrate profile fields from Firestore when present
-      if (user != null) {
+      final currentUser = user;
+      if (currentUser != null) {
         user = UserProfile(
-          uid: user!.uid,
-          name: data.displayName ?? user!.name,
-          email: user!.email,
-          createdAt: user!.createdAt,
-          photoUrl: data.photoUrl ?? user!.photoUrl,
-          isAdmin: user!.isAdmin || data.isAdmin,
+          uid: currentUser.uid,
+          name: data.displayName ?? currentUser.name,
+          email: currentUser.email,
+          createdAt: currentUser.createdAt,
+          photoUrl: data.photoUrl ?? currentUser.photoUrl,
+          isAdmin: currentUser.isAdmin || data.isAdmin,
         );
       }
     } catch (e) {

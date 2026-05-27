@@ -63,10 +63,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get createAccount => '创建帐户';
 
   @override
-  String get createAccountButton => 'Create Account';
+  String get createAccountButton => '创建帐户';
 
   @override
-  String get continueButton => 'Continue';
+  String get continueButton => '继续';
 
   @override
   String get fullName => '全名';
@@ -120,20 +120,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get resend => '没有收到代码？重新发送';
 
   @override
-  String get resendCode => 'Resend code';
+  String get resendCode => '重新发送代码';
 
   @override
   String resendInSeconds(int seconds) {
-    return '${seconds}s';
+    return '$seconds秒';
   }
 
   @override
   String verificationCodeSent(String email) {
-    return 'Verification code sent to $email';
+    return '验证码已发送至 $email';
   }
 
   @override
-  String get verifyInstructions => 'Check your inbox for verification code';
+  String get verifyInstructions => '检查您的收件箱以获取验证码';
 
   @override
   String get store => '商店';
@@ -338,4 +338,213 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get checkout => '确认到店清单';
+
+  @override
+  String get biometricCheckout => '安全预订';
+
+  @override
+  String get requireFaceIdDesc => '使用生物识别保护您的预订';
+
+  @override
+  String get manageVisitsDesc => '可以在您的历史记录中管理访问。';
+
+  @override
+  String get supportDesc => 'AppleTech支持团队随时准备为您的访问和设备提供帮助。';
+
+  @override
+  String get privacyDesc => '在此演示体验中，隐私控制受到保护。';
+
+  @override
+  String get faq1Q => 'AppleTech的退货政策是什么？';
+
+  @override
+  String get faq1A => '我们对所有硬件商品提供14天高级退货政策。设备必须采用原包装退回，并附带所有配件和购买凭证。退货完全免费。';
+
+  @override
+  String get faq2Q => 'AppleTech全球发货吗？';
+
+  @override
+  String get faq2A =>
+      '是的！我们的国际运输服务覆盖全球80多个国家。订单金额超过500美元可享受免费快速快递服务。关税和地方税将在结账时自动计算。';
+
+  @override
+  String get faq3Q => '标准配送需要多长时间？';
+
+  @override
+  String get faq3A =>
+      '本地标准配送需要1至2个工作日。如果在下午3:00前下单，快递将在次日送达。国际运输时间因国家而异，但通常平均为3到5个工作日。';
+
+  @override
+  String get faq4Q => '包含哪些保修？';
+
+  @override
+  String get faq4A =>
+      '所有全新的AppleTech硬件产品均包含1年有限硬件保修和90天免费技术支持。您可以购买AppleTech Care+以将保修期延长至3年。';
+
+  @override
+  String get cartTitle => '购物车';
+
+  @override
+  String get clearBagTitle => '清空购物袋';
+
+  @override
+  String get clearBagContent => '您确定要从购物袋中移除所有商品吗？';
+
+  @override
+  String get clearAll => '全部清空';
+
+  @override
+  String get discount => '折扣';
+
+  @override
+  String get scheduledVisits => '已预约的到店访问';
+
+  @override
+  String get timeNotSelected => '未选择时间';
+
+  @override
+  String get visitScheduled => '已预约访问';
+
+  @override
+  String get totalToPay => '应付总额';
+
+  @override
+  String get editDetails => '编辑详情';
+
+  @override
+  String get qty => '数量';
+
+  @override
+  String get size => '尺寸';
+
+  @override
+  String get color => '颜色';
+
+  @override
+  String get reserveThisItemOnly => '仅预订此商品';
+
+  @override
+  String get selectQuantity => '选择数量';
+
+  @override
+  String get enterPromoCode => '输入促销代码';
+
+  @override
+  String get remove => '移除';
+
+  @override
+  String get applyCode => '应用代码';
+
+  @override
+  String get accountUpper => '帐户';
+
+  @override
+  String couldNotOpenPhoto(Object error) {
+    return '无法打开照片库: $error';
+  }
+
+  @override
+  String get changePhoto => '更改照片';
+
+  @override
+  String get codeVerifiedNewPassword => '代码已验证。请创建新密码。';
+
+  @override
+  String get passwordUpdatedSignIn => '密码已更新。您现在可以登录了。';
+
+  @override
+  String addToStoreSelection(Object price) {
+    return '加入购物车 - \$$price';
+  }
+
+  @override
+  String get writeReview => '写评论';
+
+  @override
+  String viewAllReviews(Object count) {
+    return '查看所有 $count 条评论';
+  }
+
+  @override
+  String get yourReview => '您的评论';
+
+  @override
+  String get notificationsTitle => '通知';
+
+  @override
+  String get noRecentNotifications => '没有最近的通知';
+
+  @override
+  String get clear => '清除';
+
+  @override
+  String get defaultOrder => '默认排序';
+
+  @override
+  String get priceLowHigh => '价格：从低到高';
+
+  @override
+  String get priceHighLow => '价格：从高到低';
+
+  @override
+  String get topRated => '最高评分';
+
+  @override
+  String get itemRemovedFromCart => '商品已从购物车移除';
+
+  @override
+  String addedItemsToCart(Object count) {
+    return '已将 $count 件商品加入购物车';
+  }
+
+  @override
+  String get exploreProducts => '探索产品';
+
+  @override
+  String addedProductToCart(Object name) {
+    return '已将 $name 加入购物车';
+  }
+
+  @override
+  String get noOrdersFound => '未找到订单。';
+
+  @override
+  String noFilteredOrders(Object filter) {
+    return '没有 $filter 订单。';
+  }
+
+  @override
+  String get deleteProduct => '删除产品';
+
+  @override
+  String get deleteProductConfirm => '您确定要删除此产品吗？此操作无法撤销。';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get add => '添加';
+
+  @override
+  String get noProductsYet => '暂无产品';
+
+  @override
+  String get tapAddProduct => '点击添加按钮来添加产品。';
+
+  @override
+  String errorMsg(Object error) {
+    return '错误: $error';
+  }
+
+  @override
+  String get noImagePreview => '无图像预览';
+
+  @override
+  String get inStock => '有货';
+
+  @override
+  String get admin => '管理员';
+
+  @override
+  String get analyticsComingSoon => '分析图表即将推出...';
 }

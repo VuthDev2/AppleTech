@@ -17,7 +17,6 @@
   "english": "英语",
   "khmer": "高棉语",
   "chinese": "中文",
-  
   "createAccount": "创建帐户",
   "fullName": "全名",
   "enterFullName": "输入您的全名",
@@ -38,7 +37,6 @@
   "checkInbox": "检查收件箱中的验证码",
   "verifyCode": "验证代码",
   "resend": "没有收到代码？重新发送",
-  
   "store": "商店",
   "welcome": "欢迎",
   "recentCategories": "最近的分类",
@@ -58,7 +56,6 @@
   "learnMore": "进一步了解",
   "exploreUltra": "探索 Ultra",
   "latestRelease": "最新发布",
-
   "personalInformation": "个人信息",
   "nameEmailProfile": "姓名、电子邮件和客户个人资料",
   "deliveryAddresses": "到店预约",
@@ -94,14 +91,11 @@
   "markAllRead": "标记全部已读",
   "allCaughtUp": "已全部读完",
   "noNotifications": "您目前没有通知。",
-
   "searchHint": "搜索 MacBook M5, iPad, iMac, RAM, SSD…",
   "discover": "发现",
   "searchPlaceholder": "搜索产品...",
-
   "emptyWishlist": "暂无收藏",
   "wishlistEmptyDesc": "您喜爱或想要关注的产品将显示在这里。",
-
   "yourBag": "准备在到店购买的产品",
   "emptyBag": "您的清单是空的",
   "bagEmptyDesc": "添加您打算在店内测试并购买的产品。",
@@ -110,4 +104,93 @@
   "free": "免费",
   "tax": "预估税费",
   "total": "总计",
-  "checkout": "确认到店清单"}
+  "checkout": "确认到店清单",
+  "biometricCheckout": "安全预订",
+  "continueButton": "继续",
+  "createAccountButton": "创建帐户",
+  "faq1A": "我们对所有硬件商品提供14天高级退货政策。设备必须采用原包装退回，并附带所有配件和购买凭证。退货完全免费。",
+  "faq1Q": "AppleTech的退货政策是什么？",
+  "faq2A": "是的！我们的国际运输服务覆盖全球80多个国家。订单金额超过500美元可享受免费快速快递服务。关税和地方税将在结账时自动计算。",
+  "faq2Q": "AppleTech全球发货吗？",
+  "faq3A": "本地标准配送需要1至2个工作日。如果在下午3:00前下单，快递将在次日送达。国际运输时间因国家而异，但通常平均为3到5个工作日。",
+  "faq3Q": "标准配送需要多长时间？",
+  "faq4A": "所有全新的AppleTech硬件产品均包含1年有限硬件保修和90天免费技术支持。您可以购买AppleTech Care+以将保修期延长至3年。",
+  "faq4Q": "包含哪些保修？",
+  "manageVisitsDesc": "可以在您的历史记录中管理访问。",
+  "privacyDesc": "在此演示体验中，隐私控制受到保护。",
+  "requireFaceIdDesc": "使用生物识别保护您的预订",
+  "resendCode": "重新发送代码",
+  "resendInSeconds": "{seconds}秒",
+  "@resendInSeconds": {
+    "description": "Resend button text with countdown",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "example": "60"
+      }
+    }
+  },
+  "supportDesc": "AppleTech支持团队随时准备为您的访问和设备提供帮助。",
+  "verificationCodeSent": "验证码已发送至 {email}",
+  "@verificationCodeSent": {
+    "description": "Message showing where verification code was sent",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "example@domain.com"
+      }
+    }
+  },
+  "verifyInstructions": "检查您的收件箱以获取验证码",
+  "cartTitle": "购物车",
+  "clearBagTitle": "清空购物袋",
+  "clearBagContent": "您确定要从购物袋中移除所有商品吗？",
+  "clearAll": "全部清空",
+  "discount": "折扣",
+  "scheduledVisits": "已预约的到店访问",
+  "timeNotSelected": "未选择时间",
+  "visitScheduled": "已预约访问",
+  "totalToPay": "应付总额",
+  "editDetails": "编辑详情",
+  "qty": "数量",
+  "size": "尺寸",
+  "color": "颜色",
+  "reserveThisItemOnly": "仅预订此商品",
+  "selectQuantity": "选择数量",
+  "enterPromoCode": "输入促销代码",
+  "remove": "移除",
+  "applyCode": "应用代码",
+  "accountUpper": "帐户",
+  "couldNotOpenPhoto": "无法打开照片库: {error}",
+  "changePhoto": "更改照片",
+  "codeVerifiedNewPassword": "代码已验证。请创建新密码。",
+  "passwordUpdatedSignIn": "密码已更新。您现在可以登录了。",
+  "addToStoreSelection": "加入购物车 - ${price}",
+  "writeReview": "写评论",
+  "viewAllReviews": "查看所有 {count} 条评论",
+  "yourReview": "您的评论",
+  "notificationsTitle": "通知",
+  "noRecentNotifications": "没有最近的通知",
+  "clear": "清除",
+  "defaultOrder": "默认排序",
+  "priceLowHigh": "价格：从低到高",
+  "priceHighLow": "价格：从高到低",
+  "topRated": "最高评分",
+  "itemRemovedFromCart": "商品已从购物车移除",
+  "addedItemsToCart": "已将 {count} 件商品加入购物车",
+  "exploreProducts": "探索产品",
+  "addedProductToCart": "已将 {name} 加入购物车",
+  "noOrdersFound": "未找到订单。",
+  "noFilteredOrders": "没有 {filter} 订单。",
+  "deleteProduct": "删除产品",
+  "deleteProductConfirm": "您确定要删除此产品吗？此操作无法撤销。",
+  "delete": "删除",
+  "add": "添加",
+  "noProductsYet": "暂无产品",
+  "tapAddProduct": "点击添加按钮来添加产品。",
+  "errorMsg": "错误: {error}",
+  "noImagePreview": "无图像预览",
+  "inStock": "有货",
+  "admin": "管理员",
+  "analyticsComingSoon": "分析图表即将推出..."
+}

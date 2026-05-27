@@ -159,8 +159,8 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
           view = AuthView.resetPassword;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Code verified. Create a new password.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.codeVerifiedNewPassword ?? 'Code verified. Create a new password.'),
           ),
         );
       } else {
@@ -196,8 +196,8 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
           view = AuthView.signIn;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password updated. You can sign in now.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.passwordUpdatedSignIn ?? 'Password updated. You can sign in now.'),
           ),
         );
       } else {
@@ -275,17 +275,22 @@ class _WelcomeAuthScreenState extends State<WelcomeAuthScreen> {
                 _buildAuthPreferencesBar(context, store),
                 const SizedBox(height: AppSpacing.md),
                 Center(
-                  child: Column(
-                    children: [
-                      const StoreBrandMark(height: 64, compact: true),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        'AppleTech',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
+                  child: Hero(
+                    tag: 'storeLogo',
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const StoreBrandMark(height: 64, compact: true),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          'AppleTech',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1.2,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),

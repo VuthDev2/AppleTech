@@ -28,17 +28,17 @@ class _ProductGridCardState extends State<ProductGridCard> {
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withValues(alpha: 0.05) : theme.cardColor,
+            color: isDark ? Colors.white.withOpacity(0.05) : theme.cardColor,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: _isHovered 
-                  ? primary.withValues(alpha: isDark ? 0.6 : 0.4) 
-                  : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
+                  ? primary.withOpacity(isDark ? 0.6 : 0.4) 
+                  : (isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05)),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
                 blurRadius: _isHovered ? 24 : 12,
                 offset: Offset(0, _isHovered ? 12 : 6),
               ),
@@ -54,8 +54,8 @@ class _ProductGridCardState extends State<ProductGridCard> {
                   margin: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isDark 
-                        ? Colors.white.withValues(alpha: 0.03) 
-                        : Colors.black.withValues(alpha: 0.02),
+                        ? Colors.white.withOpacity(0.03) 
+                        : Colors.black.withOpacity(0.02),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Hero(
@@ -87,7 +87,7 @@ class _ProductGridCardState extends State<ProductGridCard> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.12),
+                        color: primary.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -140,7 +140,7 @@ class _ProductGridCardState extends State<ProductGridCard> {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: _isHovered ? primary : primary.withValues(alpha: 0.1),
+                                color: _isHovered ? primary : primary.withOpacity(0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(

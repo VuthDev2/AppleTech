@@ -160,29 +160,38 @@ class StoreBrandMark extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     if (compact) {
-      return Container(
+      if (isDark) {
+        // Invert: white bg → black, black logo → white.
+        // The inverted image now has a black background + white logo.
+        // On a dark screen the black bg blends in naturally.
+        return ColorFiltered(
+          colorFilter: const ColorFilter.matrix([
+            -1, 0, 0, 0, 255,
+             0,-1, 0, 0, 255,
+             0, 0,-1, 0, 255,
+             0, 0, 0, 1,   0,
+          ]),
+          child: Image.asset(
+            'assets/images/appletech_logo.png',
+            width: height,
+            height: height,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+          ),
+        );
+      }
+
+      // Light mode: render as-is, the white bg matches the light surface.
+      return Image.asset(
+        'assets/images/appletech_logo.png',
         width: height,
         height: height,
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface2 : AppColors.white,
-          shape: BoxShape.circle,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Transform.translate(
-          offset: Offset(0, height * 0.08),
-          child: Transform.scale(
-            scale: 1.85,
-            child: Image.asset(
-              'assets/images/appletech_logo.png',
-              fit: BoxFit.cover,
-              filterQuality: FilterQuality.high,
-            ),
-          ),
-        ),
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
       );
     }
 
-    Widget logo = Image.asset(
+    final Widget logo = Image.asset(
       'assets/images/logo_apt.png',
       height: height,
       fit: BoxFit.contain,
@@ -190,13 +199,14 @@ class StoreBrandMark extends StatelessWidget {
     );
 
     if (isDark) {
+      // Invert: white bg → black (blends into dark surface),
+      // dark logo pixels → white (visible on dark bg).
       return ColorFiltered(
-        // Invert colors: white background becomes black, black logo becomes white
         colorFilter: const ColorFilter.matrix([
           -1, 0, 0, 0, 255,
-          0, -1, 0, 0, 255,
-          0, 0, -1, 0, 255,
-          0, 0, 0, 1, 0,
+           0,-1, 0, 0, 255,
+           0, 0,-1, 0, 255,
+           0, 0, 0, 1,   0,
         ]),
         child: logo,
       );
@@ -970,3 +980,4 @@ class _ProfessionalTextFieldState extends State<ProfessionalTextField> {
     );
   }
 }
+

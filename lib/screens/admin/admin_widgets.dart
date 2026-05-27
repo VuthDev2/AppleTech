@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/notification_sheet.dart';
 import 'admin_notification_button.dart';
 import '../../main.dart';
+import 'package:appletech/l10n/app_localizations.dart';
 
 /// Shared glassmorphic SliverAppBar used by all admin views.
 class AdminSliverHeader extends StatelessWidget {
@@ -54,9 +55,9 @@ class AdminSliverHeader extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Text('Admin', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    Text(AppLocalizations.of(context)?.admin ?? 'Admin', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                     const Spacer(),
-                      AdminNotificationButton(),
+                      Material(type: MaterialType.transparency, child: AdminNotificationButton()),
                       if (trailingActions != null) ...trailingActions!,
                   ],
                 ),

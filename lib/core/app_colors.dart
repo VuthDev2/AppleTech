@@ -17,7 +17,7 @@ class AppColors {
   static const Color darkGray = Color(0xFF2C2C2E);
   static const Color mediumGray = Color(0xFF8E8E93);
   static const Color lightGray = Color(0xFFF5F5F7);
-  static const Color ultraLightGray = Color(0xFFFAFAFC);
+  static const Color darkSurface1 = Color(0xFF1C1C1E); // dark surface for sheets
 
   // Error & Warning
   static const Color error = Color(0xFFFF453A); // bright red for dark mode
