@@ -5,7 +5,7 @@ void showNotificationsSheet(BuildContext context) {
   showUserNotificationsSheet(context);
 }
 
-  class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
   @override
   Widget build(BuildContext context) {
@@ -322,7 +322,7 @@ class StoreHeader extends StatelessWidget {
                     if (current == 'en') {
                       store.setLocale(const Locale('km'));
                     } else if (current == 'km') {
-                      store.setLocale(const Locale('ch'));
+                      store.setLocale(const Locale('zh'));
                     } else {
                       store.setLocale(const Locale('en'));
                     }
@@ -331,7 +331,7 @@ class StoreHeader extends StatelessWidget {
                   icon: Text(
                     store.locale?.languageCode == 'km'
                         ? '🇰🇭'
-                        : store.locale?.languageCode == 'ch'
+                        : store.locale?.languageCode == 'zh'
                         ? '🇨🇳'
                         : '🇺🇸',
                     style: const TextStyle(fontSize: 18),
@@ -727,10 +727,15 @@ class _PromoBannerCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           Positioned.fill(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(28, 20, 24, 20), // Increased right padding to 24
+              padding: const EdgeInsets.fromLTRB(
+                28,
+                20,
+                24,
+                20,
+              ), // Increased right padding to 24
               child: Row(
                 children: [
                   Expanded(flex: 12, child: _PromoBannerCopy(banner: banner)),

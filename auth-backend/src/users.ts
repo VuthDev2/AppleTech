@@ -11,6 +11,7 @@ router.use(verifyToken);
 const updateProfileSchema = z.object({
   displayName: z.string().min(1).max(100).optional(),
   locale: z.enum(['en', 'km', 'zh']).optional(),
+  photoUrl: z.string().min(1).optional(),
 });
 
 const cartItemSchema = z.object({
@@ -28,6 +29,10 @@ const createOrderSchema = z.object({
   total: z.number().nonnegative(),
   status: z.string().default('Preparing for delivery'),
   items: z.array(cartItemSchema),
+  customerName: z.string().min(1).max(120).optional(),
+  customerPhone: z.string().min(1).max(40).optional(),
+  customerAddress: z.string().min(1).max(240).optional(),
+  visitTime: z.string().datetime().optional(),
 });
 
 const addressSchema = z.object({
@@ -85,6 +90,8 @@ router.get('/me', async (req: Request, res: Response) => {
       emailVerified: userRecord.emailVerified,
       createdAt: userRecord.metadata.creationTime,
       locale: firestoreData?.locale || null,
+      photoUrl: firestoreData?.photoUrl || userRecord.photoURL || null,
+      role: firestoreData?.role || null,
     });
   } catch (err: any) {
     console.error('GET /users/me error:', err);
@@ -100,7 +107,7 @@ router.patch('/me', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid input', details: result.error.format() });
     }
 
-    const { displayName, locale } = result.data;
+    const { displayName, locale, photoUrl } = result.data;
     const updates: Record<string, unknown> = {};
 
     if (displayName !== undefined) {
@@ -108,6 +115,7 @@ router.patch('/me', async (req: Request, res: Response) => {
       updates.displayName = displayName;
     }
     if (locale !== undefined) updates.locale = locale;
+    if (photoUrl !== undefined) updates.photoUrl = photoUrl;
 
     if (Object.keys(updates).length > 0) {
       await db.collection('users').doc(uid).set(updates, { merge: true });
@@ -138,6 +146,10 @@ router.get('/me/orders', async (req: Request, res: Response) => {
         total: data.total,
         status: data.status,
         items: data.items ?? [],
+        customerName: data.customerName ?? null,
+        customerPhone: data.customerPhone ?? null,
+        customerAddress: data.customerAddress ?? null,
+        visitTime: data.visitTime?.toDate?.()?.toISOString() ?? null,
       };
     });
 
@@ -158,13 +170,15 @@ router.post('/me/orders', async (req: Request, res: Response) => {
 
     const order = result.data;
     const placedAt = new Date();
+    const visitTime = order.visitTime ? new Date(order.visitTime) : undefined;
+    const payload = visitTime === undefined ? order : { ...order, visitTime };
 
     await db
       .collection('users')
       .doc(uid)
       .collection('orders')
       .doc(order.id)
-      .set({ ...order, placedAt });
+      .set({ ...payload, placedAt });
 
     return res.status(201).json({ id: order.id, placedAt: placedAt.toISOString() });
   } catch (err: any) {

@@ -10,6 +10,7 @@ router.use(verifyToken_1.verifyToken);
 const updateProfileSchema = zod_1.z.object({
     displayName: zod_1.z.string().min(1).max(100).optional(),
     locale: zod_1.z.enum(['en', 'km', 'zh']).optional(),
+    photoUrl: zod_1.z.string().min(1).optional(),
 });
 const cartItemSchema = zod_1.z.object({
     productId: zod_1.z.string().min(1),
@@ -24,6 +25,10 @@ const createOrderSchema = zod_1.z.object({
     total: zod_1.z.number().nonnegative(),
     status: zod_1.z.string().default('Preparing for delivery'),
     items: zod_1.z.array(cartItemSchema),
+    customerName: zod_1.z.string().min(1).max(120).optional(),
+    customerPhone: zod_1.z.string().min(1).max(40).optional(),
+    customerAddress: zod_1.z.string().min(1).max(240).optional(),
+    visitTime: zod_1.z.string().datetime().optional(),
 });
 const addressSchema = zod_1.z.object({
     id: zod_1.z.string().min(1),
@@ -74,6 +79,8 @@ router.get('/me', async (req, res) => {
             emailVerified: userRecord.emailVerified,
             createdAt: userRecord.metadata.creationTime,
             locale: firestoreData?.locale || null,
+            photoUrl: firestoreData?.photoUrl || userRecord.photoURL || null,
+            role: firestoreData?.role || null,
         });
     }
     catch (err) {
@@ -88,7 +95,7 @@ router.patch('/me', async (req, res) => {
         if (!result.success) {
             return res.status(400).json({ error: 'Invalid input', details: result.error.format() });
         }
-        const { displayName, locale } = result.data;
+        const { displayName, locale, photoUrl } = result.data;
         const updates = {};
         if (displayName !== undefined) {
             await firebase_1.auth.updateUser(uid, { displayName });
@@ -96,6 +103,8 @@ router.patch('/me', async (req, res) => {
         }
         if (locale !== undefined)
             updates.locale = locale;
+        if (photoUrl !== undefined)
+            updates.photoUrl = photoUrl;
         if (Object.keys(updates).length > 0) {
             await firebase_1.db.collection('users').doc(uid).set(updates, { merge: true });
         }
@@ -123,6 +132,10 @@ router.get('/me/orders', async (req, res) => {
                 total: data.total,
                 status: data.status,
                 items: data.items ?? [],
+                customerName: data.customerName ?? null,
+                customerPhone: data.customerPhone ?? null,
+                customerAddress: data.customerAddress ?? null,
+                visitTime: data.visitTime?.toDate?.()?.toISOString() ?? null,
             };
         });
         return res.json({ orders });
@@ -141,12 +154,14 @@ router.post('/me/orders', async (req, res) => {
         }
         const order = result.data;
         const placedAt = new Date();
+        const visitTime = order.visitTime ? new Date(order.visitTime) : undefined;
+        const payload = visitTime === undefined ? order : { ...order, visitTime };
         await firebase_1.db
             .collection('users')
             .doc(uid)
             .collection('orders')
             .doc(order.id)
-            .set({ ...order, placedAt });
+            .set({ ...payload, placedAt });
         return res.status(201).json({ id: order.id, placedAt: placedAt.toISOString() });
     }
     catch (err) {

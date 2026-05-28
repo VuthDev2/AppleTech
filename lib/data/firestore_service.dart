@@ -61,9 +61,6 @@ class DirectFirestoreService implements UserDataRepository {
 
   final FirebaseFirestore _firestore;
 
-  CollectionReference<Map<String, dynamic>> _userDoc(String uid) =>
-      _firestore.collection('users').doc(uid).collection('data');
-
   @override
   Future<UserFirestoreData> loadUserData(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
@@ -89,6 +86,16 @@ class DirectFirestoreService implements UserDataRepository {
         .doc(uid)
         .collection('notifications')
         .get();
+    final addressesSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('addresses')
+        .get();
+    final cardsSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('cards')
+        .get();
 
     return UserFirestoreData(
       bag: bagSnap.docs
@@ -98,11 +105,16 @@ class DirectFirestoreService implements UserDataRepository {
       orders: ordersSnap.docs
           .map((d) => FirestoreService._orderFromJson(d.data()))
           .toList(),
-      addresses: [], // Simplified for now
-      cards: [],
+      addresses: addressesSnap.docs
+          .map((d) => FirestoreService._addressFromJson(d.data()))
+          .toList(),
+      cards: cardsSnap.docs
+          .map((d) => FirestoreService._cardFromJson(d.data()))
+          .toList(),
       notifications: notificationsSnap.docs
           .map((d) => FirestoreService._notificationFromJson(d.data()))
           .toList(),
+      locale: data['locale'] as String?,
       displayName: data['displayName'] as String?,
       photoUrl: data['photoUrl'] as String?,
       isAdmin: data['role'] == 'admin',
@@ -119,7 +131,7 @@ class DirectFirestoreService implements UserDataRepository {
       'displayName': name,
       'email': email,
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    }, SetOptions(merge: true));
   }
 
   @override
@@ -131,8 +143,13 @@ class DirectFirestoreService implements UserDataRepository {
   }) async {
     final data = <String, dynamic>{};
     if (name != null) data['displayName'] = name;
+    if (locale != null) data['locale'] = locale;
     if (photoUrl != null) data['photoUrl'] = photoUrl;
-    await _firestore.collection('users').doc(uid).update(data);
+    if (data.isEmpty) return;
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .set(data, SetOptions(merge: true));
   }
 
   @override
@@ -180,7 +197,7 @@ class DirectFirestoreService implements UserDataRepository {
         .doc(uid)
         .collection('wishlist')
         .doc(productId)
-        .set({'timestamp': FieldValue.serverTimestamp()});
+        .set({'productId': productId});
   }
 
   @override
@@ -195,45 +212,103 @@ class DirectFirestoreService implements UserDataRepository {
 
   @override
   Future<void> saveOrder(String uid, OrderRecord order) async {
+    final data = <String, dynamic>{
+      'id': order.id,
+      'total': order.total,
+      'status': order.status,
+      'placedAt': Timestamp.fromDate(order.placedAt),
+      'items': order.items
+          .map(
+            (i) => {
+              'productId': i.productId,
+              'variantId': i.variantId,
+              'quantity': i.quantity,
+            },
+          )
+          .toList(),
+    };
+    if (order.customerName != null) data['customerName'] = order.customerName;
+    if (order.customerPhone != null) {
+      data['customerPhone'] = order.customerPhone;
+    }
+    if (order.customerAddress != null) {
+      data['customerAddress'] = order.customerAddress;
+    }
+    if (order.visitTime != null) {
+      data['visitTime'] = Timestamp.fromDate(order.visitTime!);
+    }
+
     await _firestore
         .collection('users')
         .doc(uid)
         .collection('orders')
         .doc(order.id)
+        .set(data);
+  }
+
+  @override
+  Future<void> saveAddress(String uid, ShippingAddress address) async {
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('addresses')
+        .doc(address.id)
         .set({
-          'id': order.id,
-          'total': order.total,
-          'status': order.status,
-          'placedAt': order.placedAt.toIso8601String(),
-          'items': order.items
-              .map(
-                (i) => {
-                  'productId': i.productId,
-                  'variantId': i.variantId,
-                  'quantity': i.quantity,
-                },
-              )
-              .toList(),
-          'customerName': order.customerName,
-          'customerPhone': order.customerPhone,
-          'customerAddress': order.customerAddress,
-          'visitTime': order.visitTime?.toIso8601String(),
+          'id': address.id,
+          'fullName': address.fullName,
+          'street': address.street,
+          'city': address.city,
+          'postalCode': address.postalCode,
+          'phone': address.phone,
+          'isDefault': address.isDefault,
         });
   }
 
   @override
-  Future<void> saveAddress(String uid, ShippingAddress address) async {}
-  @override
-  Future<void> removeAddress(String uid, String addressId) async {}
+  Future<void> removeAddress(String uid, String addressId) async {
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('addresses')
+        .doc(addressId)
+        .delete();
+  }
+
   @override
   Future<void> saveAllAddresses(
     String uid,
     List<ShippingAddress> addresses,
-  ) async {}
+  ) async {
+    await Future.wait(addresses.map((address) => saveAddress(uid, address)));
+  }
+
   @override
-  Future<void> saveCard(String uid, PaymentCard card) async {}
+  Future<void> saveCard(String uid, PaymentCard card) async {
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('cards')
+        .doc(card.id)
+        .set({
+          'id': card.id,
+          'cardholderName': card.cardholderName,
+          'cardNumber': card.cardNumber,
+          'expiryDate': card.expiryDate,
+          'brand': card.brand,
+          'themeColor': card.themeColor.toARGB32(),
+        });
+  }
+
   @override
-  Future<void> removeCard(String uid, String cardId) async {}
+  Future<void> removeCard(String uid, String cardId) async {
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('cards')
+        .doc(cardId)
+        .delete();
+  }
+
   @override
   Future<void> saveNotification(String uid, AppNotification notif) async {
     await _firestore
@@ -247,7 +322,7 @@ class DirectFirestoreService implements UserDataRepository {
           'body': notif.body,
           'kind': notif.kind.name,
           'isRead': notif.isRead,
-          'createdAt': notif.createdAt.toIso8601String(),
+          'createdAt': Timestamp.fromDate(notif.createdAt),
         });
   }
 
@@ -406,12 +481,23 @@ class FirestoreService implements UserDataRepository {
   // ── orders ───────────────────────────────────────────────────────────────
 
   Future<void> saveOrder(String uid, OrderRecord order) async {
-    await _post('/users/me/orders', {
+    final data = <String, dynamic>{
       'id': order.id,
       'total': order.total,
       'status': order.status,
       'items': order.items.map(_cartItemToJson).toList(),
-    });
+    };
+    if (order.customerName != null) data['customerName'] = order.customerName;
+    if (order.customerPhone != null) {
+      data['customerPhone'] = order.customerPhone;
+    }
+    if (order.customerAddress != null) {
+      data['customerAddress'] = order.customerAddress;
+    }
+    if (order.visitTime != null) {
+      data['visitTime'] = order.visitTime!.toIso8601String();
+    }
+    await _post('/users/me/orders', data);
   }
 
   // ── addresses ────────────────────────────────────────────────────────────
@@ -624,6 +710,9 @@ class FirestoreService implements UserDataRepository {
   }
 
   static DateTime? _parseDate(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    }
     if (value is String && value.isNotEmpty) {
       return DateTime.tryParse(value);
     }
